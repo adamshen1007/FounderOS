@@ -1,0 +1,140 @@
+# FounderOS Strategy & Business Model
+
+Version: 0.1 (Draft)
+
+# Purpose
+
+Define the long-term strategic direction for FounderOS before
+engineering begins.
+
+------------------------------------------------------------------------
+
+# Vision
+
+FounderOS is an AI-native operating system that helps founders
+repeatedly transform ideas into successful companies through structured
+workflows, reusable knowledge, and intelligent automation.
+
+------------------------------------------------------------------------
+
+# Strategic Position
+
+FounderOS is **not**: - another note-taking app - another project
+manager - another AI chatbot
+
+FounderOS **orchestrates** best-in-class tools into a unified founder
+operating system.
+
+------------------------------------------------------------------------
+
+# Core Value Proposition
+
+1.  Standardize company creation.
+2.  Preserve institutional knowledge.
+3.  Reduce repeated work.
+4.  Automate documentation and publishing.
+5.  Continuously improve from completed projects.
+
+------------------------------------------------------------------------
+
+# Target Users
+
+## Initial
+
+-   Solo AI founders
+-   Technical founders
+-   Startup studios
+
+## Expansion
+
+-   Small startup teams
+-   Accelerators
+-   Venture studios
+-   Innovation teams
+
+------------------------------------------------------------------------
+
+# Product Strategy
+
+## Phase 1
+
+Internal platform supporting Opportunity OS, Speculor AI, and the
+Founder Library.
+
+## Phase 2
+
+Reusable engineering platform for additional ventures.
+
+## Phase 3
+
+Public framework with optional open-source components.
+
+## Phase 4
+
+Commercial SaaS offering with AI-assisted founder workflows.
+
+------------------------------------------------------------------------
+
+# Business Model Options
+
+## Internal Platform
+
+Pros: - Fast iteration - Optimized for personal workflows
+
+## Open Source
+
+Pros: - Community - Trust - Ecosystem
+
+## Commercial
+
+Potential revenue: - Subscription - Team plans - Enterprise -
+Templates - AI workflow marketplace - Premium publishing
+
+Recommended approach: Start internal, selectively open-source
+foundational components, then commercialize higher-level capabilities
+after validation.
+
+------------------------------------------------------------------------
+
+# Competitive Advantage
+
+FounderOS combines: - documentation-first engineering - AI-assisted
+execution - knowledge management - automated publishing - reusable
+engineering kits
+
+The long-term moat is the accumulated workflows, templates, governance,
+and knowledge---not any individual AI model.
+
+------------------------------------------------------------------------
+
+# Ecosystem
+
+Integrations: - GitHub - Obsidian - Notion - Figma - Google Workspace -
+AI coding assistants - Future MCP-compatible tools
+
+------------------------------------------------------------------------
+
+# Five-Year Vision
+
+FounderOS should become the primary operating environment for launching,
+documenting, scaling, and continuously improving AI-native companies.
+
+------------------------------------------------------------------------
+
+# Success Metrics
+
+-   Reduced startup creation time
+-   Higher documentation reuse
+-   Increased automation coverage
+-   Faster publishing cycles
+-   Successful ventures built using FounderOS
+
+------------------------------------------------------------------------
+
+# Guiding Principle
+
+Every new company, handbook, playbook, and engineering kit should
+strengthen FounderOS itself, creating a compounding knowledge platform.
+
+Decision: Proceed with FounderOS as a modular platform, beginning with
+governance, engineering standards, and the publishing subsystem.
