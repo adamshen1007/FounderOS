@@ -41,6 +41,9 @@ jobs:
       - name: Verify engineering-kit example is deterministic
         run: pnpm check:example
 
+      - name: Verify research example and provenance graph
+        run: pnpm check:research
+
   build:
     name: Build publishing artifacts
     needs: quality

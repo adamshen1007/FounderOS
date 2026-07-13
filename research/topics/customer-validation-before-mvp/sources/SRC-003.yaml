@@ -1,0 +1,12 @@
+schemaVersion: 1
+id: SRC-003
+type: official-guidance
+sourceClass: primary
+title: The Scientific Method for Startups
+author: Michael Seibel
+publisher: Y Combinator
+url: https://www.ycombinator.com/blog/the-scientific-method-for-startups/
+published: 2016-12-05
+accessed: 2026-07-13
+summary: Advocates hypotheses, measurement, testing, analytics, and direct user learning in product decisions.
+licenseNote: Store metadata and paraphrased notes only; link to the canonical public page.

@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: CLM-006
+statement: The same validation sequence works without modification for every category of AI product.
+classification: assumption
+confidence: low
+status: proposed
+evidence: []
+limitations:
+  - Regulated, high-risk, or technically uncertain AI products may need earlier feasibility and safety evidence.
+contradicts: []

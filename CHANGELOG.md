@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0
+
+- Add M3 research automation RFC, ADR, and Specification 010.
+- Add schemas for research topics, sources, evidence, and classified claims.
+- Add `research create`, `add-source`, `validate`, `build`, `status`, and
+  `refresh` CLI commands.
+- Add deterministic freshness calculations and protected research-brief output.
+- Enforce provenance integrity, synthesis diversity, quotation limits, and safe
+  repository paths.
+- Add a five-source customer-validation research example and cited brief.
+- Add 13 research tests and CI research-graph drift checks.
+- Add beginner-first research operations documentation.
+
 ## 0.4.0
 
 - Add the M2 engineering-kit generator RFC, ADR, specification, and JSON Schema.

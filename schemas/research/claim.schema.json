@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founderos.dev/schemas/research/claim.schema.json",
+  "title": "FounderOS research claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "statement", "classification", "confidence", "status", "evidence", "limitations", "contradicts"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^CLM-[0-9]{3}$" },
+    "statement": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "classification": { "type": "string", "enum": ["sourced-fact", "source-opinion", "synthesis", "assumption", "observation"] },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+    "status": { "type": "string", "enum": ["proposed", "accepted", "rejected"] },
+    "evidence": { "type": "array", "items": { "type": "string", "pattern": "^EVD-[0-9]{3}$" }, "uniqueItems": true },
+    "limitations": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 500 }, "uniqueItems": true },
+    "contradicts": { "type": "array", "items": { "type": "string", "pattern": "^CLM-[0-9]{3}$" }, "uniqueItems": true }
+  }
+}

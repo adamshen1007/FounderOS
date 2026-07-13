@@ -87,6 +87,7 @@ pnpm check:diagrams
 pnpm check:citations
 pnpm test
 pnpm check:example
+pnpm check:research
 ```
 
 Run an individual gate while fixing a focused problem, then run `pnpm check`
@@ -102,6 +103,17 @@ pnpm founderos generate examples/ai-launch-copilot/founderos.project.yaml --chec
 
 See the [engineering-kit generator guide](engineering-kit-generator.md) for
 project creation, dry runs, regeneration, and conflict recovery.
+
+## Research Commands
+
+```bash
+pnpm founderos research validate research/topics/customer-validation-before-mvp/research.yaml
+pnpm founderos research status research/topics/customer-validation-before-mvp/research.yaml
+pnpm founderos research build research/topics/customer-validation-before-mvp/research.yaml --check
+```
+
+See the [research automation guide](research-automation.md) for topic creation,
+source records, evidence relationships, freshness, and protected brief builds.
 
 ## Generated Files
 

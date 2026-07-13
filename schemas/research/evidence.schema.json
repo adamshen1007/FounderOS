@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founderos.dev/schemas/research/evidence.schema.json",
+  "title": "FounderOS research evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "source", "kind", "locator", "note", "capturedBy", "capturedAt"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^EVD-[0-9]{3}$" },
+    "source": { "type": "string", "pattern": "^SRC-[0-9]{3}$" },
+    "kind": { "type": "string", "enum": ["quote", "paraphrase", "observation"] },
+    "locator": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "excerpt": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "note": { "type": "string", "minLength": 1, "maxLength": 1500 },
+    "capturedBy": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "capturedAt": { "type": "string", "format": "date" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "quote" } }, "required": ["kind"] },
+      "then": { "required": ["excerpt"] }
+    }
+  ]
+}

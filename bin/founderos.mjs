@@ -8,6 +8,7 @@ import { DEFAULT_MANIFEST, SCHEMA_FILE, TEMPLATE_DIRECTORY, TEMPLATE_OUTPUTS } f
 import { generateKit } from "../scripts/generator/generator.mjs";
 import { createManifest, loadManifest, resolveOutputDirectory, serializeManifest } from "../scripts/generator/manifest.mjs";
 import { assertRepositoryPath } from "../scripts/generator/paths.mjs";
+import { runResearchCommand } from "../scripts/research/cli.mjs";
 
 const HELP = `FounderOS Engineering Kit Generator
 
@@ -16,6 +17,7 @@ Usage:
   founderos validate [manifest]
   founderos generate [manifest] [--dry-run] [--check] [--force]
   founderos doctor
+  founderos research <command> [options]
 
 Create options:
   --name <text>          Project name
@@ -124,6 +126,7 @@ async function main() {
   const { positionals, options } = parseArguments(process.argv.slice(2));
   const [command, subject] = positionals;
   if (!command || command === "help" || options.help) return console.log(HELP);
+  if (command === "research") return runResearchCommand(positionals.slice(1), options);
   if (command === "create") return createCommand(subject, options);
   if (command === "validate") return validateCommand(subject ?? DEFAULT_MANIFEST);
   if (command === "generate") {

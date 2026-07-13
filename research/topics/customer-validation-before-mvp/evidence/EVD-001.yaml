@@ -1,0 +1,8 @@
+schemaVersion: 1
+id: EVD-001
+source: SRC-001
+kind: paraphrase
+locator: MVP Spec Tool and Product Versus Prototype sections
+note: The author frames an MVP as a real product for testing demand and advises focusing on one leading function with only supporting features.
+capturedBy: FounderOS Editorial
+capturedAt: 2026-07-13

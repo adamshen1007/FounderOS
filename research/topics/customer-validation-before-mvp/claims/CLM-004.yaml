@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: CLM-004
+statement: Measurement and direct user learning should accompany product experiments rather than relying only on founder intuition.
+classification: synthesis
+confidence: medium
+status: accepted
+evidence: [EVD-003, EVD-004, EVD-005]
+limitations:
+  - The sources provide practitioner frameworks rather than quantified causal evidence.
+contradicts: []

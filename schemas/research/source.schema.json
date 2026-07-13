@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founderos.dev/schemas/research/source.schema.json",
+  "title": "FounderOS research source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "type", "sourceClass", "title", "author", "publisher", "url", "published", "accessed", "summary", "licenseNote"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^SRC-[0-9]{3}$" },
+    "type": { "type": "string", "enum": ["official-guidance", "research-paper", "book", "interview", "article", "internal-observation"] },
+    "sourceClass": { "type": "string", "enum": ["primary", "secondary", "internal"] },
+    "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "author": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "publisher": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "published": { "type": "string", "format": "date" },
+    "accessed": { "type": "string", "format": "date" },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "licenseNote": { "type": "string", "minLength": 1, "maxLength": 300 }
+  }
+}

@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: CLM-002
+statement: First-time founders can reduce premature implementation by launching a stripped-down service and tolerating manual work initially.
+classification: source-opinion
+confidence: medium
+status: accepted
+evidence: [EVD-002]
+limitations:
+  - The recommendation may not apply unchanged to regulated or safety-critical products.
+contradicts: []

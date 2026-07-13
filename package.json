@@ -1,6 +1,6 @@
 {
   "name": "founderos",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "Documentation-first publishing foundation for FounderOS",
   "type": "module",
@@ -13,7 +13,7 @@
   },
   "packageManager": "pnpm@11.7.0",
   "scripts": {
-    "check": "pnpm run check:tools && pnpm run check:markdown && pnpm run check:links && pnpm run check:spelling && pnpm run check:style && pnpm run check:diagrams && pnpm run check:citations && pnpm run test && pnpm run check:example",
+    "check": "pnpm run check:tools && pnpm run check:markdown && pnpm run check:links && pnpm run check:spelling && pnpm run check:style && pnpm run check:diagrams && pnpm run check:citations && pnpm run test && pnpm run check:example && pnpm run check:research",
     "check:tools": "node scripts/check-tools.mjs",
     "check:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#build/**\"",
     "check:links": "node scripts/check-links.mjs",
@@ -22,8 +22,10 @@
     "check:diagrams": "node scripts/check-diagrams.mjs",
     "check:citations": "node scripts/check-citations.mjs",
     "check:example": "node bin/founderos.mjs generate examples/ai-launch-copilot/founderos.project.yaml --check",
+    "check:research": "node bin/founderos.mjs research validate research/topics/customer-validation-before-mvp/research.yaml && node bin/founderos.mjs research build research/topics/customer-validation-before-mvp/research.yaml --check",
     "founderos": "node bin/founderos.mjs",
     "test": "node --test tests/*.test.mjs",
+    "test:research": "node --test tests/research.test.mjs",
     "build": "node scripts/build-book.mjs",
     "verify:outputs": "node scripts/verify-outputs.mjs",
     "preview": "node scripts/preview.mjs",
@@ -32,6 +34,7 @@
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.16.0",
     "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
     "cspell": "^10.0.1",
     "markdownlint-cli2": "^0.23.0",
     "yaml": "^2.9.0"

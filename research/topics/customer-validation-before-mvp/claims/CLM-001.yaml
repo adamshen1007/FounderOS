@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: CLM-001
+statement: An MVP should test demand for one clear product function with real users rather than maximize its feature count.
+classification: source-opinion
+confidence: medium
+status: accepted
+evidence: [EVD-001]
+limitations:
+  - This is practitioner guidance, not a controlled comparison of MVP designs.
+contradicts: []

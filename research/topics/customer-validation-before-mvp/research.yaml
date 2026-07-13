@@ -1,0 +1,12 @@
+schemaVersion: 1
+topic:
+  id: customer-validation-before-mvp
+  title: Customer Validation Before an MVP
+  question: Which customer-validation practices are most useful for first-time AI founders before building an MVP?
+  owner: FounderOS Editorial
+research:
+  status: review
+  minimumSources: 5
+  freshnessDays: 365
+  asOf: 2026-07-13
+  output: .

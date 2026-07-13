@@ -1,0 +1,12 @@
+schemaVersion: 1
+id: SRC-002
+type: official-guidance
+sourceClass: primary
+title: One Order of Operations for Starting a Startup
+author: Michael Seibel
+publisher: Y Combinator
+url: https://www.ycombinator.com/blog/one-order-of-operations-for-starting-a-startup
+published: 2018-03-20
+accessed: 2026-07-13
+summary: Recommends starting from a meaningful problem, building a stripped-down MVP, and learning from real users.
+licenseNote: Store metadata and paraphrased notes only; link to the canonical public page.

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founderos.dev/schemas/research/topic.schema.json",
+  "title": "FounderOS research topic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "topic", "research"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "topic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "question", "owner"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 80 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "question": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "owner": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "minimumSources", "freshnessDays", "asOf", "output"],
+      "properties": {
+        "status": { "type": "string", "enum": ["collecting", "review", "approved"] },
+        "minimumSources": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "freshnessDays": { "type": "integer", "minimum": 1, "maximum": 3650 },
+        "asOf": { "type": "string", "format": "date" },
+        "output": { "const": "." }
+      }
+    }
+  }
+}

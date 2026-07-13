@@ -1,0 +1,11 @@
+schemaVersion: 1
+id: CLM-005
+statement: A practical sequence is to select a meaningful problem, state the riskiest assumption, run the smallest measurable test, and build an MVP only when real use is needed for the next evidence.
+classification: synthesis
+confidence: medium
+status: accepted
+evidence: [EVD-001, EVD-002, EVD-003, EVD-004, EVD-005]
+limitations:
+  - The sequence is FounderOS synthesis and has not been tested as a universal process.
+  - AI products may require additional evaluation for model reliability and safety.
+contradicts: []

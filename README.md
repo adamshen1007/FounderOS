@@ -5,11 +5,11 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The repository has completed **Milestone 2 (M2): Engineering Kit Generator**. It
+The repository has completed **Milestone 3 (M3): Research Automation**. It
 contains the canonical strategy, architecture, engine specifications,
 governance records, publishing templates, an initial Founder Library sample,
-the local and CI publishing pipeline, and a deterministic project-kit CLI. It
-is not yet a SaaS application.
+the local and CI publishing pipeline, a deterministic project-kit CLI, and a
+traceable research workflow. It is not yet a SaaS application.
 
 ## Core Principles
 
@@ -70,6 +70,18 @@ pnpm founderos create my-project \
 See the [engineering-kit generator guide](docs/05-operations/engineering-kit-generator.md)
 before regenerating or forcing replacement.
 
+Validate and inspect the example research topic:
+
+```bash
+pnpm founderos research validate \
+  research/topics/customer-validation-before-mvp/research.yaml
+pnpm founderos research status \
+  research/topics/customer-validation-before-mvp/research.yaml
+```
+
+See the [research automation guide](docs/05-operations/research-automation.md)
+before adding sources, advancing freshness dates, or rebuilding a brief.
+
 The preview is available at <http://127.0.0.1:4173>. See the
 [local development guide](docs/05-operations/local-development.md) for system
 prerequisites and individual commands.
@@ -84,7 +96,7 @@ FounderOS/
 ├── templates/      # Reusable document and project templates
 ├── prompts/        # Reusable AI-assisted workflows
 ├── books/          # Canonical Founder Library source content
-├── research/       # Raw and processed research
+├── research/       # Topics, sources, evidence, claims, and research briefs
 ├── diagrams/       # Diagram sources and standards
 ├── publishing/     # Publishing pipeline configuration
 ├── automation/     # Reproducible automation
@@ -100,18 +112,18 @@ and implementation contracts live under [`specs`](specs).
 
 ## Current Milestone
 
-M0 established the repository foundation, M1 implemented the publishing path,
-and M2 implements deterministic engineering-kit generation:
+M0 established the repository foundation, M1 implemented publishing, M2 added
+project-kit generation, and M3 provides traceable research automation:
 
 ```text
-founderos.project.yaml
-  -> schema and path validation
-  -> deterministic Markdown kit
-  -> protected regeneration
+research question
+  -> normalized sources and evidence
+  -> classified claims
+  -> validated cited brief
 ```
 
 See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. The next
-development focus is M3 — Research Automation.
+development focus is M4 — AI Agent Ecosystem.
 
 ## Contributing and Security
 

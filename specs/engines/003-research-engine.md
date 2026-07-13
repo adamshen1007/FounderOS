@@ -22,10 +22,11 @@ The Research Engine is responsible for Public sources, citations, trend reviews.
 
 ## Primary Objects
 
-- Project
-- Specification
-- Milestone
-- Release (where applicable)
+- Research topic
+- Source
+- Evidence
+- Claim
+- Research brief
 
 ## Events
 
@@ -51,3 +52,7 @@ The Research Engine is responsible for Public sources, citations, trend reviews.
 - Responsibilities are clearly defined.
 - Interfaces documented.
 - No overlap with other engine ownership.
+- Sourced claims resolve through evidence to normalized source records.
+- Synthesis uses at least two distinct sources.
+- Freshness is reproducible from the topic's explicit review date.
+- Generated briefs protect human modifications.

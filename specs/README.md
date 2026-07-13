@@ -18,7 +18,7 @@ references do not change when new specifications are added.
 | 007 | Output profiles and metadata | Defined |
 | 008 | Citations | Defined |
 | 009 | Notion synchronization | Defined |
-| 010 | Research workflow | Reserved for M3 |
+| 010 | Research workflow | Defined |
 | 011 | Knowledge model | Reserved for M2 or later |
 | 012 | Automation | Reserved for M1 or later |
 | 013 | AI agent behavior | Reserved for M4 |

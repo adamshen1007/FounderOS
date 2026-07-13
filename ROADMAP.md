@@ -69,6 +69,8 @@ Exit criteria:
 
 **Goal:** Ingest, evaluate, cite, and refresh evidence reproducibly.
 
+**Status:** Complete
+
 Deliverables:
 
 - Research ingestion and normalization workflow
@@ -79,6 +81,10 @@ Exit criteria:
 
 - One research topic can move from source capture to cited publication with an
   auditable trail.
+- Sourced claims resolve through evidence to normalized sources.
+- Freshness, generated output, and refresh state are deterministic.
+- Human changes and unsafe paths are protected.
+- CI blocks invalid provenance or example drift.
 
 ## M4 — AI Agent Ecosystem
 

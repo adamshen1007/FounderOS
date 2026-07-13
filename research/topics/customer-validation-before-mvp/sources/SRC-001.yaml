@@ -1,0 +1,12 @@
+schemaVersion: 1
+id: SRC-001
+type: official-guidance
+sourceClass: primary
+title: "Practical Design: MVP Spec"
+author: Dominika Blackappl
+publisher: Y Combinator
+url: https://www.ycombinator.com/blog/practical-design-mvp
+published: 2016-08-29
+accessed: 2026-07-13
+summary: Explains an MVP as a real product used to test demand and distinguishes product functions from optional features.
+licenseNote: Store metadata and paraphrased notes only; link to the canonical public page.

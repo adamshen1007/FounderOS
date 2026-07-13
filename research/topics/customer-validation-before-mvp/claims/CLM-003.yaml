@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: CLM-003
+statement: Validation experiments are easier to interpret when the hypothesis, test, measurement, and success threshold are recorded before execution.
+classification: source-opinion
+confidence: medium
+status: accepted
+evidence: [EVD-005]
+limitations:
+  - A well-structured test can still target the wrong assumption or audience.
+contradicts: []
