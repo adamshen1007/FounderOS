@@ -15,6 +15,7 @@ host, or multi-tenant deployment.
 - Execute only fixed argument arrays with `shell: false`.
 - Limit execution to one job and retain bounded, redacted logs.
 - Recover interrupted jobs as failed rather than silently retrying them.
+- Represent human cancellation explicitly and create a new record for reruns.
 - Exclude Git, approval, push, publish, and arbitrary commands from the job
   allowlist.
 

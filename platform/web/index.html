@@ -34,6 +34,7 @@
         </ol>
       </aside>
       <div class="desk">
+        <div id="index-status" class="index-status" role="status" aria-live="polite"></div>
         <section aria-labelledby="projects-title">
           <div class="section-heading"><div><p class="eyebrow">Registered work</p><h2 id="projects-title">Project dossiers</h2></div><p id="project-count" class="count"></p></div>
           <div id="projects" class="project-grid" aria-live="polite"></div>
@@ -46,6 +47,10 @@
     </div>
   </main>
   <template id="empty-jobs"><div class="empty"><strong>No workflow runs yet.</strong><span>Choose a project action to create an observable local job.</span></div></template>
+  <dialog id="dossier" aria-labelledby="dossier-title">
+    <div class="dialog-head"><div><p class="eyebrow">Project evidence</p><h2 id="dossier-title">Project dossier</h2></div><button id="close-dossier" class="quiet-button" type="button">Close</button></div>
+    <div id="dossier-content" class="dossier-content" aria-live="polite"></div>
+  </dialog>
   <script type="module" src="/app.js"></script>
 </body>
 </html>

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0
+
+- Add the M5A.1 internal pilot protocol and schema without claiming sessions.
+- Add safe project registry list, add, inspect, dry-run, and remove commands.
+- Add live index generations, stale-state preservation, and project health.
+- Add project dossier views for research and governed agent evidence.
+- Add explicit job cancellation, rerun lineage, timing, and termination reasons.
+- Add sanitized diagnostics and exports plus dry-run retention cleanup.
+- Record an evidence-based no-go for hosted M5B until the pilot gate is met.
+
 ## 0.7.0
 
 - Accept the M5A local Founder Workspace boundary through RFC-004 and ADR-005.

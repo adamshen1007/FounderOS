@@ -1,10 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { extname, resolve } from "node:path";
-import { parse } from "yaml";
+import { createHash } from "node:crypto";
 import { ROOT, listFiles } from "../lib.mjs";
 import { loadManifest } from "../generator/manifest.mjs";
 import { loadWorkspace, validatePlatformRecord } from "./model.mjs";
 import { safePlatformPath } from "./security.mjs";
+import { loadResearch } from "../research/model.mjs";
+import { WORKSPACE_FILE } from "./constants.mjs";
 
 function count(directory, predicate) {
   return listFiles(directory, predicate).length;
@@ -16,8 +18,8 @@ function roadmapState() {
   const records = sections.map((section) => ({ milestone: section.match(/^## (M\d+) —/m)?.[1], status: section.match(/^\*\*Status:\*\* (.+)$/m)?.[1] })).filter((record) => record.milestone);
   const complete = records.filter((record) => record.status?.startsWith("Complete")).map((record) => record.milestone);
   const nextRecord = records.find((record) => record.status?.startsWith("Next"));
-  const m5aPilot = records.find((record) => record.milestone === "M5" && record.status?.includes("M5A local workspace complete"));
-  const next = nextRecord?.milestone ?? (m5aPilot ? "M5A pilot" : "Unscheduled");
+  const m5aPilot = records.find((record) => record.milestone === "M5" && record.status?.includes("M5A"));
+  const next = nextRecord?.milestone ?? (m5aPilot ? "M5A.1 pilot" : "Unscheduled");
   return { complete, next };
 }
 
@@ -27,7 +29,7 @@ function repositorySummary(project, workspace) {
   const roadmap = roadmapState();
   return {
     schemaVersion: 1, id: project.id, name: "FounderOS", description: pkg.description,
-    owner: workspace.workspace.owner, stage: "platform", path: base.relative,
+    owner: workspace.workspace.owner, stage: "platform", path: base.relative, health: "attention",
     milestone: roadmap.next,
     signals: {
       researchTopics: count(resolve(base.absolute, "research", "topics"), (file) => file.endsWith("research.yaml")),
@@ -35,7 +37,7 @@ function repositorySummary(project, workspace) {
       documents: count(resolve(base.absolute, "docs"), (file) => extname(file) === ".md")
     },
     workflows: ["quality-check", "research-validate", "agent-review-fake"],
-    nextAction: roadmap.next === "M5A pilot" ? "Use M5A in repeated internal workflows before proposing hosted M5B." : `${roadmap.next} is next; begin with its accepted RFC boundary.`
+    nextAction: roadmap.next === "M5A.1 pilot" ? "Record repeated internal workflows before proposing hosted M5B." : `${roadmap.next} is next; begin with its accepted RFC boundary.`
   };
 }
 
@@ -46,7 +48,7 @@ function kitSummary(project) {
   return {
     schemaVersion: 1, id: project.id, name: manifest.project.name,
     description: manifest.project.description, owner: manifest.project.owner,
-    stage: manifest.product.stage, path: base.relative, milestone: "Generated kit",
+    stage: manifest.product.stage, path: base.relative, milestone: "Generated kit", health: "healthy",
     signals: { researchTopics: 0, agentRuns: 0, documents: count(base.absolute, (file) => extname(file) === ".md") },
     workflows: ["kit-check"], nextAction: "Review the generated verification plan and choose the next milestone outcome."
   };
@@ -58,17 +60,40 @@ export function buildWorkspaceIndex(file) {
   return { schemaVersion: 1, workspace: workspace.workspace, projects };
 }
 
+export class WorkspaceIndex {
+  constructor({ file = WORKSPACE_FILE, now = () => new Date().toISOString() } = {}) { this.file = file; this.now = now; this.generation = 0; this.current = null; this.lastError = null; this.refresh(); if (!this.current) throw new Error(this.lastError); }
+  refresh() {
+    try {
+      const next = buildWorkspaceIndex(this.file);
+      const tracked = [resolve(ROOT, "ROADMAP.md"), resolve(ROOT, "package.json"), resolve(this.file), ...listFiles(resolve(ROOT, "research"), (file) => /\.(ya?ml|json|md)$/.test(file)), ...listFiles(resolve(ROOT, "examples"), (file) => /(founderos\.project\.yaml|\/(proposal|verification|approval|summary)\.json)$/.test(file))];
+      const fingerprint = tracked.sort().map((file) => `${file.slice(ROOT.length + 1)}:${createHash("sha256").update(readFileSync(file)).digest("hex")}`).join("|");
+      const hash = createHash("sha256").update(JSON.stringify(next)).update(fingerprint).digest("hex");
+      if (hash !== this.hash) { this.current = next; this.hash = hash; this.generation += 1; }
+      this.lastError = null;
+    } catch (error) { this.lastError = error.message; }
+    return { ...this.current, index: { generation: this.generation, indexedAt: this.now(), stale: Boolean(this.lastError), error: this.lastError } };
+  }
+}
+
 export function researchDetail(projectId) {
   if (projectId !== "founderos-core") return { topics: [] };
   const topicFiles = listFiles(resolve(ROOT, "research", "topics"), (file) => file.endsWith("research.yaml"));
   return { topics: topicFiles.map((file) => {
-    const record = parse(readFileSync(file, "utf8"));
-    return { id: record.topic.id, title: record.topic.title, status: record.research.status, asOf: record.research.asOf };
+    const data = loadResearch(file);
+    return { id: data.topic.topic.id, title: data.topic.topic.title, status: data.topic.research.status, asOf: data.topic.research.asOf, sources: data.sources.length, evidence: data.evidence.length, claims: data.claims.length, staleSources: data.staleSources.length, proposedClaims: data.claims.filter((claim) => claim.status === "proposed").length, assumptions: data.claims.filter((claim) => claim.classification === "assumption").length };
   }) };
 }
 
 export function agentRunDetail(projectId) {
   if (projectId !== "founderos-core") return { runs: [] };
   const files = listFiles(resolve(ROOT, "examples", "agent-runs"), (file) => file.endsWith("summary.json"));
-  return { runs: files.map((file) => JSON.parse(readFileSync(file, "utf8"))) };
+  return { runs: files.map((file) => {
+    const directory = resolve(file, "..");
+    const summary = JSON.parse(readFileSync(file, "utf8"));
+    const proposal = JSON.parse(readFileSync(resolve(directory, "proposal.json"), "utf8"));
+    const verification = JSON.parse(readFileSync(resolve(directory, "verification.json"), "utf8"));
+    const approvalFile = resolve(directory, "approval.json");
+    const approval = existsSync(approvalFile) ? JSON.parse(readFileSync(approvalFile, "utf8")) : null;
+    return { ...summary, findings: proposal.findings, changes: proposal.changes.length, verified: verification.valid, decision: approval?.decision ?? "pending" };
+  }) };
 }

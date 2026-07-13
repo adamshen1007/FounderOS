@@ -1,6 +1,6 @@
 {
   "name": "founderos",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "description": "Documentation-first publishing foundation for FounderOS",
   "type": "module",
@@ -30,7 +30,7 @@
     "eval:agents": "node scripts/agents/eval.mjs",
     "check:agent-example": "node bin/founderos.mjs agent validate examples/agent-runs/research-review-rejected",
     "test:platform": "node --test tests/platform.test.mjs",
-    "check:platform": "node bin/founderos.mjs platform doctor && node bin/founderos.mjs platform index",
+    "check:platform": "node bin/founderos.mjs platform doctor && node bin/founderos.mjs platform index && node bin/founderos.mjs platform pilot check",
     "platform:start": "node bin/founderos.mjs platform start",
     "build": "node scripts/build-book.mjs",
     "verify:outputs": "node scripts/verify-outputs.mjs",

@@ -45,7 +45,7 @@ function parseArguments(args) {
       continue;
     }
     const key = argument.slice(2);
-    if (["dry-run", "check", "force", "non-interactive", "help", "json"].includes(key)) options[key] = true;
+    if (["dry-run", "check", "force", "non-interactive", "help", "json", "confirm"].includes(key)) options[key] = true;
     else {
       const value = args[index + 1];
       if (!value || value.startsWith("--")) throw new Error(`Option --${key} requires a value.`);

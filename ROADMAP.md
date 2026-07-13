@@ -111,7 +111,7 @@ Exit criteria:
 
 **Goal:** Package proven workflows into a coherent multi-project platform.
 
-**Status:** M5A local workspace complete; hosted expansion requires a new RFC
+**Status:** M5A.1 pilot-ready; hosted expansion blocked pending real evidence
 
 Potential capabilities:
 
@@ -129,6 +129,10 @@ M5A delivered:
 
 Hosted accounts, collaboration, billing, remote projects, and commercial
 workflows remain deferred until internal use provides evidence for M5B.
+
+M5A.1 adds safe project registration, live indexing, detailed project evidence,
+cancellable job history, diagnostics, and a pilot protocol. No completed pilot
+sessions are claimed yet.
 
 M5A exit criteria are defined in RFC-004. Any M5B exit criteria require a new
 RFC after internal pilot evidence exists.

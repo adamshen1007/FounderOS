@@ -35,4 +35,8 @@ flowchart LR
 - The index snapshot is deterministic for equal canonical inputs.
 - API errors are structured and actionable.
 - Interrupted running jobs recover as failed after restart.
+- Equal canonical state retains one index generation; changed state increments
+  it, while invalid state preserves the last valid view with an error.
+- Cancellation terminates the tracked child process and reruns create lineage
+  instead of rewriting history.
 - The dashboard is keyboard accessible, responsive, and honors reduced motion.

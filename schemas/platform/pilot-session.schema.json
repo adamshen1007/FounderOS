@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FounderOS pilot session",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "date", "projectId", "task", "outcome", "durationMinutes", "observations", "privacy"],
+  "properties": {
+    "schemaVersion": { "const": 1 }, "id": { "type": "string", "pattern": "^PILOT-[0-9]{3}$" }, "date": { "type": "string", "format": "date" }, "projectId": { "type": "string" }, "task": { "enum": ["setup", "register-project", "inspect-status", "run-workflow", "recover-job"] }, "outcome": { "enum": ["completed", "blocked", "abandoned"] }, "durationMinutes": { "type": "integer", "minimum": 0, "maximum": 480 }, "observations": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 500 } }, "privacy": { "const": "sanitized-no-secrets" }
+  }
+}

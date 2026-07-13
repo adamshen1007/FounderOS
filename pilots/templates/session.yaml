@@ -1,0 +1,10 @@
+schemaVersion: 1
+id: PILOT-000
+date: 2026-07-13
+projectId: replace-with-observed-project
+task: inspect-status
+outcome: blocked
+durationMinutes: 0
+observations:
+  - Replace this template text with a sanitized observation from a real session.
+privacy: sanitized-no-secrets

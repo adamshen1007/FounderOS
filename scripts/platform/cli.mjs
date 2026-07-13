@@ -5,9 +5,51 @@ import { LOOPBACK_HOSTS, PLATFORM_WEB_DIRECTORY, WORKSPACE_FILE } from "./consta
 import { buildWorkspaceIndex } from "./indexer.mjs";
 import { loadWorkspace } from "./model.mjs";
 import { startPlatform } from "./server.mjs";
+import { addProject, inspectProject, removeProject } from "./registry.mjs";
+import { cleanJobs, diagnostics, sanitizedJobs, validatePilotSessions, writeJsonOutput } from "./operations.mjs";
 
 export async function runPlatformCommand(positionals, options) {
-  const [command] = positionals;
+  const [command, action, subject] = positionals;
+  if (command === "project") {
+    if (action === "list") return loadWorkspace().projects.forEach((project) => console.log(`${project.id.padEnd(22)} ${project.kind.padEnd(12)} ${project.path}`));
+    if (action === "inspect") return console.log(JSON.stringify(inspectProject(subject), null, 2));
+    if (action === "add") {
+      const project = addProject(subject, { id: options.id, dryRun: options["dry-run"] });
+      console.log(`${options["dry-run"] ? "Would add" : "Added"}: ${project.id} (${project.kind})`);
+      return;
+    }
+    if (action === "remove") {
+      const project = removeProject(subject, { dryRun: options["dry-run"], confirm: options.confirm });
+      console.log(`${options["dry-run"] ? "Would remove" : "Removed"}: ${project.id}; project files unchanged.`);
+      return;
+    }
+    throw new Error("Platform project command must be list, inspect, add, or remove.");
+  }
+  if (command === "diagnose") {
+    const report = diagnostics();
+    if (options.output) console.log(`Wrote sanitized diagnostics: ${writeJsonOutput(options.output, report)}`);
+    else console.log(JSON.stringify(report, null, 2));
+    return;
+  }
+  if (command === "jobs") {
+    if (action === "export") {
+      if (!options.output) throw new Error("jobs export requires --output <file>.");
+      console.log(`Wrote sanitized job export: ${writeJsonOutput(options.output, sanitizedJobs())}`);
+      return;
+    }
+    if (action === "clean") {
+      const value = options["older-than"];
+      if (!/^\d+d$/.test(value ?? "")) throw new Error("jobs clean requires --older-than <days>d.");
+      const files = cleanJobs({ days: Number(value.slice(0, -1)), dryRun: options["dry-run"] });
+      console.log(`${options["dry-run"] ? "Would delete" : "Deleted"} ${files.length} terminal job record(s).`);
+      return;
+    }
+    throw new Error("Platform jobs command must be export or clean.");
+  }
+  if (command === "pilot" && action === "check") {
+    console.log(`✓ ${validatePilotSessions()} completed pilot session record(s) validated.`);
+    return;
+  }
   if (command === "doctor") {
     const checks = [["Workspace manifest", existsSync(WORKSPACE_FILE)], ["Dashboard assets", existsSync(PLATFORM_WEB_DIRECTORY)], ["Loopback host", LOOPBACK_HOSTS.has(options.host ?? "127.0.0.1")]];
     checks.forEach(([label, passed]) => console.log(`${passed ? "✓" : "✗"} ${label}`));
@@ -37,5 +79,5 @@ export async function runPlatformCommand(positionals, options) {
     process.on("SIGTERM", stop);
     return new Promise(() => {});
   }
-  throw new Error("Platform command must be doctor, index, or start.");
+  throw new Error("Platform command must be doctor, index, start, project, diagnose, jobs, or pilot.");
 }

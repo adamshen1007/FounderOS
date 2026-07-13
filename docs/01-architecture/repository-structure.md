@@ -22,6 +22,7 @@ FounderOS/
 ├── prompts/                 # Reusable AI-assisted workflows
 ├── publishing/              # Publishing configuration
 ├── platform/                # Local Founder Workspace assets
+├── pilots/                  # Sanitized internal pilot templates and records
 ├── research/                # Raw and processed research
 ├── specs/                   # Numbered, engine, and orchestration contracts
 ├── templates/               # Reusable templates

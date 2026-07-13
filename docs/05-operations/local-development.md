@@ -140,6 +140,7 @@ proposal, or making an optional live-provider request.
 ```bash
 pnpm founderos platform doctor
 pnpm founderos platform index
+pnpm founderos platform pilot check
 pnpm platform:start
 ```
 

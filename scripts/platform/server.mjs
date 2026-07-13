@@ -3,12 +3,13 @@ import { readFileSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 import { PLATFORM_WEB_DIRECTORY, LOOPBACK_HOSTS } from "./constants.mjs";
-import { agentRunDetail, buildWorkspaceIndex, researchDetail } from "./indexer.mjs";
+import { agentRunDetail, WorkspaceIndex, researchDetail } from "./indexer.mjs";
 import { JobManager } from "./jobs.mjs";
 import { safePlatformPath } from "./security.mjs";
 
 const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
 const json = (response, status, body) => { response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" }); response.end(JSON.stringify(body)); };
+const validOrigin = (origin) => !origin || /^http:\/\/(127\.0\.0\.1|\[::1\]|localhost)(:\d+)?$/.test(origin);
 
 async function body(request) {
   let value = "";
@@ -20,7 +21,7 @@ async function body(request) {
 }
 
 export function createPlatformServer(options = {}) {
-  const index = options.index ?? buildWorkspaceIndex(options.workspaceFile);
+  const indexService = options.indexService ?? (options.index ? { refresh: () => options.index } : new WorkspaceIndex({ file: options.workspaceFile }));
   const jobs = options.jobs ?? new JobManager(options.jobOptions);
   const csrfToken = options.csrfToken ?? randomBytes(24).toString("hex");
   const requests = new Map();
@@ -34,7 +35,8 @@ export function createPlatformServer(options = {}) {
       if (count > 120) return json(response, 429, { error: "rate_limit", message: "Too many local requests; wait one minute." });
       const url = new URL(request.url, "http://localhost");
       if (request.method === "GET" && url.pathname === "/api/session") return json(response, 200, { csrfToken });
-      if (request.method === "GET" && url.pathname === "/api/workspace") return json(response, 200, { ...index, jobs: jobs.list() });
+      const index = indexService.refresh();
+      if (request.method === "GET" && url.pathname === "/api/workspace") return json(response, 200, { ...index, jobs: jobs.snapshot() });
       const projectMatch = url.pathname.match(/^\/api\/projects\/([a-z0-9-]+)$/);
       if (request.method === "GET" && projectMatch) {
         const project = index.projects.find((item) => item.id === projectMatch[1]);
@@ -47,12 +49,20 @@ export function createPlatformServer(options = {}) {
         if (request.headers["content-type"] !== "application/json") return json(response, 415, { error: "content_type", message: "Workflow requests require application/json." });
         if (request.headers["x-founderos-csrf"] !== csrfToken) return json(response, 403, { error: "csrf", message: "Refresh the workspace before starting a workflow." });
         const origin = request.headers.origin;
-        if (origin && !/^http:\/\/(127\.0\.0\.1|\[::1\]|localhost)(:\d+)?$/.test(origin)) return json(response, 403, { error: "origin", message: "Remote origins are not allowed." });
+        if (!validOrigin(origin)) return json(response, 403, { error: "origin", message: "Remote origins are not allowed." });
         const input = await body(request);
         if (input.confirm !== true) return json(response, 400, { error: "confirmation", message: "Set confirm to true after reviewing the workflow." });
         const project = index.projects.find((item) => item.id === workflowMatch[1]);
         if (!project || !project.workflows.includes(workflowMatch[2])) return json(response, 403, { error: "workflow_denied", message: "That workflow is not allowed for this project." });
         return json(response, 202, jobs.create(project.id, workflowMatch[2]));
+      }
+      const jobAction = url.pathname.match(/^\/api\/jobs\/(JOB-[A-Z0-9-]+)\/(cancel|rerun)$/);
+      if (request.method === "POST" && jobAction) {
+        if (request.headers["content-type"] !== "application/json" || request.headers["x-founderos-csrf"] !== csrfToken) return json(response, 403, { error: "job_action_denied", message: "Refresh the workspace before changing a job." });
+        if (!validOrigin(request.headers.origin)) return json(response, 403, { error: "origin", message: "Remote origins are not allowed." });
+        const input = await body(request);
+        if (input.confirm !== true) return json(response, 400, { error: "confirmation", message: "Confirm the job action first." });
+        return json(response, 202, jobAction[2] === "cancel" ? jobs.cancel(jobAction[1]) : jobs.rerun(jobAction[1]));
       }
       if (request.method === "GET" && !url.pathname.startsWith("/api/")) {
         const name = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
@@ -66,7 +76,7 @@ export function createPlatformServer(options = {}) {
       return json(response, 400, { error: "request_failed", message: error.message });
     }
   });
-  return { server, csrfToken, index, jobs };
+  return { server, csrfToken, indexService, jobs };
 }
 
 export async function startPlatform({ host = "127.0.0.1", port = 4310 } = {}) {

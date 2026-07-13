@@ -54,3 +54,10 @@ outside M5A. Any one of them requires a new RFC and threat-model update.
 
 M5A is accepted after the two-project example, API tests, adversarial tests,
 responsive browser review, clean-tree quality suite, and operator guide pass.
+
+## M5A.1 Amendment
+
+The internal-pilot release adds registry commands, live derived indexing,
+project dossiers, cancellable and rerunnable jobs, sanitized diagnostics, and
+pilot evidence records. It does not expand the local trust boundary. Hosted
+M5B remains blocked until completed pilot records meet the published protocol.

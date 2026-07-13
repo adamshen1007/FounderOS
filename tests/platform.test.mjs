@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
-import { stringify } from "yaml";
+import { parse, stringify } from "yaml";
 import { ROOT } from "../scripts/lib.mjs";
-import { buildWorkspaceIndex } from "../scripts/platform/indexer.mjs";
+import { buildWorkspaceIndex, WorkspaceIndex } from "../scripts/platform/indexer.mjs";
 import { JobManager, workflowCommand } from "../scripts/platform/jobs.mjs";
 import { loadWorkspace, validatePlatformRecord } from "../scripts/platform/model.mjs";
 import { redactLog, safePlatformPath } from "../scripts/platform/security.mjs";
 import { createPlatformServer, startPlatform } from "../scripts/platform/server.mjs";
+import { addProject, inspectProject, removeProject } from "../scripts/platform/registry.mjs";
+import { cleanJobs, diagnostics, sanitizedJobs } from "../scripts/platform/operations.mjs";
 
 const temporaryRoot = resolve(ROOT, ".tmp");
 mkdirSync(temporaryRoot, { recursive: true });
@@ -19,7 +21,7 @@ test("two-project workspace produces deterministic schema-valid summaries", () =
   const second = buildWorkspaceIndex();
   assert.deepEqual(first, second);
   assert.deepEqual(first.projects.map((project) => project.id), ["founderos-core", "ai-launch-copilot"]);
-  assert.equal(first.projects[0].milestone, "M5A pilot");
+  assert.equal(first.projects[0].milestone, "M5A.1 pilot");
   first.projects.forEach((project) => validatePlatformRecord("project-summary", project));
 });
 
@@ -36,6 +38,49 @@ test("workspace rejects duplicate projects and missing kit manifests", () => {
     writeFileSync(file, stringify(base));
     assert.throws(() => loadWorkspace(file), /must declare a manifest/);
   } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("registry add, inspect, dry-run, and remove never delete projects", () => {
+  const directory = mkdtempSync(resolve(temporaryRoot, "registry-"));
+  const project = resolve(directory, "third-project");
+  cpSync(resolve(ROOT, "examples", "ai-launch-copilot"), project, { recursive: true });
+  const workspaceFile = resolve(directory, "workspace.yaml");
+  writeFileSync(workspaceFile, stringify(loadWorkspace()));
+  try {
+    assert.equal(addProject(project, { id: "third-project", file: workspaceFile }).kind, "kit");
+    assert.equal(inspectProject("third-project", workspaceFile).path.startsWith(".tmp/"), true);
+    removeProject("third-project", { file: workspaceFile, dryRun: true });
+    assert.ok(inspectProject("third-project", workspaceFile));
+    removeProject("third-project", { file: workspaceFile, confirm: true });
+    assert.throws(() => inspectProject("third-project", workspaceFile), /not registered/);
+    assert.equal(existsSync(project), true);
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("live index increments only when canonical state changes", () => {
+  const directory = mkdtempSync(resolve(temporaryRoot, "live-index-"));
+  const file = resolve(directory, "workspace.yaml");
+  const workspace = loadWorkspace();
+  writeFileSync(file, stringify(workspace));
+  try {
+    const index = new WorkspaceIndex({ file, now: () => "2026-07-13T09:00:00Z" });
+    assert.equal(index.refresh().index.generation, 1);
+    workspace.workspace.name = "Changed Working Studio";
+    writeFileSync(file, stringify(workspace));
+    const refreshed = index.refresh();
+    assert.equal(refreshed.index.generation, 2);
+    assert.equal(refreshed.workspace.name, "Changed Working Studio");
+    writeFileSync(file, "invalid: true\n");
+    const stale = index.refresh();
+    assert.equal(stale.index.stale, true);
+    assert.equal(stale.workspace.name, "Changed Working Studio");
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("pilot template validates without being claimed as a completed session", () => {
+  const template = parse(readFileSync(resolve(ROOT, "pilots", "templates", "session.yaml"), "utf8"));
+  assert.doesNotThrow(() => validatePlatformRecord("pilot-session", template));
+  assert.equal(template.observations[0].startsWith("Replace this template"), true);
 });
 
 test("platform paths deny escape, secrets, and symbolic links", () => {
@@ -66,6 +111,39 @@ test("job records persist terminal state and recover interrupted work", async ()
     const recovered = new JobManager({ directory, now: () => "2026-07-13T06:05:00Z" });
     assert.equal(recovered.get(job.id).status, "failed");
     assert.match(recovered.get(job.id).log, /restart/);
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("running jobs cancel explicitly and reruns retain lineage", async () => {
+  const directory = mkdtempSync(resolve(temporaryRoot, "job-cancel-"));
+  let finish;
+  const executor = async (_command, _output, registerCancel) => new Promise((resolvePromise) => { finish = resolvePromise; registerCancel(() => resolvePromise({ exitCode: 143, output: "terminated" })); });
+  try {
+    const manager = new JobManager({ directory, executor });
+    const job = manager.create("founderos-core", "research-validate");
+    await waitFor(() => manager.get(job.id).status === "running");
+    assert.equal(manager.cancel(job.id).status, "cancelled");
+    await waitFor(() => manager.active === false);
+    const rerun = manager.rerun(job.id);
+    assert.equal(rerun.parentJobId, job.id);
+    assert.ok(["queued", "running"].includes(rerun.status));
+    finish({ exitCode: 0, output: "" });
+    await waitFor(() => manager.get(rerun.id).status === "passed");
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("diagnostics and exports omit logs while retention supports dry-run", async () => {
+  const directory = mkdtempSync(resolve(temporaryRoot, "job-retention-"));
+  try {
+    const manager = new JobManager({ directory, now: () => "2025-01-01T00:00:00Z", executor: async () => ({ exitCode: 0, output: "password=private" }) });
+    manager.create("founderos-core", "research-validate");
+    await waitFor(() => manager.list()[0].status === "passed");
+    assert.equal("log" in sanitizedJobs(directory)[0], false);
+    assert.equal(diagnostics(directory).jobs.total, 1);
+    assert.equal(cleanJobs({ days: 30, dryRun: true, directory, now: Date.parse("2026-01-01T00:00:00Z") }).length, 1);
+    assert.equal(sanitizedJobs(directory).length, 1);
+    cleanJobs({ days: 30, directory, now: Date.parse("2026-01-01T00:00:00Z") });
+    assert.equal(sanitizedJobs(directory).length, 0);
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });
 
