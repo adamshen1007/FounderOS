@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>FounderOS Workspace</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <header class="masthead">
+    <div class="wordmark"><span class="mark">F/OS</span><span>Founder workspace</span></div>
+    <div class="system-state"><span class="pulse" aria-hidden="true"></span><span>Local system</span></div>
+  </header>
+  <main id="workspace" tabindex="-1">
+    <section class="briefing" aria-labelledby="workspace-title">
+      <div>
+        <p class="eyebrow">Operating ledger / M5A</p>
+        <h1 id="workspace-title">Loading workspace…</h1>
+      </div>
+      <p class="briefing-note">Canonical files stay in control. This view reads their state and delegates work to validated FounderOS commands.</p>
+    </section>
+    <div class="shell">
+      <aside class="spine" aria-label="Milestone spine">
+        <p class="spine-label">System progression</p>
+        <ol id="milestones">
+          <li class="complete"><span>M0</span><small>Governance</small></li>
+          <li class="complete"><span>M1</span><small>Publishing</small></li>
+          <li class="complete"><span>M2</span><small>Kits</small></li>
+          <li class="complete"><span>M3</span><small>Research</small></li>
+          <li class="complete"><span>M4</span><small>Agents</small></li>
+          <li class="active"><span>M5</span><small>Platform</small></li>
+        </ol>
+      </aside>
+      <div class="desk">
+        <section aria-labelledby="projects-title">
+          <div class="section-heading"><div><p class="eyebrow">Registered work</p><h2 id="projects-title">Project dossiers</h2></div><p id="project-count" class="count"></p></div>
+          <div id="projects" class="project-grid" aria-live="polite"></div>
+        </section>
+        <section class="activity" aria-labelledby="activity-title">
+          <div class="section-heading"><div><p class="eyebrow">Local execution</p><h2 id="activity-title">Workflow record</h2></div><button id="refresh" class="quiet-button" type="button">Refresh state</button></div>
+          <div id="jobs" class="jobs"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <template id="empty-jobs"><div class="empty"><strong>No workflow runs yet.</strong><span>Choose a project action to create an observable local job.</span></div></template>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

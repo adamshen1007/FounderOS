@@ -5,12 +5,12 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The repository has completed **Milestone 4 (M4): AI Agent Ecosystem**. It
+The repository has completed **M5A: Local Founder Workspace**. It
 contains the canonical strategy, architecture, engine specifications,
 governance records, publishing templates, an initial Founder Library sample,
 the local and CI publishing pipeline, a deterministic project-kit CLI, and a
-traceable research workflow, and a governed proposal-only agent runtime. It is
-not yet a SaaS application.
+traceable research workflow, a governed proposal-only agent runtime, and a
+local multi-project dashboard. It is not yet a hosted SaaS application.
 
 ## Core Principles
 
@@ -96,6 +96,17 @@ This creates a proposal, not a canonical edit. Read the
 [governed agent runtime guide](docs/05-operations/agent-runtime.md) before
 reviewing, applying, or selecting the optional OpenAI provider.
 
+Start the local Founder Workspace:
+
+```bash
+pnpm founderos platform doctor
+pnpm platform:start
+```
+
+Open <http://127.0.0.1:4310>. See the
+[local workspace guide](docs/05-operations/local-founder-workspace.md) before
+running workflows or changing the project registry.
+
 The preview is available at <http://127.0.0.1:4173>. See the
 [local development guide](docs/05-operations/local-development.md) for system
 prerequisites and individual commands.
@@ -116,6 +127,8 @@ FounderOS/
 ├── automation/     # Reproducible automation
 ├── agents/         # Governed role definitions, prompts, and fake fixtures
 ├── evals/          # Deterministic agent evaluation cases
+├── platform/       # Local dashboard assets
+├── workspace/      # Multi-project registry
 ├── examples/       # Committed end-to-end reference projects
 ├── schemas/        # Machine-readable input contracts
 ├── scripts/        # Publishing and generator implementation
@@ -140,8 +153,8 @@ validated research
   -> existing M3 validation
 ```
 
-See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. M5 platform
-scoping is next and requires an RFC before implementation.
+See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. Repeated
+internal M5A use is next; hosted M5B scope requires a new RFC.
 
 ## Contributing and Security
 

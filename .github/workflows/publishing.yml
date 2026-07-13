@@ -49,6 +49,11 @@ jobs:
           OPENAI_API_KEY: ""
         run: pnpm test:agents && pnpm eval:agents && pnpm check:agent-example
 
+      - name: Verify local Founder Workspace
+        env:
+          OPENAI_API_KEY: ""
+        run: pnpm test:platform && pnpm check:platform
+
   build:
     name: Build publishing artifacts
     needs: quality

@@ -21,9 +21,11 @@ FounderOS/
 ├── governance/              # ADRs, RFCs, and policies
 ├── prompts/                 # Reusable AI-assisted workflows
 ├── publishing/              # Publishing configuration
+├── platform/                # Local Founder Workspace assets
 ├── research/                # Raw and processed research
 ├── specs/                   # Numbered, engine, and orchestration contracts
 ├── templates/               # Reusable templates
+├── workspace/               # Multi-project registry
 ├── CONSTITUTION.md          # Canonical governing principles
 ├── README.md                # Project entry point
 └── ROADMAP.md               # Canonical milestone sequence

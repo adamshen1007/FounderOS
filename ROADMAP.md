@@ -111,7 +111,7 @@ Exit criteria:
 
 **Goal:** Package proven workflows into a coherent multi-project platform.
 
-**Status:** Next; scope requires RFC approval before implementation
+**Status:** M5A local workspace complete; hosted expansion requires a new RFC
 
 Potential capabilities:
 
@@ -120,5 +120,15 @@ Potential capabilities:
 - Team collaboration and commercial workflows
 - Selectively open-sourced foundational components
 
-Exit criteria will be defined through an RFC after M1–M4 provide evidence for
-the product boundary.
+M5A delivered:
+
+- A local two-project registry and deterministic read model
+- A loopback-only API and responsive founder dashboard
+- Governed execution of existing validated workflows
+- Persistent, redacted, recoverable local job records
+
+Hosted accounts, collaboration, billing, remote projects, and commercial
+workflows remain deferred until internal use provides evidence for M5B.
+
+M5A exit criteria are defined in RFC-004. Any M5B exit criteria require a new
+RFC after internal pilot evidence exists.

@@ -91,6 +91,8 @@ pnpm check:research
 pnpm test:agents
 pnpm eval:agents
 pnpm check:agent-example
+pnpm test:platform
+pnpm check:platform
 ```
 
 Run an individual gate while fixing a focused problem, then run `pnpm check`
@@ -132,6 +134,18 @@ pnpm founderos agent run research-reviewer \
 The fake provider needs no secret and is the normal development and CI path.
 See the [agent runtime guide](agent-runtime.md) before human review, applying a
 proposal, or making an optional live-provider request.
+
+## Founder Workspace
+
+```bash
+pnpm founderos platform doctor
+pnpm founderos platform index
+pnpm platform:start
+```
+
+Open <http://127.0.0.1:4310>. Follow the
+[local workspace guide](local-founder-workspace.md) for workflow execution and
+recovery.
 
 ## Generated Files
 

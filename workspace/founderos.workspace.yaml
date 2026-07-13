@@ -1,0 +1,12 @@
+schemaVersion: 1
+workspace:
+  name: FounderOS Working Studio
+  owner: Adam Shen
+projects:
+  - id: founderos-core
+    kind: repository
+    path: .
+  - id: ai-launch-copilot
+    kind: kit
+    path: examples/ai-launch-copilot
+    manifest: founderos.project.yaml

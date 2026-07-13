@@ -10,6 +10,7 @@ import { createManifest, loadManifest, resolveOutputDirectory, serializeManifest
 import { assertRepositoryPath } from "../scripts/generator/paths.mjs";
 import { runResearchCommand } from "../scripts/research/cli.mjs";
 import { runAgentCommand } from "../scripts/agents/cli.mjs";
+import { runPlatformCommand } from "../scripts/platform/cli.mjs";
 
 const HELP = `FounderOS Engineering Kit Generator
 
@@ -20,6 +21,7 @@ Usage:
   founderos doctor
   founderos research <command> [options]
   founderos agent <list|doctor|run|status|review|apply|validate> [options]
+  founderos platform <doctor|index|start> [options]
 
 Create options:
   --name <text>          Project name
@@ -43,7 +45,7 @@ function parseArguments(args) {
       continue;
     }
     const key = argument.slice(2);
-    if (["dry-run", "check", "force", "non-interactive", "help"].includes(key)) options[key] = true;
+    if (["dry-run", "check", "force", "non-interactive", "help", "json"].includes(key)) options[key] = true;
     else {
       const value = args[index + 1];
       if (!value || value.startsWith("--")) throw new Error(`Option --${key} requires a value.`);
@@ -130,6 +132,7 @@ async function main() {
   if (!command || command === "help" || options.help) return console.log(HELP);
   if (command === "research") return runResearchCommand(positionals.slice(1), options);
   if (command === "agent") return runAgentCommand(positionals.slice(1), options);
+  if (command === "platform") return runPlatformCommand(positionals.slice(1), options);
   if (command === "create") return createCommand(subject, options);
   if (command === "validate") return validateCommand(subject ?? DEFAULT_MANIFEST);
   if (command === "generate") {

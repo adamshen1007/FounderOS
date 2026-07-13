@@ -10,6 +10,7 @@ node_modules/
 .tmp/
 .vale/cache/
 .founderos/agent-runs/
+.founderos/platform/jobs/
 
 # Environment and local configuration
 .env

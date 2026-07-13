@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0
+
+- Accept the M5A local Founder Workspace boundary through RFC-004 and ADR-005.
+- Add versioned workspace, project-summary, and workflow-job schemas.
+- Add a safe deterministic two-project indexer and loopback-only local API.
+- Add a responsive operating-ledger dashboard for projects, signals, and jobs.
+- Delegate writes to a fixed allowlist of existing FounderOS CLI workflows.
+- Add CSRF, origin, path, symbolic-link, rate, concurrency, redaction, retention,
+  and interrupted-job recovery controls.
+- Add seven platform tests, CI verification, and beginner-first local operations
+  documentation.
+
 ## 0.6.0
 
 - Add RFC-003, ADR-004, the agent threat model, and local retention policy.

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FounderOS workflow job",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "projectId", "workflow", "status", "createdAt", "updatedAt", "command", "log"],
+  "properties": {
+    "schemaVersion": { "const": 1 }, "id": { "type": "string", "pattern": "^JOB-[A-Z0-9-]+$" }, "projectId": { "type": "string" }, "workflow": { "type": "string" }, "status": { "enum": ["queued", "running", "passed", "failed"] }, "createdAt": { "type": "string", "format": "date-time" }, "updatedAt": { "type": "string", "format": "date-time" }, "command": { "type": "array", "minItems": 1, "items": { "type": "string" } }, "log": { "type": "string", "maxLength": 20000 }, "exitCode": { "type": ["integer", "null"] }
+  }
+}
