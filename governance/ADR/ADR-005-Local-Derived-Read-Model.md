@@ -21,6 +21,7 @@ CLI workflows through a fixed allowlist.
 
 - The first platform slice remains portable, inspectable, and easy to remove.
 - No database migration, account system, or cloud service is required.
-- Repository-contained projects are supported first; arbitrary external roots
-  remain deferred.
+- Repository-contained projects are supported by the committed registry.
+  ADR-006 permits explicit external roots through an ignored, read-only local
+  overlay; arbitrary external execution remains deferred.
 - A later framework or hosted architecture requires fresh evidence and an ADR.

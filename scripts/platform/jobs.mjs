@@ -121,7 +121,12 @@ export class JobManager {
   }
 
   list() { return [...this.jobs.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }
-  snapshot() { return this.list().map((job) => ({ ...job, queuePosition: job.status === "queued" ? this.queue.findIndex((entry) => entry.job.id === job.id) + 1 : null })); }
+  snapshot() { return this.list().map((job) => ({
+    ...job,
+    queuePosition: job.status === "queued" ? this.queue.findIndex((entry) => entry.job.id === job.id) + 1 : null,
+    progress: job.status === "queued" ? "waiting" : job.status === "running" ? "executing" : "complete",
+    recoveryHint: job.status === "failed" ? (job.terminationReason === "platform-restart" ? "The platform stopped during execution. Review the log, correct the cause, then run again." : "Review the bounded log, correct the reported cause, then run again as a new job.") : job.status === "cancelled" ? "This job was intentionally stopped. Run again only when you are ready." : null
+  })); }
   get(id) { return this.jobs.get(id); }
   cancel(id) {
     const job = this.get(id);

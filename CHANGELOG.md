@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0
+
+- Add guided inspection and import commands for external repositories.
+- Store explicit external-root permissions and imports in a Git-ignored overlay.
+- Keep imported repositories read-only with executable workflows disabled.
+- Add onboarding, empty, error, job-progress, and recovery states to the dashboard.
+- Add dry-run, inspect, and confirmed restore for local registry backups.
+- Expand platform security, integration, API, and browser-shell coverage.
+- Record the M5A.2 pilot-readiness boundary without claiming pilot evidence.
+
 ## 0.8.0
 
 - Add the M5A.1 internal pilot protocol and schema without claiming sessions.

@@ -21,7 +21,7 @@ Usage:
   founderos doctor
   founderos research <command> [options]
   founderos agent <list|doctor|run|status|review|apply|validate> [options]
-  founderos platform <doctor|index|start> [options]
+  founderos platform <doctor|index|start|project|root|backup> [options]
 
 Create options:
   --name <text>          Project name

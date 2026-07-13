@@ -11,6 +11,8 @@ node_modules/
 .vale/cache/
 .founderos/agent-runs/
 .founderos/platform/jobs/
+.founderos/platform/local-workspace.yaml
+.founderos/platform/backups/
 
 # Environment and local configuration
 .env

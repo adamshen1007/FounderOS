@@ -3,9 +3,9 @@
   "title": "FounderOS project summary",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "id", "name", "description", "owner", "stage", "path", "milestone", "health", "signals", "workflows", "nextAction"],
+  "required": ["schemaVersion", "id", "name", "description", "owner", "source", "stage", "path", "milestone", "health", "signals", "workflows", "nextAction"],
   "properties": {
-    "schemaVersion": { "const": 1 }, "id": { "type": "string" }, "name": { "type": "string" }, "description": { "type": "string" }, "owner": { "type": "string" }, "stage": { "type": "string" }, "path": { "type": "string" }, "milestone": { "type": "string" }, "health": { "enum": ["healthy", "attention", "unavailable"] },
+    "schemaVersion": { "const": 1 }, "id": { "type": "string" }, "name": { "type": "string" }, "description": { "type": "string" }, "owner": { "type": "string" }, "source": { "enum": ["committed", "local"] }, "stage": { "type": "string" }, "path": { "type": "string" }, "milestone": { "type": "string" }, "health": { "enum": ["healthy", "attention", "unavailable"] },
     "signals": { "type": "object", "additionalProperties": false, "required": ["researchTopics", "agentRuns", "documents"], "properties": { "researchTopics": { "type": "integer", "minimum": 0 }, "agentRuns": { "type": "integer", "minimum": 0 }, "documents": { "type": "integer", "minimum": 0 } } },
     "workflows": { "type": "array", "uniqueItems": true, "items": { "enum": ["quality-check", "research-validate", "agent-review-fake", "kit-check"] } }, "nextAction": { "type": "string", "minLength": 1 }
   }

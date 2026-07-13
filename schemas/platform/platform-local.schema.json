@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FounderOS local workspace overlay",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "allowedRoots", "projects"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "allowedRoots": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "projects": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "path"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "kind": { "const": "repository" },
+          "path": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

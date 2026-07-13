@@ -61,3 +61,16 @@ The internal-pilot release adds registry commands, live derived indexing,
 project dossiers, cancellable and rerunnable jobs, sanitized diagnostics, and
 pilot evidence records. It does not expand the local trust boundary. Hosted
 M5B remains blocked until completed pilot records meet the published protocol.
+
+## M5A.2 Amendment
+
+Pilot-readiness hardening permits external repositories through a Git-ignored
+local overlay. The operator must inspect the candidate, allow an absolute root
+with explicit confirmation, and then import it. Imported external repositories
+are read-only and receive no executable workflows. Canonical committed project
+registration remains repository-contained.
+
+The amendment also permits local-registry-only backups, confirmed restore,
+dashboard onboarding, and clearer job recovery guidance. Backups do not contain
+or restore canonical project content. Remote access, automatic workflow trust,
+and hosted behavior remain deferred.

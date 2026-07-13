@@ -27,6 +27,7 @@ FounderOS/
 ├── specs/                   # Numbered, engine, and orchestration contracts
 ├── templates/               # Reusable templates
 ├── workspace/               # Multi-project registry
+├── .founderos/platform/     # Ignored local registry, backups, and job state
 ├── CONSTITUTION.md          # Canonical governing principles
 ├── README.md                # Project entry point
 └── ROADMAP.md               # Canonical milestone sequence
@@ -35,3 +36,7 @@ FounderOS/
 The repository must not introduce a second nested project root. Derived
 publishing outputs belong in ignored output directories such as `dist/` and
 must not replace their canonical Markdown sources.
+
+The `.founderos/platform/` directory is local runtime state, not a canonical
+project source. It must remain ignored by Git. Its external-project overlay may
+reference explicitly allowed repositories without copying their content.

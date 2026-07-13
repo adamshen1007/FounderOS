@@ -35,8 +35,9 @@
       </aside>
       <div class="desk">
         <div id="index-status" class="index-status" role="status" aria-live="polite"></div>
+        <div id="notice" class="notice" role="alert" hidden></div>
         <section aria-labelledby="projects-title">
-          <div class="section-heading"><div><p class="eyebrow">Registered work</p><h2 id="projects-title">Project dossiers</h2></div><p id="project-count" class="count"></p></div>
+          <div class="section-heading"><div><p class="eyebrow">Registered work</p><h2 id="projects-title">Project dossiers</h2></div><div class="heading-actions"><p id="project-count" class="count"></p><button id="open-onboarding" class="quiet-button" type="button">Add project</button></div></div>
           <div id="projects" class="project-grid" aria-live="polite"></div>
         </section>
         <section class="activity" aria-labelledby="activity-title">
@@ -50,6 +51,18 @@
   <dialog id="dossier" aria-labelledby="dossier-title">
     <div class="dialog-head"><div><p class="eyebrow">Project evidence</p><h2 id="dossier-title">Project dossier</h2></div><button id="close-dossier" class="quiet-button" type="button">Close</button></div>
     <div id="dossier-content" class="dossier-content" aria-live="polite"></div>
+  </dialog>
+  <dialog id="onboarding" aria-labelledby="onboarding-title">
+    <div class="dialog-head"><div><p class="eyebrow">Guided local import</p><h2 id="onboarding-title">Add an external project</h2></div><button id="close-onboarding" class="quiet-button" type="button">Close</button></div>
+    <div class="onboarding-content">
+      <p>External repositories stay where they are. FounderOS reads only an explicitly allowlisted directory and never enables workflows for it automatically.</p>
+      <ol>
+        <li><strong>Inspect</strong><code>pnpm founderos platform project onboard "/absolute/path/to/project"</code></li>
+        <li><strong>Allow</strong><code>pnpm founderos platform root allow "/absolute/path/to/project" --dry-run</code><code>pnpm founderos platform root allow "/absolute/path/to/project" --confirm</code></li>
+        <li><strong>Import</strong><code>pnpm founderos platform project import "/absolute/path/to/project" --dry-run</code><code>pnpm founderos platform project import "/absolute/path/to/project"</code></li>
+      </ol>
+      <p class="muted">Use the project directory itself as the allowed root. Local registry data is ignored by Git.</p>
+    </div>
   </dialog>
   <script type="module" src="/app.js"></script>
 </body>

@@ -21,7 +21,7 @@ async function body(request) {
 }
 
 export function createPlatformServer(options = {}) {
-  const indexService = options.indexService ?? (options.index ? { refresh: () => options.index } : new WorkspaceIndex({ file: options.workspaceFile }));
+  const indexService = options.indexService ?? (options.index ? { refresh: () => options.index } : new WorkspaceIndex({ file: options.workspaceFile, localFile: options.localFile }));
   const jobs = options.jobs ?? new JobManager(options.jobOptions);
   const csrfToken = options.csrfToken ?? randomBytes(24).toString("hex");
   const requests = new Map();
@@ -36,7 +36,7 @@ export function createPlatformServer(options = {}) {
       const url = new URL(request.url, "http://localhost");
       if (request.method === "GET" && url.pathname === "/api/session") return json(response, 200, { csrfToken });
       const index = indexService.refresh();
-      if (request.method === "GET" && url.pathname === "/api/workspace") return json(response, 200, { ...index, jobs: jobs.snapshot() });
+      if (request.method === "GET" && url.pathname === "/api/workspace") return json(response, 200, { ...index, onboarding: { registeredProjects: index.projects.length, localProjects: index.projects.filter((project) => project.source === "local").length, externalWorkflows: "disabled", nextCommand: "founderos platform project onboard /absolute/path/to/project" }, jobs: jobs.snapshot() });
       const projectMatch = url.pathname.match(/^\/api\/projects\/([a-z0-9-]+)$/);
       if (request.method === "GET" && projectMatch) {
         const project = index.projects.find((item) => item.id === projectMatch[1]);

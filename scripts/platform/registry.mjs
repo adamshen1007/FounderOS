@@ -5,6 +5,7 @@ import { ROOT } from "../lib.mjs";
 import { WORKSPACE_FILE } from "./constants.mjs";
 import { loadWorkspace, validatePlatformRecord } from "./model.mjs";
 import { safePlatformPath } from "./security.mjs";
+import { loadEffectiveWorkspace } from "./local-state.mjs";
 
 function slug(value) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 
@@ -52,6 +53,12 @@ export function removeProject(id, { file = WORKSPACE_FILE, dryRun = false, confi
 
 export function inspectProject(id, file = WORKSPACE_FILE) {
   const project = loadWorkspace(file).projects.find((item) => item.id === id);
+  if (!project) throw new Error(`Project is not registered: ${id}`);
+  return project;
+}
+
+export function inspectAnyProject(id, file = WORKSPACE_FILE, localFile) {
+  const project = loadEffectiveWorkspace(file, localFile).projects.find((item) => item.id === id);
   if (!project) throw new Error(`Project is not registered: ${id}`);
   return project;
 }

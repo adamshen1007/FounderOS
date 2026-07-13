@@ -11,17 +11,20 @@ import { redactLog, safePlatformPath } from "../scripts/platform/security.mjs";
 import { createPlatformServer, startPlatform } from "../scripts/platform/server.mjs";
 import { addProject, inspectProject, removeProject } from "../scripts/platform/registry.mjs";
 import { cleanJobs, diagnostics, sanitizedJobs } from "../scripts/platform/operations.mjs";
+import { allowExternalRoot, importExternalProject, inspectExternalCandidate, loadEffectiveWorkspace, loadLocalWorkspace, removeExternalProject, removeExternalRoot, saveLocalWorkspace } from "../scripts/platform/local-state.mjs";
+import { createWorkspaceBackup, restoreWorkspaceBackup } from "../scripts/platform/backups.mjs";
 
 const temporaryRoot = resolve(ROOT, ".tmp");
 mkdirSync(temporaryRoot, { recursive: true });
+const isolatedLocalFile = resolve(temporaryRoot, "platform-test-local-missing.yaml");
 const waitFor = async (predicate) => { for (let index = 0; index < 50; index += 1) { if (predicate()) return; await new Promise((resolvePromise) => setTimeout(resolvePromise, 10)); } throw new Error("Timed out waiting for test state."); };
 
 test("two-project workspace produces deterministic schema-valid summaries", () => {
-  const first = buildWorkspaceIndex();
-  const second = buildWorkspaceIndex();
+  const first = buildWorkspaceIndex(undefined, isolatedLocalFile);
+  const second = buildWorkspaceIndex(undefined, isolatedLocalFile);
   assert.deepEqual(first, second);
   assert.deepEqual(first.projects.map((project) => project.id), ["founderos-core", "ai-launch-copilot"]);
-  assert.equal(first.projects[0].milestone, "M5A.1 pilot");
+  assert.equal(first.projects[0].milestone, "M5A.2 pilot");
   first.projects.forEach((project) => validatePlatformRecord("project-summary", project));
 });
 
@@ -57,13 +60,68 @@ test("registry add, inspect, dry-run, and remove never delete projects", () => {
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });
 
+test("external onboarding requires an explicit local allowlist and stays read-only", () => {
+  const external = mkdtempSync("/private/tmp/founderos-external-");
+  const localFile = resolve(temporaryRoot, `local-${Date.now()}.yaml`);
+  writeFileSync(resolve(external, "package.json"), `${JSON.stringify({ name: "Pilot Project", description: "Local pilot repository" })}\n`);
+  writeFileSync(resolve(external, "README.md"), "# Pilot Project\n");
+  try {
+    const candidate = inspectExternalCandidate(external, { localFile });
+    assert.equal(candidate.id, "pilot-project");
+    assert.equal(candidate.allowed, false);
+    allowExternalRoot(external, { localFile, dryRun: true });
+    assert.equal(existsSync(localFile), false);
+    assert.throws(() => importExternalProject(external, { localFile }), /not allowlisted/);
+    allowExternalRoot(external, { localFile, confirm: true });
+    assert.equal(importExternalProject(external, { localFile, dryRun: true }).id, "pilot-project");
+    assert.equal(loadLocalWorkspace(localFile).projects.length, 0);
+    importExternalProject(external, { localFile });
+    const effective = loadEffectiveWorkspace(undefined, localFile);
+    assert.equal(effective.projects.length, 3);
+    const index = buildWorkspaceIndex(undefined, localFile);
+    assert.equal(index.projects.at(-1).source, "local");
+    assert.deepEqual(index.projects.at(-1).workflows, []);
+    assert.throws(() => removeExternalRoot(external, { localFile, confirm: true }), /Remove projects/);
+    removeExternalProject("pilot-project", { localFile, confirm: true });
+    removeExternalRoot(external, { localFile, confirm: true });
+    assert.equal(existsSync(external), true);
+  } finally {
+    rmSync(localFile, { force: true });
+    rmSync(external, { recursive: true, force: true });
+  }
+});
+
+test("local workspace backup dry-runs and restores registry state only", () => {
+  const external = mkdtempSync("/private/tmp/founderos-backup-project-");
+  const directory = mkdtempSync(resolve(temporaryRoot, "backup-"));
+  const localFile = resolve(directory, "local.yaml");
+  const output = resolve(directory, "workspace-backup.json");
+  writeFileSync(resolve(external, "package.json"), `${JSON.stringify({ name: "backup-project" })}\n`);
+  try {
+    allowExternalRoot(external, { localFile, confirm: true });
+    importExternalProject(external, { localFile });
+    const dry = createWorkspaceBackup({ output, localFile, dryRun: true, now: "2026-07-13T10:00:00Z" });
+    assert.equal(dry.backup.scope, "local-registry-only");
+    assert.equal(existsSync(output), false);
+    createWorkspaceBackup({ output, localFile, now: "2026-07-13T10:00:00Z" });
+    saveLocalWorkspace({ schemaVersion: 1, allowedRoots: [], projects: [] }, { file: localFile });
+    restoreWorkspaceBackup(output, { localFile, dryRun: true });
+    assert.equal(loadLocalWorkspace(localFile).projects.length, 0);
+    restoreWorkspaceBackup(output, { localFile, confirm: true });
+    assert.equal(loadLocalWorkspace(localFile).projects[0].id, "backup-project");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+    rmSync(external, { recursive: true, force: true });
+  }
+});
+
 test("live index increments only when canonical state changes", () => {
   const directory = mkdtempSync(resolve(temporaryRoot, "live-index-"));
   const file = resolve(directory, "workspace.yaml");
   const workspace = loadWorkspace();
   writeFileSync(file, stringify(workspace));
   try {
-    const index = new WorkspaceIndex({ file, now: () => "2026-07-13T09:00:00Z" });
+    const index = new WorkspaceIndex({ file, localFile: isolatedLocalFile, now: () => "2026-07-13T09:00:00Z" });
     assert.equal(index.refresh().index.generation, 1);
     workspace.workspace.name = "Changed Working Studio";
     writeFileSync(file, stringify(workspace));
@@ -111,6 +169,8 @@ test("job records persist terminal state and recover interrupted work", async ()
     const recovered = new JobManager({ directory, now: () => "2026-07-13T06:05:00Z" });
     assert.equal(recovered.get(job.id).status, "failed");
     assert.match(recovered.get(job.id).log, /restart/);
+    assert.equal(recovered.snapshot()[0].progress, "complete");
+    assert.match(recovered.snapshot()[0].recoveryHint, /platform stopped/);
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });
 
@@ -150,13 +210,15 @@ test("diagnostics and exports omit logs while retention supports dry-run", async
 test("local API serves state and requires CSRF plus confirmation for jobs", async () => {
   const directory = mkdtempSync(resolve(temporaryRoot, "api-jobs-"));
   const jobs = new JobManager({ directory, executor: async () => ({ exitCode: 0, output: "ok" }) });
-  const platform = createPlatformServer({ jobs, csrfToken: "test-csrf" });
+  const platform = createPlatformServer({ jobs, csrfToken: "test-csrf", localFile: isolatedLocalFile });
   await new Promise((resolvePromise) => platform.server.listen(0, "127.0.0.1", resolvePromise));
   const { port } = platform.server.address();
   const base = `http://127.0.0.1:${port}`;
   try {
     const workspace = await (await fetch(`${base}/api/workspace`)).json();
     assert.equal(workspace.projects.length, 2);
+    assert.equal(workspace.onboarding.externalWorkflows, "disabled");
+    assert.match(workspace.onboarding.nextCommand, /project onboard/);
     const denied = await fetch(`${base}/api/projects/founderos-core/workflows/research-validate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirm: true }) });
     assert.equal(denied.status, 403);
     const unconfirmed = await fetch(`${base}/api/projects/founderos-core/workflows/research-validate`, { method: "POST", headers: { "content-type": "application/json", "x-founderos-csrf": "test-csrf" }, body: JSON.stringify({ confirm: false }) });
@@ -165,6 +227,23 @@ test("local API serves state and requires CSRF plus confirmation for jobs", asyn
     assert.equal(accepted.status, 202);
     assert.match((await accepted.json()).id, /^JOB-/);
   } finally { await new Promise((resolvePromise) => platform.server.close(resolvePromise)); rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("browser shell exposes onboarding and recovery affordances with security headers", async () => {
+  const platform = createPlatformServer({ csrfToken: "browser-csrf", localFile: isolatedLocalFile });
+  await new Promise((resolvePromise) => platform.server.listen(0, "127.0.0.1", resolvePromise));
+  const { port } = platform.server.address();
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/`);
+    const html = await response.text();
+    assert.match(html, /id="open-onboarding"/);
+    assert.match(html, /id="notice"/);
+    assert.match(html, /Guided local import/);
+    assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
+    const app = await (await fetch(`http://127.0.0.1:${port}/app.js`)).text();
+    assert.match(app, /job-progress/);
+    assert.match(app, /recoveryHint/);
+  } finally { await new Promise((resolvePromise) => platform.server.close(resolvePromise)); }
 });
 
 test("platform refuses non-loopback hosts", async () => {

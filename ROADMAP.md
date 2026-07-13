@@ -111,7 +111,7 @@ Exit criteria:
 
 **Goal:** Package proven workflows into a coherent multi-project platform.
 
-**Status:** M5A.1 pilot-ready; hosted expansion blocked pending real evidence
+**Status:** M5A.2 pilot-ready; hosted expansion blocked pending real evidence
 
 Potential capabilities:
 
@@ -133,6 +133,11 @@ workflows remain deferred until internal use provides evidence for M5B.
 M5A.1 adds safe project registration, live indexing, detailed project evidence,
 cancellable job history, diagnostics, and a pilot protocol. No completed pilot
 sessions are claimed yet.
+
+M5A.2 adds guided external-project onboarding through an explicit, local-only
+allowlist; external projects remain read-only. It also adds registry backup and
+restore, clearer workflow progress and recovery guidance, and broader local
+security and browser-shell coverage. This hardening is not pilot evidence.
 
 M5A exit criteria are defined in RFC-004. Any M5B exit criteria require a new
 RFC after internal pilot evidence exists.

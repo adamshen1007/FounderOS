@@ -10,7 +10,8 @@ YAML, JSON, and existing validators remain authoritative.
 
 ```mermaid
 flowchart LR
-    A["Workspace manifest"] --> B["Safe indexer"]
+    A["Committed workspace manifest"] --> B["Safe indexer"]
+    H["Ignored local allowlist overlay"] --> B
     C["Canonical project files"] --> B
     B --> D["Local API"]
     D --> E["Founder dashboard"]
@@ -22,7 +23,10 @@ flowchart LR
 ## Security Invariants
 
 - The server binds only to `127.0.0.1` or `::1`.
-- Project paths remain inside the repository and cannot traverse symbolic links.
+- Committed project paths remain inside the repository and cannot traverse
+  symbolic links.
+- External repositories require an explicit local allowlist, remain read-only,
+  and receive no workflows by default.
 - API writes require JSON, same-origin requests, a CSRF token, and confirmation.
 - Only predefined command arrays may execute; request data never becomes a shell
   command.
@@ -40,3 +44,8 @@ flowchart LR
 - Cancellation terminates the tracked child process and reruns create lineage
   instead of rewriting history.
 - The dashboard is keyboard accessible, responsive, and honors reduced motion.
+- Candidate inspection and dry-run occur before external registry mutation.
+- Local registry backups exclude canonical content and restore only after
+  validation and explicit confirmation.
+- Failed and cancelled jobs expose actionable recovery guidance without
+  automatic retry.

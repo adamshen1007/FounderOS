@@ -6,8 +6,9 @@
 
 ## Sourced Facts
 
-- M5A.1 provides local registration, live indexing, project details, governed
-  jobs, diagnostics, and pilot-record infrastructure.
+- M5A.2 provides local registration, allowlisted read-only external indexing,
+  project details, governed jobs, recovery, backups, diagnostics, and
+  pilot-record infrastructure.
 - No completed pilot-session records exist at this decision point.
 
 ## Synthesis
