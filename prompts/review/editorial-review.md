@@ -1,6 +1,7 @@
 # Editorial Review Prompt
 
 Review the provided chapter for:
+
 - Clarity
 - Consistency
 - Unsupported claims
@@ -9,6 +10,7 @@ Review the provided chapter for:
 - Weak actionability
 
 Return:
+
 - Summary
 - Required fixes
 - Suggested improvements

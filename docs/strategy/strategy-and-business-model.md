@@ -29,11 +29,11 @@ operating system.
 
 # Core Value Proposition
 
-1.  Standardize company creation.
-2.  Preserve institutional knowledge.
-3.  Reduce repeated work.
-4.  Automate documentation and publishing.
-5.  Continuously improve from completed projects.
+1. Standardize company creation.
+2. Preserve institutional knowledge.
+3. Reduce repeated work.
+4. Automate documentation and publishing.
+5. Continuously improve from completed projects.
 
 ------------------------------------------------------------------------
 
@@ -41,16 +41,16 @@ operating system.
 
 ## Initial
 
--   Solo AI founders
--   Technical founders
--   Startup studios
+- Solo AI founders
+- Technical founders
+- Startup studios
 
 ## Expansion
 
--   Small startup teams
--   Accelerators
--   Venture studios
--   Innovation teams
+- Small startup teams
+- Accelerators
+- Venture studios
+- Innovation teams
 
 ------------------------------------------------------------------------
 
@@ -126,11 +126,11 @@ documenting, scaling, and continuously improving AI-native companies.
 
 # Success Metrics
 
--   Reduced startup creation time
--   Higher documentation reuse
--   Increased automation coverage
--   Faster publishing cycles
--   Successful ventures built using FounderOS
+- Reduced startup creation time
+- Higher documentation reuse
+- Increased automation coverage
+- Faster publishing cycles
+- Successful ventures built using FounderOS
 
 ------------------------------------------------------------------------
 

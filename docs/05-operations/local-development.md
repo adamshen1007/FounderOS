@@ -1,0 +1,114 @@
+# Local Development
+
+## Purpose
+
+This guide sets up and runs the M1 publishing workflow on macOS. The workflow
+requires no database, credentials, or private service.
+
+## Prerequisites
+
+- Git
+- Node.js 24
+- pnpm 11
+- Pandoc 3 or newer
+- Vale 3 or newer
+
+Check the installed versions:
+
+```bash
+git --version
+node --version
+pnpm --version
+pandoc --version
+vale --version
+```
+
+The repository pins its Node version in `.node-version` and its pnpm version in
+`package.json`.
+
+### Install Homebrew, Pandoc, and Vale
+
+If `brew` is unavailable, install Homebrew using the command on
+[brew.sh](https://brew.sh/), then follow the installer's shell-path instructions.
+
+Install the system publishing tools:
+
+```bash
+brew install pandoc vale
+```
+
+## First Setup
+
+```bash
+git clone https://github.com/adamshen1007/FounderOS.git
+cd FounderOS
+pnpm install
+```
+
+`pnpm install` also downloads the browser runtime used by Mermaid CLI.
+
+## Daily Commands
+
+Run all quality gates:
+
+```bash
+pnpm check
+```
+
+Generate HTML, EPUB, and DOCX:
+
+```bash
+pnpm build
+```
+
+Preview the generated HTML:
+
+```bash
+pnpm preview
+```
+
+Open <http://127.0.0.1:4173> and press `Ctrl+C` in Terminal when finished.
+
+Remove generated files:
+
+```bash
+pnpm clean
+```
+
+## Individual Quality Gates
+
+```bash
+pnpm check:tools
+pnpm check:markdown
+pnpm check:links
+pnpm check:spelling
+pnpm check:style
+pnpm check:diagrams
+pnpm check:citations
+```
+
+Run an individual gate while fixing a focused problem, then run `pnpm check`
+before requesting review.
+
+## Generated Files
+
+The build writes review artifacts to:
+
+```text
+dist/books/volume-01-yc-playbook/
+├── index.html
+├── yc-playbook.epub
+└── yc-playbook.docx
+```
+
+Intermediate Markdown and rendered diagrams live under `build/`. Both
+directories are ignored by Git and may be deleted at any time.
+
+## Adding a Chapter
+
+1. Copy `templates/chapter-template.md` into the book's `chapters/` directory.
+2. Give it the next zero-padded sequence number.
+3. Complete every required section.
+4. Add public, traceable sources for external claims.
+5. Run `pnpm check` and `pnpm build`.
+6. Review the HTML and at least one downloadable format.

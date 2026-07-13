@@ -56,14 +56,14 @@ knowledge.
 
 ## Platform Modules
 
--   Knowledge Repository
--   Research Engine
--   Engineering Kit Generator
--   Publishing Platform
--   AI Agent Orchestrator
--   Founder Library
--   Marketing Toolkit
--   Fundraising Toolkit
+- Knowledge Repository
+- Research Engine
+- Engineering Kit Generator
+- Publishing Platform
+- AI Agent Orchestrator
+- Founder Library
+- Marketing Toolkit
+- Fundraising Toolkit
 
 ## Architecture Position
 
@@ -79,20 +79,20 @@ GitHub Actions = Automation
 
 ## Risks
 
--   Scope creep
--   Tool changes
--   Automation complexity
+- Scope creep
+- Tool changes
+- Automation complexity
 
 Mitigation: - Documentation-first - Milestone-based delivery - Modular
 architecture
 
 ## Success Metrics
 
--   Faster project creation
--   Higher documentation reuse
--   Reduced repeated work
--   Automation coverage
--   Publishing speed
+- Faster project creation
+- Higher documentation reuse
+- Reduced repeated work
+- Automation coverage
+- Publishing speed
 
 ## Roadmap
 

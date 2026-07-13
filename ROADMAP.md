@@ -9,6 +9,8 @@ criteria before the next milestone becomes the primary implementation focus.
 
 **Goal:** Establish the source of truth and define what FounderOS is building.
 
+**Status:** Complete
+
 Deliverables:
 
 - Vision, worthiness review, strategy, and product requirements
@@ -27,6 +29,8 @@ Exit criteria:
 ## M1 — Publishing Foundation
 
 **Goal:** Turn canonical Markdown into validated release artifacts.
+
+**Status:** Complete; public release remains a human approval gate
 
 Deliverables:
 

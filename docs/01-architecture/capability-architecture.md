@@ -268,7 +268,7 @@ Validate content, diagrams, links, citations, style, and release readiness.
 
 Includes:
 
-- markdown linting
+- Markdown linting
 - link checking
 - citation review
 - diagram rendering

@@ -3,6 +3,7 @@
 Generate a book chapter using `templates/chapter-template.md`.
 
 Requirements:
+
 - Use Notion-compatible Markdown.
 - Include diagrams as Mermaid.
 - Include checklists and worksheets.

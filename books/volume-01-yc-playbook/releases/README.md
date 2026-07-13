@@ -1,0 +1,4 @@
+# Book Releases
+
+Approved release manifests may be stored here. Generated HTML, EPUB, and DOCX
+files belong under the ignored root `dist/` directory and are not committed.

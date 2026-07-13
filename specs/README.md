@@ -14,8 +14,8 @@ references do not change when new specifications are added.
 | 003 | Book | Defined |
 | 004 | Chapter | Defined |
 | 005 | Diagram | Defined |
-| 006 | Publishing pipeline | Reserved for M1 |
-| 007 | Output profiles and metadata | Reserved for M1 |
+| 006 | Publishing pipeline | Defined |
+| 007 | Output profiles and metadata | Defined |
 | 008 | Citations | Defined |
 | 009 | Notion synchronization | Defined |
 | 010 | Research workflow | Reserved for M3 |
@@ -23,7 +23,7 @@ references do not change when new specifications are added.
 | 012 | Automation | Reserved for M1 or later |
 | 013 | AI agent behavior | Reserved for M4 |
 | 014 | Integrations | Reserved for M4 or later |
-| 015 | Release and versioning | Reserved for M1 |
+| 015 | Release and versioning | Defined |
 | 016 | Quality gates | Defined |
 
 The gaps are intentional reservations, not missing files. A reserved file is

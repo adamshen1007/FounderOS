@@ -20,41 +20,41 @@ Secondary:
 
 ## Product Goals
 
-1.  Standardize company-building workflows.
-2.  Generate reusable engineering kits.
-3.  Maintain a searchable founder knowledge base.
-4.  Publish books and documentation automatically.
-5.  Continuously improve from completed projects.
+1. Standardize company-building workflows.
+2. Generate reusable engineering kits.
+3. Maintain a searchable founder knowledge base.
+4. Publish books and documentation automatically.
+5. Continuously improve from completed projects.
 
 ## MVP Modules
 
--   Knowledge Repository
--   Publishing Platform
--   Engineering Kit Generator
--   Prompt Library
--   AI Agent Framework
+- Knowledge Repository
+- Publishing Platform
+- Engineering Kit Generator
+- Prompt Library
+- AI Agent Framework
 
 ## Future Modules
 
--   Research Automation
--   GTM Toolkit
--   Fundraising Toolkit
--   Founder Dashboard
--   Multi-project analytics
+- Research Automation
+- GTM Toolkit
+- Fundraising Toolkit
+- Founder Dashboard
+- Multi-project analytics
 
 ## Success Metrics
 
--   Reduced setup time for new ventures
--   Documentation reuse
--   Automation coverage
--   Publishing lead time
--   Founder satisfaction
+- Reduced setup time for new ventures
+- Documentation reuse
+- Automation coverage
+- Publishing lead time
+- Founder satisfaction
 
 ## Risks
 
--   Scope creep
--   Tool ecosystem changes
--   Excessive automation complexity
+- Scope creep
+- Tool ecosystem changes
+- Excessive automation complexity
 
 ## Release Strategy
 

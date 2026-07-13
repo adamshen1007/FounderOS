@@ -13,6 +13,7 @@
 ## Required Chapter Elements
 
 Every book chapter should include:
+
 - Learning objectives
 - Core principle
 - Deep-dive explanation

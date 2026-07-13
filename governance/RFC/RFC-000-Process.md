@@ -11,6 +11,7 @@ The RFC process is used to propose significant changes before implementation.
 ## When to Use an RFC
 
 Use an RFC for:
+
 - New major modules
 - New MCP/tool integrations
 - Changes to source-of-truth rules

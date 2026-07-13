@@ -1,0 +1,42 @@
+{
+  "version": "0.2",
+  "language": "en,en-GB,en-US",
+  "useGitignore": true,
+  "enableGlobDot": true,
+  "ignorePaths": [
+    ".git/**",
+    "build/**",
+    "dist/**",
+    "node_modules/**",
+    "pnpm-lock.yaml"
+  ],
+  "ignoreRegExpList": ["Urls", "Email"],
+  "words": [
+    "API",
+    "APIs",
+    "Blackappl",
+    "ChatGPT",
+    "Codex",
+    "DOCX",
+    "Dominika",
+    "EPUB",
+    "FounderOS",
+    "frontmatter",
+    "GTM",
+    "inspectable",
+    "Mermaid",
+    "Notion",
+    "Obsidian",
+    "Pandoc",
+    "playbook",
+    "playbooks",
+    "pnpm",
+    "roadmap",
+    "SaaS",
+    "Seibel",
+    "Speculor",
+    "toolchain",
+    "workflows",
+    "YAML"
+  ]
+}

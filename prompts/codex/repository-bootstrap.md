@@ -3,6 +3,7 @@
 Create or update the FounderOS Publishing Platform repository according to the specs.
 
 Rules:
+
 - Preserve existing files unless instructed.
 - Use Markdown as source of truth.
 - Do not implement code before specs exist.

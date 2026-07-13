@@ -1,0 +1,42 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import { basename, resolve } from "node:path";
+import { localBinary, ROOT, run } from "./lib.mjs";
+
+const MERMAID_BLOCK = /```mermaid\s*\n([\s\S]*?)```/g;
+
+function safeStem(value) {
+  return value.replace(/\.md$/i, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
+}
+
+export function countMermaidBlocks(markdown) {
+  return [...markdown.matchAll(MERMAID_BLOCK)].length;
+}
+
+export function renderMermaidBlocks(markdown, sourceName, outputDirectory, options = {}) {
+  mkdirSync(outputDirectory, { recursive: true });
+  const matches = [...markdown.matchAll(MERMAID_BLOCK)];
+  let rendered = markdown;
+  let offset = 0;
+
+  matches.forEach((match, matchIndex) => {
+    const index = matchIndex + 1;
+    const stem = `${safeStem(basename(sourceName))}-diagram-${index}`;
+    const sourceFile = resolve(outputDirectory, `${stem}.mmd`);
+    const outputFile = resolve(outputDirectory, `${stem}.${options.format ?? "png"}`);
+    writeFileSync(sourceFile, `${match[1].trim()}\n`);
+    run(localBinary("mmdc"), [
+      "-i", sourceFile, "-o", outputFile,
+      "-p", resolve(ROOT, "publishing", "puppeteer-config.json"),
+      "-b", "transparent",
+    ]);
+
+    if (options.replace) {
+      const alt = `Diagram ${index} from ${basename(sourceName, ".md")}`;
+      const replacement = `![${alt}](${options.linkPrefix}/${stem}.${options.format ?? "png"})`;
+      const start = match.index + offset;
+      rendered = `${rendered.slice(0, start)}${replacement}${rendered.slice(start + match[0].length)}`;
+      offset += replacement.length - match[0].length;
+    }
+  });
+  return { markdown: rendered, count: matches.length };
+}

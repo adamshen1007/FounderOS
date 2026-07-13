@@ -1,37 +1,50 @@
 # Publishing Engine Specification
 
 ## Purpose
-The Publishing Engine is responsible for Markdown.
+
+The Publishing Engine converts canonical Markdown into reproducible derived
+formats while preserving source traceability.
 
 ## Responsibilities
-- Own this domain.
-- Publish clear contracts.
-- Remain loosely coupled to other engines.
-- Emit events instead of direct hidden dependencies.
+
+- Discover and order canonical book content.
+- Render source-first diagrams for output formats.
+- Generate HTML, EPUB, and DOCX artifacts.
+- Verify output structure and metadata.
+- Keep generated output separate from canonical sources.
 
 ## Inputs
-- Domain events
-- Shared objects
+
+- Book metadata and Markdown chapters
+- Publishing output profiles
+- Validated diagrams and referenced assets
+- An approved source revision
 
 ## Outputs
-- Notion, PDF, EPUB, DOCX, website outputs
+
+- M1: standalone HTML, EPUB 3, and DOCX
+- Later milestones: PDF, Notion, and hosted website outputs
 
 ## Primary Objects
+
 - Project
 - Specification
 - Milestone
 - Release (where applicable)
 
 ## Events
+
 - Receives domain-specific events.
 - Emits completion and validation events.
 
 ## Dependencies
-- Shared Kernel
-- Governance policies
-- AI Agent contracts (where applicable)
+
+- Governance and citation policies
+- Quality Engine validation results
+- Pandoc and Mermaid CLI for the M1 implementation
 
 ## Quality Gates
+
 - Specification complete
 - Acceptance criteria satisfied
 - Version updated
@@ -39,6 +52,7 @@ The Publishing Engine is responsible for Markdown.
 - Human approval where required
 
 ## Acceptance Criteria
+
 - Responsibilities are clearly defined.
 - Interfaces documented.
 - No overlap with other engine ownership.

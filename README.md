@@ -5,10 +5,11 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The repository is currently in **Milestone 0 (M0): Strategy and Governance**.
-It contains the canonical strategy, architecture, engine specifications,
-governance records, publishing templates, and an initial Founder Library
-sample. It is not yet a deployable application.
+The repository has completed **Milestone 1 (M1): Publishing Foundation**. It
+contains the canonical strategy, architecture, engine specifications,
+governance records, publishing templates, an initial Founder Library sample,
+and a working local and CI publishing pipeline. It is not yet a SaaS
+application.
 
 ## Core Principles
 
@@ -41,18 +42,23 @@ Then read these documents in order:
 6. [Capability architecture](docs/01-architecture/capability-architecture.md)
 7. [Master specification](specs/000-master-spec.md)
 
-No dependency installation or local deployment is required in M0. Markdown
-files can be read directly on GitHub or in an editor such as VS Code or
-Obsidian.
-
-If [Vale](https://vale.sh/) is installed, check the writing rules locally with:
+Install dependencies and run the complete quality suite:
 
 ```bash
-vale .
+pnpm install
+pnpm check
 ```
 
-The planned M1 workflow will add repeatable `check`, `build`, and `preview`
-commands for the publishing pipeline.
+Build and preview the sample book:
+
+```bash
+pnpm build
+pnpm preview
+```
+
+The preview is available at <http://127.0.0.1:4173>. See the
+[local development guide](docs/05-operations/local-development.md) for system
+prerequisites and individual commands.
 
 ## Canonical Repository Structure
 
@@ -77,9 +83,8 @@ and implementation contracts live under [`specs`](specs).
 
 ## Current Milestone
 
-M0 establishes the strategy, governance, architecture, and repository
-foundation. The next milestone, M1, will implement the smallest useful
-publishing path:
+M0 established the strategy, governance, architecture, and repository
+foundation. M1 implements the smallest useful publishing path:
 
 ```text
 Markdown change
@@ -88,8 +93,8 @@ Markdown change
   -> release artifact
 ```
 
-See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence and exit
-criteria.
+See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. The next
+development focus is M2 — Engineering Kit Generator.
 
 ## Contributing and Security
 
