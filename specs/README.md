@@ -25,6 +25,7 @@ references do not change when new specifications are added.
 | 014 | Integrations | Reserved for M4 or later |
 | 015 | Release and versioning | Defined |
 | 016 | Quality gates | Defined |
+| 017 | Engineering kit generator | Defined |
 
 The gaps are intentional reservations, not missing files. A reserved file is
 created only when its milestone begins and its contract is ready for review.

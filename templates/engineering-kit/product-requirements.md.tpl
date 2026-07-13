@@ -1,0 +1,48 @@
+# {{project.name}} Product Requirements
+
+## Status
+
+Draft for human review
+
+## Owner
+
+{{project.owner}}
+
+## Problem Statement
+
+{{product.problem}}
+
+## Target User
+
+{{product.audience}}
+
+## Desired Outcome
+
+Users can complete the core job with a measurable improvement over their
+current workflow.
+
+## Initial Scope
+
+- Document the current user workflow.
+- Define one testable core use case.
+- Build the smallest end-to-end path for that use case.
+- Measure completion, failure, and user feedback.
+
+## Out of Scope
+
+- Scale work before the core use case is validated
+- Integrations without demonstrated user demand
+- Automated decisions without an explicit human approval policy
+
+## Acceptance Criteria
+
+- A target user can complete the core use case.
+- Success and failure are observable.
+- Known assumptions and risks are documented.
+- The owner approves the release decision.
+
+## Open Questions
+
+- What is the baseline workflow and cost?
+- Which result proves meaningful user value?
+- Which constraints are legal, security-related, or operational?

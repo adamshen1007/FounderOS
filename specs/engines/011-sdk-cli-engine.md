@@ -51,3 +51,7 @@ The SDK / CLI Engine is responsible for Commands.
 - Responsibilities are clearly defined.
 - Interfaces documented.
 - No overlap with other engine ownership.
+- `create`, `validate`, `generate`, and `doctor` follow Specification 017.
+- Commands return nonzero status for invalid input, unsafe paths, conflicts, or
+  generated-example drift.
+- Destructive replacement requires the explicit `--force` flag.

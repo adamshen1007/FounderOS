@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founderos.dev/schemas/founderos.project.schema.json",
+  "title": "FounderOS project manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "product", "generation"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "slug", "description", "owner"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 63 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "owner": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audience", "problem", "stage"],
+      "properties": {
+        "audience": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "problem": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "stage": { "type": "string", "enum": ["discovery", "validation", "build", "launch", "growth"] }
+      }
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template", "output"],
+      "properties": {
+        "template": { "const": "default" },
+        "output": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    }
+  }
+}

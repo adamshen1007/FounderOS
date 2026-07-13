@@ -5,6 +5,7 @@ output/
 
 # Dependencies and tool caches
 node_modules/
+.pnpm-store/
 .cache/
 .tmp/
 .vale/cache/

@@ -50,6 +50,8 @@ Exit criteria:
 
 **Goal:** Generate a consistent project foundation from reusable templates.
 
+**Status:** Complete
+
 Deliverables:
 
 - Standard project starter documents
@@ -59,6 +61,9 @@ Deliverables:
 Exit criteria:
 
 - A new project kit can be generated, reviewed, and regenerated predictably.
+- Invalid manifests and unsafe output paths fail before writes occur.
+- User-modified generated documents require explicit replacement approval.
+- A committed example is checked for drift in CI.
 
 ## M3 — Research Automation
 

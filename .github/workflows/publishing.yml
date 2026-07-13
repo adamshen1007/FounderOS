@@ -38,6 +38,9 @@ jobs:
       - name: Run quality gates
         run: pnpm check
 
+      - name: Verify engineering-kit example is deterministic
+        run: pnpm check:example
+
   build:
     name: Build publishing artifacts
     needs: quality

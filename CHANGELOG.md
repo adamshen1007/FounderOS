@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+- Add the M2 engineering-kit generator RFC, ADR, specification, and JSON Schema.
+- Add `create`, `validate`, `generate`, and `doctor` CLI commands.
+- Generate eight standard Markdown project documents from one YAML manifest.
+- Protect unowned and user-modified files with deterministic generation hashes.
+- Add dry-run, drift-check, and explicit force-replacement behavior.
+- Add snapshot, validation, path-safety, idempotency, and overwrite tests.
+- Add the AI Launch Copilot example kit and enforce it in CI.
+- Add beginner-first generator and regeneration documentation.
+
 ## 0.3.0
 
 - Add M1 publishing specifications and ADR-001.

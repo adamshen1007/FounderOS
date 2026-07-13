@@ -1,0 +1,13 @@
+schemaVersion: 1
+project:
+  name: AI Launch Copilot
+  slug: ai-launch-copilot
+  description: A guided launch workspace for first-time AI product founders.
+  owner: Example Founder
+product:
+  audience: First-time founders preparing an AI product launch
+  problem: Founders struggle to turn an early AI prototype into a focused, evidence-backed launch plan.
+  stage: validation
+generation:
+  template: default
+  output: .

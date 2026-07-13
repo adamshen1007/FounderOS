@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This guide sets up and runs the M1 publishing workflow on macOS. The workflow
-requires no database, credentials, or private service.
+This guide sets up and runs the publishing and engineering-kit workflows on
+macOS. They require no database, credentials, or private service.
 
 ## Prerequisites
 
@@ -85,10 +85,23 @@ pnpm check:spelling
 pnpm check:style
 pnpm check:diagrams
 pnpm check:citations
+pnpm test
+pnpm check:example
 ```
 
 Run an individual gate while fixing a focused problem, then run `pnpm check`
 before requesting review.
+
+## Engineering Kit Commands
+
+```bash
+pnpm founderos doctor
+pnpm founderos validate examples/ai-launch-copilot/founderos.project.yaml
+pnpm founderos generate examples/ai-launch-copilot/founderos.project.yaml --check
+```
+
+See the [engineering-kit generator guide](engineering-kit-generator.md) for
+project creation, dry runs, regeneration, and conflict recovery.
 
 ## Generated Files
 

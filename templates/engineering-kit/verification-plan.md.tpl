@@ -1,0 +1,26 @@
+# {{project.name}} Verification Plan
+
+## Purpose
+
+Verify that the project solves the documented problem safely and observably.
+
+## Product Verification
+
+| Area | Verification | Evidence | Status |
+|---|---|---|---|
+| Core use case | Representative user completes the workflow | Session notes | Pending |
+| Reliability | Expected failures return actionable guidance | Test report | Pending |
+| Usability | User understands the next action | Observation notes | Pending |
+| Value | Outcome improves on the baseline | Before-and-after measure | Pending |
+
+## Engineering Verification
+
+- Automated tests cover the core path and known failure modes.
+- Configuration and secrets are documented and excluded from source control.
+- A fresh environment can reproduce the documented setup.
+- Logs identify failures without exposing sensitive information.
+
+## Release Gate
+
+{{project.owner}} reviews the evidence, unresolved risks, rollback approach, and
+support ownership before approving a release.

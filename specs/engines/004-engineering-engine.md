@@ -51,3 +51,6 @@ The Engineering Engine is responsible for PRDs, specs, milestones.
 - Responsibilities are clearly defined.
 - Interfaces documented.
 - No overlap with other engine ownership.
+- A schema-valid project manifest produces the complete standard engineering
+  kit defined by Specification 017.
+- Regeneration remains deterministic and protects human changes.

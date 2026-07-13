@@ -5,11 +5,11 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The repository has completed **Milestone 1 (M1): Publishing Foundation**. It
+The repository has completed **Milestone 2 (M2): Engineering Kit Generator**. It
 contains the canonical strategy, architecture, engine specifications,
 governance records, publishing templates, an initial Founder Library sample,
-and a working local and CI publishing pipeline. It is not yet a SaaS
-application.
+the local and CI publishing pipeline, and a deterministic project-kit CLI. It
+is not yet a SaaS application.
 
 ## Core Principles
 
@@ -56,6 +56,20 @@ pnpm build
 pnpm preview
 ```
 
+Create an engineering kit for a new project:
+
+```bash
+pnpm founderos create my-project \
+  --name "My Project" \
+  --description "A focused description of the project." \
+  --owner "Your Name" \
+  --audience "The people you intend to help" \
+  --problem "The concrete problem they experience"
+```
+
+See the [engineering-kit generator guide](docs/05-operations/engineering-kit-generator.md)
+before regenerating or forcing replacement.
+
 The preview is available at <http://127.0.0.1:4173>. See the
 [local development guide](docs/05-operations/local-development.md) for system
 prerequisites and individual commands.
@@ -74,6 +88,9 @@ FounderOS/
 ├── diagrams/       # Diagram sources and standards
 ├── publishing/     # Publishing pipeline configuration
 ├── automation/     # Reproducible automation
+├── examples/       # Committed end-to-end reference projects
+├── schemas/        # Machine-readable input contracts
+├── scripts/        # Publishing and generator implementation
 └── ci/             # Quality and continuous-integration configuration
 ```
 
@@ -83,18 +100,18 @@ and implementation contracts live under [`specs`](specs).
 
 ## Current Milestone
 
-M0 established the strategy, governance, architecture, and repository
-foundation. M1 implements the smallest useful publishing path:
+M0 established the repository foundation, M1 implemented the publishing path,
+and M2 implements deterministic engineering-kit generation:
 
 ```text
-Markdown change
-  -> quality checks
-  -> publishing export
-  -> release artifact
+founderos.project.yaml
+  -> schema and path validation
+  -> deterministic Markdown kit
+  -> protected regeneration
 ```
 
 See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. The next
-development focus is M2 — Engineering Kit Generator.
+development focus is M3 — Research Automation.
 
 ## Contributing and Security
 
