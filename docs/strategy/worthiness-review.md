@@ -96,17 +96,15 @@ architecture
 
 ## Roadmap
 
-Phase 0 --- Vision & Governance
+- M0 — Strategy and Governance
+- M1 — Publishing Foundation
+- M2 — Engineering Kit Generator
+- M3 — Research Automation
+- M4 — AI Agent Ecosystem
+- M5 — FounderOS Platform
 
-Phase 1 --- Publishing Foundation
-
-Phase 2 --- Engineering Kit
-
-Phase 3 --- Research Automation
-
-Phase 4 --- AI Agents
-
-Phase 5 --- FounderOS Platform
+See the root [roadmap](../../ROADMAP.md) for milestone deliverables and exit
+criteria.
 
 ## Decision
 

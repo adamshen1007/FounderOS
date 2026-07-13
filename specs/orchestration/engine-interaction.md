@@ -1,5 +1,7 @@
-# FounderOS Engine Interaction & Orchestration Specification
-Version: M0.3 Draft
+# FounderOS Engine Interaction and Orchestration Specification
+
+**Milestone:** M0 — Strategy and Governance  
+**Status:** Draft
 
 ## Purpose
 
@@ -450,7 +452,8 @@ Human approval is required for:
 
 # 15. Minimal Implementation Recommendation
 
-M1 should implement only the simplest orchestration pattern:
+M1 — Publishing Foundation should implement only the simplest orchestration
+pattern:
 
 ```text
 Markdown file change

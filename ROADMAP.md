@@ -1,0 +1,101 @@
+# FounderOS Roadmap
+
+FounderOS uses one milestone sequence: **M0, M1, M2, M3, M4, and M5**.
+Decimal milestone names such as M0.1–M0.3 were working-draft labels and are no
+longer part of the canonical roadmap. Each milestone must satisfy its exit
+criteria before the next milestone becomes the primary implementation focus.
+
+## M0 — Strategy and Governance
+
+**Goal:** Establish the source of truth and define what FounderOS is building.
+
+Deliverables:
+
+- Vision, worthiness review, strategy, and product requirements
+- Constitution, RFC process, and foundational ADR
+- Domain, capability, engine, and orchestration specifications
+- Canonical repository structure and documentation standards
+- Initial book, chapter, worksheet, and governance templates
+
+Exit criteria:
+
+- Canonical documents have one unambiguous location.
+- The repository can be understood from the root README.
+- Future work maps to an accepted milestone and capability.
+- Documentation quality configuration is present and reproducible.
+
+## M1 — Publishing Foundation
+
+**Goal:** Turn canonical Markdown into validated release artifacts.
+
+Deliverables:
+
+- Markdown, link, style, diagram, and citation checks
+- Repeatable local `check`, `build`, and `preview` commands
+- HTML, EPUB, and DOCX output from one representative book chapter
+- CI workflow that validates changes and uploads build artifacts
+- Documented local setup and troubleshooting guide
+
+Exit criteria:
+
+- A fresh clone can produce the documented outputs without private services.
+- A failed quality gate blocks publication.
+- Generated outputs are reproducible and excluded from source control.
+
+## M2 — Engineering Kit Generator
+
+**Goal:** Generate a consistent project foundation from reusable templates.
+
+Deliverables:
+
+- Standard project starter documents
+- PRD, ADR, milestone, and verification-plan generators
+- One end-to-end generated engineering kit
+
+Exit criteria:
+
+- A new project kit can be generated, reviewed, and regenerated predictably.
+
+## M3 — Research Automation
+
+**Goal:** Ingest, evaluate, cite, and refresh evidence reproducibly.
+
+Deliverables:
+
+- Research ingestion and normalization workflow
+- Citation validation and evidence-quality policy
+- Quarterly update workflow
+
+Exit criteria:
+
+- One research topic can move from source capture to cited publication with an
+  auditable trail.
+
+## M4 — AI Agent Ecosystem
+
+**Goal:** Assist validated workflows with governed, observable AI agents.
+
+Deliverables:
+
+- Research, authoring, editorial, diagram, QA, and publisher roles
+- Human approval gates and traceable agent outputs
+- Failure handling and operational observability
+
+Exit criteria:
+
+- Agents improve an existing validated workflow without becoming a new source
+  of truth or bypassing human approval.
+
+## M5 — FounderOS Platform
+
+**Goal:** Package proven workflows into a coherent multi-project platform.
+
+Potential capabilities:
+
+- Founder workspace and dashboard
+- Multi-project knowledge and analytics
+- Team collaboration and commercial workflows
+- Selectively open-sourced foundational components
+
+Exit criteria will be defined through an RFC after M1–M4 provide evidence for
+the product boundary.

@@ -1,0 +1,14 @@
+extends: substitution
+message: "Use '%s' instead of '%s'."
+level: warning
+ignorecase: false
+swap:
+  markdown: Markdown
+  Github: GitHub
+  github: GitHub
+  notion: Notion
+  codex: Codex
+  Chatgpt: ChatGPT
+  chatgpt: ChatGPT
+  Founderos: FounderOS
+  founderOS: FounderOS

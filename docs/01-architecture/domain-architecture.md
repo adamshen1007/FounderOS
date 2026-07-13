@@ -1,5 +1,7 @@
 # FounderOS Domain Architecture
-Version: M0.1 Draft
+
+**Milestone:** M0 — Strategy and Governance  
+**Status:** Draft
 
 ## Purpose
 

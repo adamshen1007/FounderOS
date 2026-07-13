@@ -7,9 +7,16 @@ documentation, and publishing workflows.
 
 ## Users
 
-Primary: - Solo AI founders - Technical founders - Startup studios
+Primary:
 
-Secondary: - Accelerators - Innovation teams
+- Solo AI founders
+- Technical founders
+- Startup studios
+
+Secondary:
+
+- Accelerators
+- Innovation teams
 
 ## Product Goals
 
@@ -51,5 +58,12 @@ Secondary: - Accelerators - Innovation teams
 
 ## Release Strategy
 
-Phase 0: Governance Phase 1: Publishing foundation Phase 2: Engineering
-kit Phase 3: AI agent ecosystem
+- M0 — Strategy and Governance
+- M1 — Publishing Foundation
+- M2 — Engineering Kit Generator
+- M3 — Research Automation
+- M4 — AI Agent Ecosystem
+- M5 — FounderOS Platform
+
+The root [roadmap](../../ROADMAP.md) defines the deliverables and exit criteria
+for each milestone.

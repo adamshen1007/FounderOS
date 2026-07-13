@@ -1,0 +1,28 @@
+# Generated publishing outputs
+dist/
+build/
+output/
+
+# Dependencies and tool caches
+node_modules/
+.cache/
+.tmp/
+.vale/cache/
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*

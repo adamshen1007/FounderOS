@@ -54,22 +54,25 @@ operating system.
 
 ------------------------------------------------------------------------
 
-# Product Strategy
+# Product Evolution
 
-## Phase 1
+These stages describe the long-term business evolution. They are distinct from
+the delivery milestones defined in the root roadmap.
+
+## Stage 1 — Internal Validation
 
 Internal platform supporting Opportunity OS, Speculor AI, and the
 Founder Library.
 
-## Phase 2
+## Stage 2 — Reusable Platform
 
 Reusable engineering platform for additional ventures.
 
-## Phase 3
+## Stage 3 — Public Framework
 
 Public framework with optional open-source components.
 
-## Phase 4
+## Stage 4 — Commercial Product
 
 Commercial SaaS offering with AI-assisted founder workflows.
 
