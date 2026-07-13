@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: diagram
+name: Diagram Agent
+status: contract-only
+purpose: Propose accessible Mermaid diagrams that follow the diagram specification.
+prompt: agents/prompts/contract-only.md
+model: { provider: fake, name: unavailable }
+permissions:
+  read: [books/**, docs/02-authoring/diagram-standards.md, specs/005-diagram-spec.md]
+  propose: [books/**]
+  shell: false
+  network: false
+  git: false
+  publish: false
+limits: { timeoutMs: 30000, maxInputTokens: 20000, maxOutputTokens: 4000, maxCostUsd: 1, maxFiles: 100 }
+outputSchema: schemas/agents/proposal.schema.json

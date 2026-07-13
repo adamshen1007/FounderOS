@@ -2,52 +2,54 @@
 
 ## Purpose
 
-The AI Agents Engine is responsible for Tasks, context.
+The AI Agents Engine provides bounded, observable assistance over validated
+FounderOS artifacts without becoming a source of truth.
 
 ## Responsibilities
 
-- Own this domain.
-- Publish clear contracts.
-- Remain loosely coupled to other engines.
-- Emit events instead of direct hidden dependencies.
+- Load versioned role definitions and enforce their permissions and limits.
+- Invoke provider adapters without exposing tools to the model.
+- Verify structured proposals and record observable run artifacts.
+- Require exact human approval before a narrow change can be applied.
 
 ## Inputs
 
-- Domain events
-- Shared objects
+- Canonical research artifacts and their SHA-256 hashes
+- Agent definition, prompt, run options, and provider configuration
 
 ## Outputs
 
-- Structured agent outputs and handoffs
+- Proposal, verification, approval, and summary artifacts
 
 ## Primary Objects
 
-- Project
-- Specification
-- Milestone
-- Release (where applicable)
+- Agent definition
+- Run request
+- Proposal
+- Verification
+- Approval
+- Run summary
 
 ## Events
 
-- Receives domain-specific events.
-- Emits completion and validation events.
+- Receives a human-invoked run request over an existing artifact.
+- Emits a proposal for human review; it does not emit hidden messages.
 
 ## Dependencies
 
-- Shared Kernel
-- Governance policies
-- AI Agent contracts (where applicable)
+- M3 Research Engine validators
+- Governance policies and agent schemas
+- Provider adapter selected explicitly by the operator
 
 ## Quality Gates
 
-- Specification complete
-- Acceptance criteria satisfied
-- Version updated
-- Changelog updated
-- Human approval where required
+- Schema-valid and allowlisted output
+- Token, time, file, and cost budgets satisfied
+- Exact human approval before application
+- Existing domain validation after application
 
 ## Acceptance Criteria
 
-- Responsibilities are clearly defined.
-- Interfaces documented.
-- No overlap with other engine ownership.
+- The model cannot access shell, Git, browsing, publishing, or secrets.
+- Deterministic fake execution passes in CI without provider credentials.
+- A stale or rejected approval cannot modify canonical content.

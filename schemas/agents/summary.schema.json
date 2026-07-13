@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FounderOS agent run summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "agentId", "status", "provider", "model", "startedAt", "completedAt", "durationMs", "usage", "artifacts"],
+  "properties": {
+    "schemaVersion": { "const": 1 }, "runId": { "type": "string" }, "agentId": { "type": "string" }, "status": { "enum": ["proposed", "rejected", "applied", "failed"] }, "provider": { "enum": ["fake", "openai"] }, "model": { "type": "string" }, "startedAt": { "type": "string", "format": "date-time" }, "completedAt": { "type": "string", "format": "date-time" }, "durationMs": { "type": "integer", "minimum": 0 },
+    "usage": { "type": "object", "additionalProperties": false, "required": ["inputTokens", "outputTokens", "estimatedCostUsd"], "properties": { "inputTokens": { "type": "integer", "minimum": 0 }, "outputTokens": { "type": "integer", "minimum": 0 }, "estimatedCostUsd": { "type": ["number", "null"], "minimum": 0 } } }, "artifacts": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }, "error": { "type": "string" }
+  }
+}

@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: publisher
+name: Publisher Agent
+status: contract-only
+purpose: Propose release readiness findings while leaving publication to a human operator.
+prompt: agents/prompts/contract-only.md
+model: { provider: fake, name: unavailable }
+permissions:
+  read: [books/**, docs/05-operations/**, specs/006-publishing-pipeline.md]
+  propose: []
+  shell: false
+  network: false
+  git: false
+  publish: false
+limits: { timeoutMs: 30000, maxInputTokens: 30000, maxOutputTokens: 4000, maxCostUsd: 1, maxFiles: 100 }
+outputSchema: schemas/agents/proposal.schema.json

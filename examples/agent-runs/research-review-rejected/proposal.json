@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "runId": "RUN-M4-EXAMPLE",
+  "agentId": "research-reviewer",
+  "summary": "The graph is structurally valid; one assumption remains explicitly unresolved and should stay visible to human reviewers.",
+  "findings": [
+    {
+      "severity": "warning",
+      "category": "coverage",
+      "message": "The unresolved assumption has no evidence by design and must not be presented as a sourced conclusion.",
+      "paths": [
+        "research/topics/customer-validation-before-mvp/claims/CLM-006.yaml"
+      ]
+    }
+  ],
+  "changes": []
+}

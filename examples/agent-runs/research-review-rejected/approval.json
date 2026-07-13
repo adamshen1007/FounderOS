@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "runId": "RUN-M4-EXAMPLE",
+  "decision": "rejected",
+  "reviewer": "Example Human Reviewer",
+  "reviewedAt": "2026-07-13T05:05:00Z",
+  "proposalHash": "4fc24bcaf432b1bb330a26c2f4a186cf42f131057e35be8fe1fea8e99597d11d",
+  "files": [],
+  "note": "Sanitized example: no canonical change is justified by this deterministic fixture."
+}

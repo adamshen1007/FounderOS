@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founderos.dev/schemas/agents/proposal.schema.json",
+  "title": "FounderOS agent proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "agentId", "summary", "findings", "changes"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string", "pattern": "^[A-Z0-9][A-Z0-9-]{2,63}$" },
+    "agentId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" },
+    "summary": { "type": "string", "minLength": 10, "maxLength": 2000 },
+    "findings": { "type": "array", "maxItems": 100, "items": { "type": "object", "additionalProperties": false, "required": ["severity", "category", "message", "paths"], "properties": { "severity": { "enum": ["info", "warning", "error"] }, "category": { "enum": ["provenance", "freshness", "classification", "contradiction", "coverage", "prompt-injection", "quality"] }, "message": { "type": "string", "minLength": 5, "maxLength": 2000 }, "paths": { "type": "array", "maxItems": 20, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } } } } },
+    "changes": { "type": "array", "maxItems": 50, "items": { "type": "object", "additionalProperties": false, "required": ["path", "expectedHash", "operation", "field", "value", "reason"], "properties": { "path": { "type": "string", "minLength": 1 }, "expectedHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "operation": { "const": "set" }, "field": { "enum": ["statement", "classification", "confidence", "status", "limitations", "contradicts"] }, "value": {}, "reason": { "type": "string", "minLength": 5, "maxLength": 2000 } } } }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "runId": "RUN-M4-EXAMPLE",
+  "agentId": "research-reviewer",
+  "subject": "research/topics/customer-validation-before-mvp/research.yaml",
+  "provider": "fake",
+  "model": "deterministic-fixture-v1",
+  "createdAt": "2026-07-13T05:00:00Z",
+  "inputs": [
+    {
+      "path": "research/topics/customer-validation-before-mvp/claims/CLM-001.yaml",
+      "sha256": "02a391b200a8fc3cbaa5f1bc4e4af9d6aab12ca59dcffe60686274dda396a8ed",
+      "bytes": 348
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/claims/CLM-002.yaml",
+      "sha256": "7f0e2a98631db6f0f15c27d6c9f5d5a2725ea83d49c893e33f9c8231088ca6a6",
+      "bytes": 376
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/claims/CLM-003.yaml",
+      "sha256": "9d177f9f469e0b076669842f5a65172e1789486618624a49c0efca3bd73503ad",
+      "bytes": 374
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/claims/CLM-004.yaml",
+      "sha256": "9ff2fe2c6d8ba2c5568277f32ee8310edb4f1138f587e3d5101c1512532115ca",
+      "bytes": 378
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/claims/CLM-005.yaml",
+      "sha256": "297f9b66b893e036a0a5fc2e0303fc2ad97102027cbdc8d6513126b85be1db88",
+      "bytes": 549
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/claims/CLM-006.yaml",
+      "sha256": "eb64234d54988f42464c29a8729f65511d71d5500a0c3e8d8df064cd68ea7672",
+      "bytes": 345
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/evidence/EVD-001.yaml",
+      "sha256": "2640c213dd3f9259832072f8c6d2b5b657968749aee2f1215a584f0d8976d4f7",
+      "bytes": 322
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/evidence/EVD-002.yaml",
+      "sha256": "8db6258cd6b9f99b07da6e0f0077ba102158ae35fccf3ebe85d3376edb727f9b",
+      "bytes": 305
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/evidence/EVD-003.yaml",
+      "sha256": "64092eeb1f21d3cc1a28a918591fc55d7d45a9f4418f9606ff9d0bcd1826c7fe",
+      "bytes": 297
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/evidence/EVD-004.yaml",
+      "sha256": "43c69f71e673060a172c6eb8289d142071b6a6b8543ae90235295794d62f3bdb",
+      "bytes": 323
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/evidence/EVD-005.yaml",
+      "sha256": "692709383314ed24abea968ab94b5de84511d73c16274770a581ec093b784f65",
+      "bytes": 281
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/research.yaml",
+      "sha256": "21449917878309869f346708e4d27ea785e8158b76a38edee8893e0e83c7b78f",
+      "bytes": 347
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/sources/SRC-001.yaml",
+      "sha256": "bc26f46de9d2d8357d9ce31cab90d85d9d52bbfd3eee2f262ce03212a653c33f",
+      "bytes": 477
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/sources/SRC-002.yaml",
+      "sha256": "cc893dfca007eea4d99139f7c23a999a961d5507007a289a85b083b684c8f411",
+      "bytes": 510
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/sources/SRC-003.yaml",
+      "sha256": "6261f7300f5347e87ef0b5481672e16c589e088921979e0b5de5b0b80007b19b",
+      "bytes": 482
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/sources/SRC-004.yaml",
+      "sha256": "f26fa3abdc19ebd58e59a768ef35f94e94fae96e11c95e0af9ea5159340588bc",
+      "bytes": 479
+    },
+    {
+      "path": "research/topics/customer-validation-before-mvp/sources/SRC-005.yaml",
+      "sha256": "851678657aff2aeb4e2dda74ff460069a9f9cc7f2e937cbd6a12ab4cc113c0b9",
+      "bytes": 503
+    },
+    {
+      "path": "specs/008-citation-spec.md",
+      "sha256": "62af115af4f18177af6be1f1692eb5d7b851be80ef4d44da24d88596a22caf84",
+      "bytes": 556
+    },
+    {
+      "path": "governance/policies/citation-policy.md",
+      "sha256": "99fbd13ec03fdae8ab9d2a8dfb2c494498b43d204c63548e62924a489d2c7653",
+      "bytes": 305
+    }
+  ],
+  "limits": {
+    "timeoutMs": 30000,
+    "maxInputTokens": 30000,
+    "maxOutputTokens": 4000,
+    "maxCostUsd": 1,
+    "maxFiles": 100
+  }
+}

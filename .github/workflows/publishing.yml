@@ -44,6 +44,11 @@ jobs:
       - name: Verify research example and provenance graph
         run: pnpm check:research
 
+      - name: Verify governed agents with the fake provider
+        env:
+          OPENAI_API_KEY: ""
+        run: pnpm test:agents && pnpm eval:agents && pnpm check:agent-example
+
   build:
     name: Build publishing artifacts
     needs: quality

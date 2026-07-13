@@ -21,7 +21,7 @@ references do not change when new specifications are added.
 | 010 | Research workflow | Defined |
 | 011 | Knowledge model | Reserved for M2 or later |
 | 012 | Automation | Reserved for M1 or later |
-| 013 | AI agent behavior | Reserved for M4 |
+| 013 | AI agent behavior | Defined |
 | 014 | Integrations | Reserved for M4 or later |
 | 015 | Release and versioning | Defined |
 | 016 | Quality gates | Defined |

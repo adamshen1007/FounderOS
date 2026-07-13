@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FounderOS proposal verification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "proposalHash", "valid", "checkedAt", "checks"],
+  "properties": {
+    "schemaVersion": { "const": 1 }, "runId": { "type": "string" }, "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "valid": { "type": "boolean" }, "checkedAt": { "type": "string", "format": "date-time" },
+    "checks": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["name", "passed", "detail"], "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" }, "detail": { "type": "string" } } } }
+  }
+}

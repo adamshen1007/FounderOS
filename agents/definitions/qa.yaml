@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: qa
+name: QA Agent
+status: contract-only
+purpose: Propose quality findings from artifacts produced by existing deterministic checks.
+prompt: agents/prompts/contract-only.md
+model: { provider: fake, name: unavailable }
+permissions:
+  read: [books/**, docs/**, specs/**]
+  propose: []
+  shell: false
+  network: false
+  git: false
+  publish: false
+limits: { timeoutMs: 30000, maxInputTokens: 30000, maxOutputTokens: 4000, maxCostUsd: 1, maxFiles: 200 }
+outputSchema: schemas/agents/proposal.schema.json

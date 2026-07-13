@@ -1,6 +1,6 @@
 {
   "name": "founderos",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "Documentation-first publishing foundation for FounderOS",
   "type": "module",
@@ -13,7 +13,7 @@
   },
   "packageManager": "pnpm@11.7.0",
   "scripts": {
-    "check": "pnpm run check:tools && pnpm run check:markdown && pnpm run check:links && pnpm run check:spelling && pnpm run check:style && pnpm run check:diagrams && pnpm run check:citations && pnpm run test && pnpm run check:example && pnpm run check:research",
+    "check": "pnpm run check:tools && pnpm run check:markdown && pnpm run check:links && pnpm run check:spelling && pnpm run check:style && pnpm run check:diagrams && pnpm run check:citations && pnpm run test && pnpm run eval:agents && pnpm run check:example && pnpm run check:research && pnpm run check:agent-example",
     "check:tools": "node scripts/check-tools.mjs",
     "check:markdown": "markdownlint-cli2 \"**/*.md\" \"#node_modules/**\" \"#dist/**\" \"#build/**\"",
     "check:links": "node scripts/check-links.mjs",
@@ -26,6 +26,9 @@
     "founderos": "node bin/founderos.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:research": "node --test tests/research.test.mjs",
+    "test:agents": "node --test tests/agents.test.mjs",
+    "eval:agents": "node scripts/agents/eval.mjs",
+    "check:agent-example": "node bin/founderos.mjs agent validate examples/agent-runs/research-review-rejected",
     "build": "node scripts/build-book.mjs",
     "verify:outputs": "node scripts/verify-outputs.mjs",
     "preview": "node scripts/preview.mjs",

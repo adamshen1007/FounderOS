@@ -90,6 +90,8 @@ Exit criteria:
 
 **Goal:** Assist validated workflows with governed, observable AI agents.
 
+**Status:** Complete
+
 Deliverables:
 
 - Research, authoring, editorial, diagram, QA, and publisher roles
@@ -100,10 +102,16 @@ Exit criteria:
 
 - Agents improve an existing validated workflow without becoming a new source
   of truth or bypassing human approval.
+- Deterministic fake-provider execution and adversarial controls pass without a
+  secret or live provider call.
+- Every proposal, verification, review decision, usage record, and lifecycle
+  state is inspectable as a versioned artifact.
 
 ## M5 — FounderOS Platform
 
 **Goal:** Package proven workflows into a coherent multi-project platform.
+
+**Status:** Next; scope requires RFC approval before implementation
 
 Potential capabilities:
 

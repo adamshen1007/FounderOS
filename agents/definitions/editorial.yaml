@@ -1,0 +1,16 @@
+schemaVersion: 1
+id: editorial
+name: Editorial Agent
+status: contract-only
+purpose: Propose clarity and structure improvements without changing sourced meaning.
+prompt: agents/prompts/contract-only.md
+model: { provider: fake, name: unavailable }
+permissions:
+  read: [books/**, docs/02-authoring/**]
+  propose: [books/**]
+  shell: false
+  network: false
+  git: false
+  publish: false
+limits: { timeoutMs: 30000, maxInputTokens: 30000, maxOutputTokens: 8000, maxCostUsd: 2, maxFiles: 100 }
+outputSchema: schemas/agents/proposal.schema.json

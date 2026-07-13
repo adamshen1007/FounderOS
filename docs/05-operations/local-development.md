@@ -88,6 +88,9 @@ pnpm check:citations
 pnpm test
 pnpm check:example
 pnpm check:research
+pnpm test:agents
+pnpm eval:agents
+pnpm check:agent-example
 ```
 
 Run an individual gate while fixing a focused problem, then run `pnpm check`
@@ -114,6 +117,21 @@ pnpm founderos research build research/topics/customer-validation-before-mvp/res
 
 See the [research automation guide](research-automation.md) for topic creation,
 source records, evidence relationships, freshness, and protected brief builds.
+
+## Agent Commands
+
+```bash
+pnpm founderos agent list
+pnpm founderos agent doctor
+pnpm founderos agent run research-reviewer \
+  --subject research/topics/customer-validation-before-mvp/research.yaml \
+  --provider fake \
+  --run-id RUN-LOCAL-001
+```
+
+The fake provider needs no secret and is the normal development and CI path.
+See the [agent runtime guide](agent-runtime.md) before human review, applying a
+proposal, or making an optional live-provider request.
 
 ## Generated Files
 

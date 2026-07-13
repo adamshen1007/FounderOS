@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.6.0
+
+- Add RFC-003, ADR-004, the agent threat model, and local retention policy.
+- Add versioned schemas for definitions, requests, proposals, verification,
+  approvals, and run summaries.
+- Add a provider-neutral, proposal-only runtime with a deterministic fake
+  provider and optional OpenAI Responses adapter.
+- Add exact hash-bound human review and safe application with M3 rollback.
+- Add path, symbolic-link, sensitive-file, prompt-injection, timeout, token,
+  and cost controls.
+- Implement the Research Review Agent and reserve five contract-only roles.
+- Add adversarial tests, evaluation fixtures, observable run summaries, and a
+  sanitized rejected-run example.
+- Run all agent checks in CI without secrets or live provider calls.
+
 ## 0.5.0
 
 - Add M3 research automation RFC, ADR, and Specification 010.

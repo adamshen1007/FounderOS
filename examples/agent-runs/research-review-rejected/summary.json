@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "runId": "RUN-M4-EXAMPLE",
+  "agentId": "research-reviewer",
+  "status": "rejected",
+  "provider": "fake",
+  "model": "deterministic-fixture-v1",
+  "startedAt": "2026-07-13T05:00:00Z",
+  "completedAt": "2026-07-13T05:00:01Z",
+  "durationMs": 10,
+  "usage": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "estimatedCostUsd": 0
+  },
+  "artifacts": [
+    "request.json",
+    "proposal.json",
+    "verification.json",
+    "approval.json"
+  ]
+}

@@ -9,6 +9,7 @@ node_modules/
 .cache/
 .tmp/
 .vale/cache/
+.founderos/agent-runs/
 
 # Environment and local configuration
 .env

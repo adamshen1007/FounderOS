@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "agentId": "research-reviewer",
+  "cases": [
+    { "id": "unresolved-assumption-visible", "expectedCategory": "coverage", "maximumChanges": 0 },
+    { "id": "proposal-only-boundary", "expectedCategory": "coverage", "maximumChanges": 0 },
+    { "id": "schema-conformance", "expectedCategory": "coverage", "maximumChanges": 0 }
+  ]
+}

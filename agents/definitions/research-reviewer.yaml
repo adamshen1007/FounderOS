@@ -1,0 +1,28 @@
+schemaVersion: 1
+id: research-reviewer
+name: Research Review Agent
+status: enabled
+purpose: Review an existing M3 research graph and propose bounded claim corrections.
+prompt: agents/prompts/research-reviewer.md
+model:
+  provider: fake
+  name: deterministic-fixture-v1
+permissions:
+  read:
+    - research/topics/**
+    - specs/008-citation-spec.md
+    - governance/policies/citation-policy.md
+  propose:
+    - research/topics/**/claims/*.yaml
+  shell: false
+  network: false
+  git: false
+  publish: false
+limits:
+  timeoutMs: 30000
+  maxInputTokens: 30000
+  maxOutputTokens: 4000
+  maxCostUsd: 1
+  maxFiles: 100
+outputSchema: schemas/agents/proposal.schema.json
+fixture: agents/fixtures/research-reviewer.json

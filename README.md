@@ -5,11 +5,12 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The repository has completed **Milestone 3 (M3): Research Automation**. It
+The repository has completed **Milestone 4 (M4): AI Agent Ecosystem**. It
 contains the canonical strategy, architecture, engine specifications,
 governance records, publishing templates, an initial Founder Library sample,
 the local and CI publishing pipeline, a deterministic project-kit CLI, and a
-traceable research workflow. It is not yet a SaaS application.
+traceable research workflow, and a governed proposal-only agent runtime. It is
+not yet a SaaS application.
 
 ## Core Principles
 
@@ -82,6 +83,19 @@ pnpm founderos research status \
 See the [research automation guide](docs/05-operations/research-automation.md)
 before adding sources, advancing freshness dates, or rebuilding a brief.
 
+Run the Research Review Agent without a provider key:
+
+```bash
+pnpm founderos agent run research-reviewer \
+  --subject research/topics/customer-validation-before-mvp/research.yaml \
+  --provider fake \
+  --run-id RUN-LOCAL-001
+```
+
+This creates a proposal, not a canonical edit. Read the
+[governed agent runtime guide](docs/05-operations/agent-runtime.md) before
+reviewing, applying, or selecting the optional OpenAI provider.
+
 The preview is available at <http://127.0.0.1:4173>. See the
 [local development guide](docs/05-operations/local-development.md) for system
 prerequisites and individual commands.
@@ -100,6 +114,8 @@ FounderOS/
 ├── diagrams/       # Diagram sources and standards
 ├── publishing/     # Publishing pipeline configuration
 ├── automation/     # Reproducible automation
+├── agents/         # Governed role definitions, prompts, and fake fixtures
+├── evals/          # Deterministic agent evaluation cases
 ├── examples/       # Committed end-to-end reference projects
 ├── schemas/        # Machine-readable input contracts
 ├── scripts/        # Publishing and generator implementation
@@ -113,17 +129,19 @@ and implementation contracts live under [`specs`](specs).
 ## Current Milestone
 
 M0 established the repository foundation, M1 implemented publishing, M2 added
-project-kit generation, and M3 provides traceable research automation:
+project-kit generation, M3 provides traceable research automation, and M4 adds
+governed assistance over those validated artifacts:
 
 ```text
-research question
-  -> normalized sources and evidence
-  -> classified claims
-  -> validated cited brief
+validated research
+  -> bounded agent proposal
+  -> deterministic verification
+  -> exact human approval or rejection
+  -> existing M3 validation
 ```
 
-See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. The next
-development focus is M4 — AI Agent Ecosystem.
+See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. M5 platform
+scoping is next and requires an RFC before implementation.
 
 ## Contributing and Security
 
