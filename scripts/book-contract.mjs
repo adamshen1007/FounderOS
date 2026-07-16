@@ -16,7 +16,12 @@ export const REQUIRED_SECTIONS = [
 const placeholderPattern = /\b(TODO|TBD|FIXME|citation needed|add (public )?sources?)\b/i;
 
 export function canonicalChapterFiles(contents) {
-  return [...contents.matchAll(/`(\d{2}-[a-z0-9-]+\.md)`/g)].map((match) => match[1]);
+  return canonicalChapterEntries(contents).map((entry) => entry.file);
+}
+
+export function canonicalChapterEntries(contents) {
+  return [...contents.matchAll(/^\|\s*(\d{2})\s*\|\s*([^|]+?)\s*\|\s*`(\d{2}-[a-z0-9-]+\.md)`\s*\|/gm)]
+    .map((match) => ({ number: match[1], title: match[2].trim(), file: match[3] }));
 }
 
 export function bookMetadata(markdown) {
@@ -25,12 +30,21 @@ export function bookMetadata(markdown) {
   return parse(frontmatter[1]);
 }
 
-export function validateChapter(filename, content) {
+export function namespaceFootnotes(markdown, namespace) {
+  return markdown.replace(/\[\^([a-zA-Z0-9_-]+)\]/g, `[^${namespace}-$1]`);
+}
+
+export function validateChapter(filename, content, expectedTitle) {
   const failures = [];
   const number = basename(filename).match(/^(\d{2})-/)?.[1];
   if (!number) failures.push("filename must begin with a two-digit chapter number");
   if (number && !new RegExp(`^# Chapter ${Number(number)} — .+`, "m").test(content)) {
     failures.push(`heading must begin with # Chapter ${Number(number)} —`);
+  }
+  if (number && expectedTitle) {
+    const expectedHeading = `# Chapter ${Number(number)} — ${expectedTitle}`;
+    const actualHeading = content.match(/^# .+$/m)?.[0];
+    if (actualHeading !== expectedHeading) failures.push(`heading must match: ${expectedHeading}`);
   }
   if (!/^>\s*\*\*Core Principle:/m.test(content)) failures.push("missing Core Principle callout");
   for (const section of REQUIRED_SECTIONS) {
@@ -57,7 +71,8 @@ export function validateChapter(filename, content) {
 export function validateBook({ bookDirectory, chapterFiles }) {
   const failures = [];
   const contents = readFileSync(resolve(bookDirectory, "table-of-contents.md"), "utf8");
-  const planned = canonicalChapterFiles(contents);
+  const entries = canonicalChapterEntries(contents);
+  const planned = entries.map((entry) => entry.file);
   if (planned.length !== 23 || new Set(planned).size !== planned.length) {
     failures.push("canonical table of contents must declare 23 unique chapter files");
   }
@@ -65,7 +80,8 @@ export function validateBook({ bookDirectory, chapterFiles }) {
   for (const file of actual) {
     if (!planned.includes(file)) failures.push(`${file}: not declared in the canonical table of contents`);
     const content = readFileSync(resolve(bookDirectory, "chapters", file), "utf8");
-    for (const failure of validateChapter(file, content)) failures.push(`${file}: ${failure}`);
+    const expectedTitle = entries.find((entry) => entry.file === file)?.title;
+    for (const failure of validateChapter(file, content, expectedTitle)) failures.push(`${file}: ${failure}`);
   }
   const metadata = bookMetadata(readFileSync(resolve(bookDirectory, "book.md"), "utf8"));
   if (["Internal Review", "Release Candidate", "Published"].includes(metadata.status)) {

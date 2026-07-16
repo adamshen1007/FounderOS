@@ -24,7 +24,7 @@ test("two-project workspace produces deterministic schema-valid summaries", () =
   const second = buildWorkspaceIndex(undefined, isolatedLocalFile);
   assert.deepEqual(first, second);
   assert.deepEqual(first.projects.map((project) => project.id), ["founderos-core", "ai-launch-copilot"]);
-  assert.equal(first.projects[0].milestone, "M5A.2 pilot");
+  assert.equal(first.projects[0].milestone, "M5A.3 pilot");
   first.projects.forEach((project) => validatePlatformRecord("project-summary", project));
 });
 

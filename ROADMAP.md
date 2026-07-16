@@ -5,6 +5,32 @@ Decimal milestone names such as M0.1–M0.3 were working-draft labels and are no
 longer part of the canonical roadmap. Each milestone must satisfy its exit
 criteria before the next milestone becomes the primary implementation focus.
 
+## Current Priority — Volume 1 Manuscript Review
+
+The canonical 23-chapter manuscript of *The YC Playbook for AI Founders* is
+complete for internal review. This content track uses the existing M1 publishing
+foundation; it does not create a decimal product milestone or imply a new
+platform phase.
+
+Completed work:
+
+- Canonical reader, promise, scope, independence note, and editorial criteria
+- Six-part, 23-chapter table of contents with a decision output per chapter
+- Primary-source registry and chapter research map
+- Automated chapter contract, authoring template, tests, and runbook
+- Complete Parts I–VI with worksheets, checklists, callouts, and sources
+- Reproducible HTML, EPUB, and DOCX internal-review artifacts
+
+Before public release:
+
+- Complete substantive and copy editing by human reviewers.
+- Obtain sensitivity, accessibility, legal, and trademark review where needed.
+- Run real beginner beta reading and record observed confusion and outcomes.
+- Resolve findings, rebuild artifacts, and make an explicit publication decision.
+
+No beta reading, legal approval, YC endorsement, or public publication is
+claimed by manuscript completion.
+
 ## M0 — Strategy and Governance
 
 **Goal:** Establish the source of truth and define what FounderOS is building.
@@ -111,7 +137,7 @@ Exit criteria:
 
 **Goal:** Package proven workflows into a coherent multi-project platform.
 
-**Status:** M5A.2 pilot-ready; hosted expansion blocked pending real evidence
+**Status:** M5A.3 evidence collection; active platform expansion paused
 
 Potential capabilities:
 

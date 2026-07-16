@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { canonicalChapterFiles, validateChapter } from "../scripts/book-contract.mjs";
+import { canonicalChapterEntries, canonicalChapterFiles, namespaceFootnotes, validateChapter } from "../scripts/book-contract.mjs";
 
 const completeChapter = `# Chapter 2 — Test a Decision
 
@@ -62,4 +62,16 @@ test("chapter contract reports missing beginner-facing elements", () => {
 
 test("canonical contents parser returns ordered chapter filenames", () => {
   assert.deepEqual(canonicalChapterFiles("| 01 | A | `01-a.md` |\n| 02 | B | `02-b.md` |"), ["01-a.md", "02-b.md"]);
+});
+
+test("canonical contents parser preserves exact titles", () => {
+  assert.deepEqual(canonicalChapterEntries("| 02 | Test a Decision | `02-test-a-decision.md` |"), [
+    { number: "02", title: "Test a Decision", file: "02-test-a-decision.md" }
+  ]);
+  assert.ok(validateChapter("02-test-a-decision.md", completeChapter, "Different Title").some((failure) => failure.includes("heading must match")));
+});
+
+test("footnote namespaces remain unique when chapters are combined", () => {
+  const chapter = "Claim.[^source]\n\n[^source]: Source note.";
+  assert.equal(namespaceFootnotes(chapter, "02"), "Claim.[^02-source]\n\n[^02-source]: Source note.");
 });

@@ -4,12 +4,21 @@ import { parse } from "yaml";
 import { BOOK_DIR, BOOK_DIST_DIR, BOOK_OUTPUT_NAME, BUILD_DIR, ROOT, run } from "./lib.mjs";
 import { renderMermaidBlocks } from "./mermaid.mjs";
 import { verifyOutputs } from "./verify-outputs.mjs";
+import { namespaceFootnotes } from "./book-contract.mjs";
 
 const metadataFile = resolve(BOOK_DIR, "book.md");
 const chaptersDirectory = resolve(BOOK_DIR, "chapters");
 const buildDirectory = resolve(BUILD_DIR, "books", "volume-01-yc-playbook");
 const diagramsDirectory = resolve(buildDirectory, "diagrams");
 const combinedFile = resolve(buildDirectory, "combined.md");
+const parts = new Map([
+  ["01", "Part I — Choose the Right Problem"],
+  ["05", "Part II — Find Evidence Before Scale"],
+  ["09", "Part III — Build the Smallest Useful Product"],
+  ["13", "Part IV — Earn Early Traction"],
+  ["17", "Part V — Operate the Company"],
+  ["21", "Part VI — Put the System into Practice"]
+]);
 
 function parseMetadata(markdown) {
   const frontmatter = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -34,7 +43,9 @@ mkdirSync(BOOK_DIST_DIR, { recursive: true });
 const sections = [bookMarkdown.trim()];
 let diagramCount = 0;
 for (const chapter of chapters) {
-  const chapterMarkdown = readFileSync(resolve(chaptersDirectory, chapter), "utf8");
+  const part = parts.get(chapter.slice(0, 2));
+  if (part) sections.push(`# ${part}`);
+  const chapterMarkdown = namespaceFootnotes(readFileSync(resolve(chaptersDirectory, chapter), "utf8"), chapter.slice(0, 2));
   const rendered = renderMermaidBlocks(chapterMarkdown, chapter, diagramsDirectory, {
     replace: true,
     linkPrefix: "diagrams",

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased — Volume 1 Internal Review
+
+- Define the reader promise, independence boundary, canonical six-part table of
+  contents, source registry, and chapter research map.
+- Add an automated chapter contract, tests, authoring runbook, and exact title
+  and sequence validation.
+- Complete all 23 chapters of *The YC Playbook for AI Founders* with required
+  beginner-facing decisions, checklists, worksheets, callouts, and sources.
+- Build the manuscript with canonical part dividers and stronger output checks.
+- Mark book version 0.2.0 as internal review without claiming beta reading,
+  legal approval, endorsement, or publication.
+
 ## 0.9.1
 
 - Add schema-valid pilot threshold status for sessions, projects, dates, tasks,

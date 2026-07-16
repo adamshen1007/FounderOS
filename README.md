@@ -5,8 +5,9 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The repository has completed the **M5A.2 pilot-readiness hardening**. It
-contains the canonical strategy, architecture, engine specifications,
+The current development priority is the **Volume 1 YC Playbook for AI Founders**.
+Its complete 23-chapter manuscript is at internal-review status. The repository
+also contains the canonical strategy, architecture, engine specifications,
 governance records, publishing templates, an initial Founder Library sample,
 the local and CI publishing pipeline, a deterministic project-kit CLI, and a
 traceable research workflow, a governed proposal-only agent runtime, and a
@@ -50,12 +51,18 @@ pnpm install
 pnpm check
 ```
 
-Build and preview the sample book:
+Build and preview the complete internal-review manuscript:
 
 ```bash
 pnpm build
 pnpm preview
 ```
+
+Start with the [editorial brief](books/volume-01-yc-playbook/editorial-brief.md),
+the [canonical table of contents](books/volume-01-yc-playbook/table-of-contents.md),
+and the [book authoring workflow](docs/05-operations/book-authoring.md). The book
+is an independent FounderOS publication; it is not endorsed by Y Combinator and
+does not promise funding or a company outcome.
 
 Create an engineering kit for a new project:
 
@@ -158,7 +165,7 @@ The root [CONSTITUTION.md](CONSTITUTION.md) is the only canonical constitution.
 Accepted architecture decisions live under [`governance/ADR`](governance/ADR),
 and implementation contracts live under [`specs`](specs).
 
-## Current Milestone
+## Current Development Priority
 
 M0 established the repository foundation, M1 implemented publishing, M2 added
 project-kit generation, M3 provides traceable research automation, and M4 adds
@@ -172,8 +179,10 @@ validated research
   -> existing M3 validation
 ```
 
-See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. Repeated
-internal M5A use is next; hosted M5B scope requires a new RFC.
+See [ROADMAP.md](ROADMAP.md) for the complete milestone sequence. Product
+platform expansion is paused while the book receives human editorial review.
+The M5A evidence cycle may continue through genuine use, but hosted M5B scope
+still requires real pilot evidence and a new RFC.
 
 ## Contributing and Security
 

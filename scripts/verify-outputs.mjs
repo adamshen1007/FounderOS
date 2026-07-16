@@ -28,6 +28,8 @@ export function verifyOutputs() {
       const html = content.toString("utf8");
       if (!/<title>[^<]*YC Playbook for AI Founders[^<]*<\/title>/i.test(html)) failures.push(`${output.file} does not contain the canonical document title.`);
       if (!/<body[\s>]/i.test(html)) failures.push(`${output.file} has no HTML body.`);
+      if (!/Chapter 23[^<]*Build Your AI Founder Operating System/i.test(html)) failures.push(`${output.file} does not contain the final canonical chapter.`);
+      if (!/Part VI[^<]*Put the System\s+into Practice/i.test(html)) failures.push(`${output.file} does not contain canonical part dividers.`);
     }
   }
   if (failures.length > 0) throw new Error(failures.join("\n"));

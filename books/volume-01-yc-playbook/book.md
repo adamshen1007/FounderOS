@@ -3,8 +3,8 @@ title: The YC Playbook for AI Founders
 subtitle: The Complete Guide to Building AI Companies
 author: FounderOS
 identifier: founderos-volume-01-yc-playbook
-version: "0.2.0-dev"
-status: Editorial Development
+version: "0.2.0"
+status: Internal Review
 lang: en-US
 rights: Copyright 2026 FounderOS contributors. All rights reserved.
 ---
