@@ -20,6 +20,7 @@
     "check:spelling": "cspell lint \"**/*.md\" --no-progress --show-suggestions",
     "check:style": "node scripts/check-style.mjs",
     "check:diagrams": "node scripts/check-diagrams.mjs",
+    "check:book": "node scripts/check-book.mjs",
     "check:citations": "node scripts/check-citations.mjs",
     "check:example": "node bin/founderos.mjs generate examples/ai-launch-copilot/founderos.project.yaml --check",
     "check:research": "node bin/founderos.mjs research validate research/topics/customer-validation-before-mvp/research.yaml && node bin/founderos.mjs research build research/topics/customer-validation-before-mvp/research.yaml --check",

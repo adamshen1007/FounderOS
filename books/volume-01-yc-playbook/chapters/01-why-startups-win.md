@@ -39,11 +39,17 @@ Use AI to shorten the mechanical parts of the loop. Keep the founder directly
 responsible for user contact, evidence quality, prioritization, and the decision
 to continue, change direction, or stop.
 
-## Callout
+## Callouts
 
-> **Fast output is not the same as fast learning.** A team can generate many
-> features with AI while learning very little. Count validated or invalidated
-> assumptions, not lines of code or prompts completed.
+### Decision Lens
+
+> **Decision Lens:** Which current unknown would most change what you do next?
+
+### Common Failure
+
+> **Common Failure:** Fast output is not the same as fast learning. A team can
+> generate many features with AI while learning very little. Count supported or
+> contradicted assumptions, not lines of code or prompts completed.
 
 ## Diagram
 

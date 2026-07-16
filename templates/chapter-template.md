@@ -1,53 +1,66 @@
-# Chapter X — Title
+# Chapter 00 — Decision-Oriented Title
 
-> **Core Principle:** Replace this with the chapter principle.
+> **Core Principle:** State one memorable rule the founder can apply.
 
 ## Learning Objectives
 
-- Objective 1
-- Objective 2
-- Objective 3
+- Understand the decision this chapter resolves.
+- Recognize strong and weak evidence for that decision.
+- Complete the chapter worksheet and choose a review date.
 
-## Main Content
+## Deep Dive
 
-## AI Founder Perspective
+Explain the idea in plain language, connect it to a founder decision, and attach
+footnotes to external claims.[^source]
 
-## Founder Tip
+## AI Founder Interpretation
 
-> 💡 **Founder Tip**  
-> Add practical advice.
+Define what AI may assist, what a person must own, and what evidence must remain
+reviewable.
 
-## Common Mistake
+## Callouts
 
-> ⚠️ **Common Mistake**  
-> Add common mistake.
+### Decision Lens
+
+> **Decision Lens:** Give one question that sharpens the founder’s choice.
+
+### Common Failure
+
+> **Common Failure:** Name one tempting behavior and its consequence.
 
 ## Diagram
 
 ```mermaid
 flowchart TD
-A[Start] --> B[Learn]
-B --> C[Ship]
-C --> A
+    A[Assumption] --> B[Test]
+    B --> C[Evidence]
+    C --> D[Decision]
 ```
 
 ## Checklist
 
-- [ ] Action 1
-- [ ] Action 2
+- [ ] Write the decision in one sentence.
+- [ ] Name the evidence needed.
+- [ ] Assign an owner and review date.
 
 ## Worksheet
 
-| Prompt | Answer |
-|---|---|
-| What assumption must be tested? | |
-| Who is the target user? | |
+| Prompt | Your answer |
+| --- | --- |
+| Decision | |
+| Current assumption | |
+| Evidence needed | |
+| Owner | |
+| Review date | |
 
 ## Key Takeaways
 
-- Takeaway 1
-- Takeaway 2
+- Restate the core principle.
+- State the evidence rule.
+- State the next action.
 
 ## Sources
 
-- Add sources here.
+- [YC’s Essential Startup Advice](https://www.ycombinator.com/blog/ycs-essential-startup-advice/)
+
+[^source]: Y Combinator, “YC’s Essential Startup Advice.”
