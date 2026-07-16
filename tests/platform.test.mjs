@@ -10,7 +10,7 @@ import { loadWorkspace, validatePlatformRecord } from "../scripts/platform/model
 import { redactLog, safePlatformPath } from "../scripts/platform/security.mjs";
 import { createPlatformServer, startPlatform } from "../scripts/platform/server.mjs";
 import { addProject, inspectProject, removeProject } from "../scripts/platform/registry.mjs";
-import { cleanJobs, diagnostics, sanitizedJobs } from "../scripts/platform/operations.mjs";
+import { cleanJobs, diagnostics, pilotStatus, sanitizedJobs, validatePilotSessions } from "../scripts/platform/operations.mjs";
 import { allowExternalRoot, importExternalProject, inspectExternalCandidate, loadEffectiveWorkspace, loadLocalWorkspace, removeExternalProject, removeExternalRoot, saveLocalWorkspace } from "../scripts/platform/local-state.mjs";
 import { createWorkspaceBackup, restoreWorkspaceBackup } from "../scripts/platform/backups.mjs";
 
@@ -141,6 +141,30 @@ test("pilot template validates without being claimed as a completed session", ()
   assert.equal(template.observations[0].startsWith("Replace this template"), true);
 });
 
+test("pilot status reports evidence progress without treating jobs as sessions", () => {
+  const directory = mkdtempSync(resolve(temporaryRoot, "pilot-status-"));
+  try {
+    const empty = pilotStatus(directory);
+    assert.equal(empty.sessions.observed, 0);
+    assert.equal(empty.decision, "collecting-evidence");
+    const tasks = ["setup", "register-project", "inspect-status", "run-workflow", "recover-job"];
+    for (let index = 0; index < 10; index += 1) {
+      const number = String(index + 1).padStart(3, "0");
+      const day = String(index === 9 ? 15 : index + 1).padStart(2, "0");
+      writeFileSync(resolve(directory, `PILOT-${number}.yaml`), stringify({ schemaVersion: 1, id: `PILOT-${number}`, date: `2026-07-${day}`, projectId: `project-${index % 3}`, task: tasks[index % tasks.length], outcome: index === 8 ? "blocked" : "completed", durationMinutes: index + 1, observations: ["Sanitized observed fixture."], privacy: "sanitized-no-secrets" }));
+    }
+    assert.equal(validatePilotSessions(directory), 10);
+    const ready = pilotStatus(directory);
+    assert.equal(ready.sessions.observed, 10);
+    assert.equal(ready.projects.represented, 3);
+    assert.equal(ready.dateSpanDays.observed, 14);
+    assert.deepEqual(ready.tasks.missing, []);
+    assert.equal(ready.automatedCriteriaMet, true);
+    assert.equal(ready.decision, "manual-review-required");
+    assert.equal(ready.outcomes.blocked, 1);
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
 test("platform paths deny escape, secrets, and symbolic links", () => {
   assert.throws(() => safePlatformPath("../outside"), /inside the repository/);
   assert.throws(() => safePlatformPath(".env"), /denied/);
@@ -219,6 +243,7 @@ test("local API serves state and requires CSRF plus confirmation for jobs", asyn
     assert.equal(workspace.projects.length, 2);
     assert.equal(workspace.onboarding.externalWorkflows, "disabled");
     assert.match(workspace.onboarding.nextCommand, /project onboard/);
+    assert.equal(workspace.pilot.sessions.observed, 0);
     const denied = await fetch(`${base}/api/projects/founderos-core/workflows/research-validate`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirm: true }) });
     assert.equal(denied.status, 403);
     const unconfirmed = await fetch(`${base}/api/projects/founderos-core/workflows/research-validate`, { method: "POST", headers: { "content-type": "application/json", "x-founderos-csrf": "test-csrf" }, body: JSON.stringify({ confirm: false }) });

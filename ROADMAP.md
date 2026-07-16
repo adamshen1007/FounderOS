@@ -139,5 +139,10 @@ allowlist; external projects remain read-only. It also adds registry backup and
 restore, clearer workflow progress and recovery guidance, and broader local
 security and browser-shell coverage. This hardening is not pilot evidence.
 
+M5A.3 is the active evidence cycle. FounderOS now reports pilot session,
+represented-project, date-span, outcome, and task coverage while preserving a
+manual decision gate. The cycle cannot complete until genuine records span the
+published two-week threshold.
+
 M5A exit criteria are defined in RFC-004. Any M5B exit criteria require a new
 RFC after internal pilot evidence exists.

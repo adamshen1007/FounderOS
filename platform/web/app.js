@@ -46,6 +46,7 @@ function renderJobs(jobs) {
 function render(data) {
   state.data = data; $("#workspace-title").textContent = data.workspace.name; $("#project-count").textContent = `${data.projects.length} projects / local`;
   const indexStatus = $("#index-status"); indexStatus.textContent = data.index?.stale ? `Showing last valid index: ${data.index.error}` : `Live index generation ${data.index?.generation ?? 1}`; indexStatus.classList.toggle("warning", Boolean(data.index?.stale));
+  $("#pilot-status").textContent = data.pilot ? `Pilot evidence ${data.pilot.sessions.observed}/${data.pilot.sessions.required} · ${data.pilot.decision}` : "Pilot evidence unavailable";
   const projects = $("#projects"); projects.replaceChildren(...data.projects.map(projectCard)); renderJobs(data.jobs ?? []);
 }
 

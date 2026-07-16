@@ -45,9 +45,32 @@ export function cleanJobs({ days, dryRun = false, directory, now = Date.now() })
   return files;
 }
 
-export function validatePilotSessions() {
-  const directory = resolve(ROOT, "pilots", "sessions");
+function pilotRecords(directory = resolve(ROOT, "pilots", "sessions")) {
   const files = readdirSync(directory).filter((name) => name.endsWith(".yaml")).sort();
-  files.forEach((name) => validatePlatformRecord("pilot-session", parse(readFileSync(resolve(directory, name), "utf8")), `pilot session ${name}`));
-  return files.length;
+  return files.map((name) => validatePlatformRecord("pilot-session", parse(readFileSync(resolve(directory, name), "utf8")), `pilot session ${name}`));
+}
+
+export function validatePilotSessions(directory) {
+  return pilotRecords(directory).length;
+}
+
+export function pilotStatus(directory) {
+  const records = pilotRecords(directory);
+  const requiredTasks = ["setup", "register-project", "inspect-status", "run-workflow", "recover-job"];
+  const observedTasks = [...new Set(records.map((record) => record.task))].sort();
+  const projectIds = [...new Set(records.map((record) => record.projectId))].sort();
+  const dates = records.map((record) => record.date).sort();
+  const dateSpan = dates.length > 1 ? Math.floor((Date.parse(dates.at(-1)) - Date.parse(dates[0])) / 86400000) : 0;
+  const status = {
+    schemaVersion: 1,
+    sessions: { observed: records.length, required: 10 },
+    projects: { represented: projectIds.length, required: 3, ids: projectIds },
+    dateSpanDays: { observed: dateSpan, required: 14, first: dates[0] ?? null, last: dates.at(-1) ?? null },
+    tasks: { observed: observedTasks, required: requiredTasks, missing: requiredTasks.filter((task) => !observedTasks.includes(task)) },
+    outcomes: Object.fromEntries(["completed", "blocked", "abandoned"].map((outcome) => [outcome, records.filter((record) => record.outcome === outcome).length])),
+    automatedCriteriaMet: records.length >= 10 && projectIds.length >= 3 && dateSpan >= 14 && requiredTasks.every((task) => observedTasks.includes(task)),
+    decision: "collecting-evidence"
+  };
+  if (status.automatedCriteriaMet) status.decision = "manual-review-required";
+  return validatePlatformRecord("pilot-status", status, "pilot status");
 }

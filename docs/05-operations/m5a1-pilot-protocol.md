@@ -25,3 +25,15 @@ was reached; it does not imply satisfaction.
 
 Hosted M5B remains a no-go until the threshold is met and an RFC documents the
 observed need. Requests are not evidence until they are tied to a real session.
+
+Check progress without converting job history into pilot evidence:
+
+```bash
+pnpm founderos platform pilot check
+pnpm founderos platform pilot status
+```
+
+The automated status can confirm record count, represented project IDs, elapsed
+date span, and task coverage. It cannot decide whether projects are genuinely
+active or whether security, accessibility, and hosted-product need are clear;
+those remain manual review gates.

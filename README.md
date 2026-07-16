@@ -120,6 +120,12 @@ The next product activity remains real internal use recorded with the
 [M5A.1 pilot protocol](docs/05-operations/m5a1-pilot-protocol.md). Hosted M5B is
 currently a no-go, not an implied next implementation stage.
 
+```bash
+pnpm founderos platform pilot status
+```
+
+This reports evidence progress but never turns local jobs into pilot sessions.
+
 The preview is available at <http://127.0.0.1:4173>. See the
 [local development guide](docs/05-operations/local-development.md) for system
 prerequisites and individual commands.

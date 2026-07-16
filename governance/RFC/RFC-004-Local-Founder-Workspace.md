@@ -74,3 +74,11 @@ The amendment also permits local-registry-only backups, confirmed restore,
 dashboard onboarding, and clearer job recovery guidance. Backups do not contain
 or restore canonical project content. Remote access, automatic workflow trust,
 and hosted behavior remain deferred.
+
+## M5A.3 Amendment
+
+The evidence cycle adds a derived pilot-status report over committed,
+schema-valid session records. It reports arithmetic progress toward the
+published threshold but cannot classify projects as genuinely active, clear a
+security or accessibility review, or approve hosted expansion. Local job records
+remain operational history and never count as pilot sessions.

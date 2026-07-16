@@ -1,6 +1,6 @@
 {
   "name": "founderos",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "description": "Documentation-first publishing foundation for FounderOS",
   "type": "module",

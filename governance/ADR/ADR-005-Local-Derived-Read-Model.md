@@ -25,3 +25,5 @@ CLI workflows through a fixed allowlist.
   ADR-006 permits explicit external roots through an ignored, read-only local
   overlay; arbitrary external execution remains deferred.
 - A later framework or hosted architecture requires fresh evidence and an ADR.
+- Pilot progress is another derived read model: only validated session records
+  contribute, while job history remains a separate operational source.

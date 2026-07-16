@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.1
+
+- Add schema-valid pilot threshold status for sessions, projects, dates, tasks,
+  outcomes, and the manual review gate.
+- Show pilot evidence progress in the CLI, local API, and dashboard.
+- Correct pilot-check wording so blocked and abandoned records are not described
+  as completed sessions.
+- Separate optional project removal from the onboarding path.
+- Record M5A.3 as an active evidence cycle without manufacturing sessions.
+
 ## 0.9.0
 
 - Add guided inspection and import commands for external repositories.

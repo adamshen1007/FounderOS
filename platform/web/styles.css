@@ -42,6 +42,7 @@ h1 { max-width: 900px; margin: 0; font-size: clamp(3rem, 8vw, 7.5rem); font-weig
 .spine small { margin-top: .25rem; color: var(--muted); }
 .desk { min-width: 0; padding: 2rem clamp(1rem, 4vw, 3rem) 4rem; }
 .index-status { margin-bottom: 1.4rem; color: var(--muted); font: .68rem var(--mono); text-transform: uppercase; }
+.status-row { display: flex; justify-content: space-between; gap: 1rem; }
 .index-status.warning { padding: .75rem; color: var(--red); border: 1px solid var(--red); }
 .notice { margin: 0 0 1.2rem; padding: .9rem 1rem; color: var(--red); background: #fff5f3; border: 1px solid var(--red); }
 .section-heading { margin-bottom: 1.2rem; display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
@@ -114,6 +115,7 @@ dialog::backdrop { background: rgba(17,24,32,.42); }
   .spine li span { font-size: .65rem; }
   .spine li small { font-size: .58rem; }
   .project-grid { grid-template-columns: 1fr; }
+  .status-row { flex-direction: column; gap: 0; }
   .section-heading, .heading-actions { align-items: flex-start; flex-direction: column; }
   .dossier-metrics { grid-template-columns: repeat(2, 1fr); }
 }

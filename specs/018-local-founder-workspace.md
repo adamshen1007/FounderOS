@@ -49,3 +49,7 @@ flowchart LR
   validation and explicit confirmation.
 - Failed and cancelled jobs expose actionable recovery guidance without
   automatic retry.
+- Pilot status counts only schema-valid session records and reports project,
+  date-span, task, and outcome coverage independently of local job history.
+- Automated pilot criteria never bypass the manual security, accessibility, and
+  hosted-need decision gate.

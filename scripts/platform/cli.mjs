@@ -6,7 +6,7 @@ import { buildWorkspaceIndex } from "./indexer.mjs";
 import { loadWorkspace } from "./model.mjs";
 import { startPlatform } from "./server.mjs";
 import { addProject, inspectAnyProject, removeProject } from "./registry.mjs";
-import { cleanJobs, diagnostics, sanitizedJobs, validatePilotSessions, writeJsonOutput } from "./operations.mjs";
+import { cleanJobs, diagnostics, pilotStatus, sanitizedJobs, validatePilotSessions, writeJsonOutput } from "./operations.mjs";
 import { allowExternalRoot, importExternalProject, inspectExternalCandidate, loadEffectiveWorkspace, loadLocalWorkspace, removeExternalProject, removeExternalRoot } from "./local-state.mjs";
 import { createWorkspaceBackup, inspectWorkspaceBackup, restoreWorkspaceBackup } from "./backups.mjs";
 
@@ -88,7 +88,19 @@ export async function runPlatformCommand(positionals, options) {
     throw new Error("Platform jobs command must be export or clean.");
   }
   if (command === "pilot" && action === "check") {
-    console.log(`✓ ${validatePilotSessions()} completed pilot session record(s) validated.`);
+    console.log(`✓ ${validatePilotSessions()} pilot session record(s) validated.`);
+    return;
+  }
+  if (command === "pilot" && action === "status") {
+    const status = pilotStatus();
+    if (options.json) console.log(JSON.stringify(status, null, 2));
+    else {
+      console.log(`Sessions: ${status.sessions.observed}/${status.sessions.required}`);
+      console.log(`Represented projects: ${status.projects.represented}/${status.projects.required}`);
+      console.log(`Date span: ${status.dateSpanDays.observed}/${status.dateSpanDays.required} days`);
+      console.log(`Task coverage: ${status.tasks.observed.length}/${status.tasks.required.length}${status.tasks.missing.length ? `; missing ${status.tasks.missing.join(", ")}` : ""}`);
+      console.log(`Decision: ${status.decision}`);
+    }
     return;
   }
   if (command === "doctor") {

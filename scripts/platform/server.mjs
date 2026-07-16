@@ -6,6 +6,7 @@ import { PLATFORM_WEB_DIRECTORY, LOOPBACK_HOSTS } from "./constants.mjs";
 import { agentRunDetail, WorkspaceIndex, researchDetail } from "./indexer.mjs";
 import { JobManager } from "./jobs.mjs";
 import { safePlatformPath } from "./security.mjs";
+import { pilotStatus } from "./operations.mjs";
 
 const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
 const json = (response, status, body) => { response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" }); response.end(JSON.stringify(body)); };
@@ -36,7 +37,7 @@ export function createPlatformServer(options = {}) {
       const url = new URL(request.url, "http://localhost");
       if (request.method === "GET" && url.pathname === "/api/session") return json(response, 200, { csrfToken });
       const index = indexService.refresh();
-      if (request.method === "GET" && url.pathname === "/api/workspace") return json(response, 200, { ...index, onboarding: { registeredProjects: index.projects.length, localProjects: index.projects.filter((project) => project.source === "local").length, externalWorkflows: "disabled", nextCommand: "founderos platform project onboard /absolute/path/to/project" }, jobs: jobs.snapshot() });
+      if (request.method === "GET" && url.pathname === "/api/workspace") return json(response, 200, { ...index, pilot: pilotStatus(options.pilotDirectory), onboarding: { registeredProjects: index.projects.length, localProjects: index.projects.filter((project) => project.source === "local").length, externalWorkflows: "disabled", nextCommand: "founderos platform project onboard /absolute/path/to/project" }, jobs: jobs.snapshot() });
       const projectMatch = url.pathname.match(/^\/api\/projects\/([a-z0-9-]+)$/);
       if (request.method === "GET" && projectMatch) {
         const project = index.projects.find((item) => item.id === projectMatch[1]);

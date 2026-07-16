@@ -29,12 +29,10 @@ pnpm founderos platform project list
 pnpm founderos platform project add examples/my-project --dry-run
 pnpm founderos platform project add examples/my-project
 pnpm founderos platform project inspect my-project
-pnpm founderos platform project remove my-project --dry-run
-pnpm founderos platform project remove my-project --confirm
 ```
 
-Removal changes only the registry and never deletes project files. FounderOS
-detects a kit from `founderos.project.yaml` or a repository from `package.json`.
+FounderOS detects a kit from `founderos.project.yaml` or a repository from
+`package.json`.
 
 ## Import an External Repository
 
@@ -66,6 +64,20 @@ External imports require `package.json`. They appear in the dashboard as local,
 read-only projects. FounderOS does not run their scripts or grant workflows.
 Removing an import or allowed root never deletes external files.
 
+### Optional Cleanup — Do Not Run During Onboarding
+
+Stop after `project list` if you want the project to remain registered. Run the
+following only when you intentionally want to remove a project from FounderOS:
+
+```bash
+pnpm founderos platform project remove my-project --dry-run
+pnpm founderos platform project remove my-project --confirm
+```
+
+For an external project, remove its project registration before removing its
+allowed root. Removal changes only FounderOS local state and never deletes the
+project directory.
+
 ## Run a Workflow
 
 Choose an action on a project dossier and confirm it. FounderOS creates a local
@@ -93,10 +105,17 @@ pnpm founderos platform jobs export --output .tmp/platform-jobs.json
 pnpm founderos platform jobs clean --older-than 30d --dry-run
 pnpm founderos platform jobs clean --older-than 30d
 pnpm founderos platform pilot check
+pnpm founderos platform pilot status
+pnpm founderos platform pilot status --json
 ```
 
 Diagnostics and exports contain status metadata but omit commands, logs,
 environment values, and canonical content.
+
+`pilot check` validates committed session records. `pilot status` reports
+progress toward the automated session, project, date-span, and task-coverage
+thresholds. Even when those criteria pass, a human security, accessibility, and
+product-need review remains required.
 
 ## Recovery
 

@@ -7,7 +7,7 @@ import { PLATFORM_SCHEMA_DIRECTORY, WORKSPACE_FILE } from "./constants.mjs";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
-const validators = Object.fromEntries(["workspace", "platform-local", "platform-backup", "project-summary", "workflow-job", "pilot-session"].map((kind) => {
+const validators = Object.fromEntries(["workspace", "platform-local", "platform-backup", "project-summary", "workflow-job", "pilot-session", "pilot-status"].map((kind) => {
   const schema = JSON.parse(readFileSync(resolve(PLATFORM_SCHEMA_DIRECTORY, `${kind}.schema.json`), "utf8"));
   return [kind, ajv.compile(schema)];
 }));
