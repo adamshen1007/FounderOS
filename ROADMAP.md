@@ -5,12 +5,13 @@ Decimal milestone names such as M0.1–M0.3 were working-draft labels and are no
 longer part of the canonical roadmap. Each milestone must satisfy its exit
 criteria before the next milestone becomes the primary implementation focus.
 
-## Current Priority — Volume 1 Manuscript Review
+## Current Priority — Volume 1 Publication Preparation
 
-The canonical 23-chapter manuscript of *The YC Playbook for AI Founders* is
-complete for internal review. This content track uses the existing M1 publishing
-foundation; it does not create a decimal product milestone or imply a new
-platform phase.
+The canonical 23-chapter manuscript of *The FounderOS Playbook for AI Founders*
+is a version 0.3.0 publication candidate. The explicit decision to pursue public
+publication was made on 2026-07-21. This content track uses the existing M1
+publishing foundation; it does not create a decimal product milestone or imply
+a new platform phase.
 
 Completed work:
 
@@ -21,15 +22,17 @@ Completed work:
 - Complete Parts I–VI with worksheets, checklists, callouts, and sources
 - Reproducible HTML, EPUB, and DOCX internal-review artifacts
 
-Before public release:
+Before the 0.9.0 Public Preview:
 
 - Complete substantive and copy editing by human reviewers.
 - Obtain sensitivity, accessibility, legal, and trademark review where needed.
 - Run real beginner beta reading and record observed confusion and outcomes.
-- Resolve findings, rebuild artifacts, and make an explicit publication decision.
+- Resolve blocking findings, rebuild artifacts, and record preview approval.
 
-No beta reading, legal approval, YC endorsement, or public publication is
-claimed by manuscript completion.
+Version 1.0.0 follows the Public Preview only after preview findings are
+resolved and final publication approval is recorded. No beta reading, legal
+approval, Y Combinator endorsement, public preview, or final publication is
+claimed by the decision to pursue publication.
 
 ## M0 — Strategy and Governance
 

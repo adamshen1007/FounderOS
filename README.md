@@ -5,8 +5,8 @@ founder operating system. It is designed to turn reusable knowledge,
 governance, research, engineering practices, and publishing workflows into a
 compounding operating system for founders.
 
-The current development priority is the **Volume 1 YC Playbook for AI Founders**.
-Its complete 23-chapter manuscript is at internal-review status. The repository
+The current development priority is **The FounderOS Playbook for AI Founders**.
+Its complete 23-chapter manuscript is a publication candidate. The repository
 also contains the canonical strategy, architecture, engine specifications,
 governance records, publishing templates, an initial Founder Library sample,
 the local and CI publishing pipeline, a deterministic project-kit CLI, and a
@@ -51,7 +51,7 @@ pnpm install
 pnpm check
 ```
 
-Build and preview the complete internal-review manuscript:
+Build and preview the complete publication-candidate manuscript:
 
 ```bash
 pnpm build
@@ -60,6 +60,8 @@ pnpm preview
 
 Start with the [editorial brief](books/volume-01-yc-playbook/editorial-brief.md),
 the [canonical table of contents](books/volume-01-yc-playbook/table-of-contents.md),
+the [publication plan](books/volume-01-yc-playbook/publication-plan.md), the
+[release-readiness checklist](books/volume-01-yc-playbook/release-readiness-checklist.md),
 and the [book authoring workflow](docs/05-operations/book-authoring.md). The book
 is an independent FounderOS publication; it is not endorsed by Y Combinator and
 does not promise funding or a company outcome.

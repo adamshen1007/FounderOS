@@ -77,4 +77,6 @@ editorial approval.
 Do not claim beta reading, legal review, accessibility review, or publication
 until it happened and has a review record. During drafting, use the book status
 `Editorial Development`. Use `Internal Review` only when all 23 canonical
-chapters exist; that status makes missing chapters a contract failure.
+chapters exist. `Publication Candidate`, `Public Preview`, and `Published` also
+require all canonical chapters and must follow the gates in the
+[release-readiness checklist](../../books/volume-01-yc-playbook/release-readiness-checklist.md).

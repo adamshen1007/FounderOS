@@ -42,8 +42,8 @@ For `books/volume-01-yc-playbook`, the pipeline writes:
 ```text
 dist/books/volume-01-yc-playbook/
 ├── index.html
-├── yc-playbook.epub
-└── yc-playbook.docx
+├── founderos-playbook.epub
+└── founderos-playbook.docx
 ```
 
 Intermediate documents and rendered diagrams live under `build/`.

@@ -155,8 +155,8 @@ The build writes review artifacts to:
 ```text
 dist/books/volume-01-yc-playbook/
 ├── index.html
-├── yc-playbook.epub
-└── yc-playbook.docx
+├── founderos-playbook.epub
+└── founderos-playbook.docx
 ```
 
 Intermediate Markdown and rendered diagrams live under `build/`. Both

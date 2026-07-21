@@ -1,13 +1,22 @@
 # Changelog
 
-## Unreleased — Volume 1 Internal Review
+## Unreleased — Volume 1 Publication Preparation
+
+- Rename the public edition to *The FounderOS Playbook for AI Founders* while
+  retaining the historical source-directory slug.
+- Record the decision to pursue a staged 0.9.0 Public Preview before 1.0.0.
+- Add publication planning, readiness, review, feedback, and release records for
+  WP71 through WP78 without claiming uncompleted human approvals.
+
+## Volume 1 — 0.2.0 Internal Review
 
 - Define the reader promise, independence boundary, canonical six-part table of
   contents, source registry, and chapter research map.
 - Add an automated chapter contract, tests, authoring runbook, and exact title
   and sequence validation.
-- Complete all 23 chapters of *The YC Playbook for AI Founders* with required
-  beginner-facing decisions, checklists, worksheets, callouts, and sources.
+- Complete all 23 chapters under the then-working title *The YC Playbook for AI
+  Founders* with required beginner-facing decisions, checklists, worksheets,
+  callouts, and sources.
 - Build the manuscript with canonical part dividers and stronger output checks.
 - Mark book version 0.2.0 as internal review without claiming beta reading,
   legal approval, endorsement, or publication.
