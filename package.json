@@ -35,6 +35,8 @@
     "platform:start": "node bin/founderos.mjs platform start",
     "build": "node scripts/build-book.mjs",
     "verify:outputs": "node scripts/verify-outputs.mjs",
+    "notion:export": "node scripts/notion-publication.mjs export",
+    "notion:check": "node scripts/notion-publication.mjs check",
     "preview": "node scripts/preview.mjs",
     "clean": "node scripts/clean.mjs"
   },

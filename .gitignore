@@ -13,6 +13,7 @@ node_modules/
 .founderos/platform/jobs/
 .founderos/platform/local-workspace.yaml
 .founderos/platform/backups/
+.founderos/notion/
 
 # Environment and local configuration
 .env

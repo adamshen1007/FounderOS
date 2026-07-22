@@ -21,6 +21,9 @@ Completed work:
 - Automated chapter contract, authoring template, tests, and runbook
 - Complete Parts I–VI with worksheets, checklists, callouts, and sources
 - Reproducible HTML, EPUB, and DOCX internal-review artifacts
+- Private Notion Book Headquarters with derived pages and worksheets for all 23
+  chapters, searchable sources, review findings, release gates, and source-hash
+  freshness checks
 
 Before the 0.9.0 Public Preview:
 
