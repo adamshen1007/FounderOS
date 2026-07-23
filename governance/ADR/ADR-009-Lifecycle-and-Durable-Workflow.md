@@ -84,6 +84,18 @@ or resume the existing logical operation rather than duplicate records or
 side effects. A retry creates a new attempt linked to its predecessor and
 preserves the run and stage lineage.
 
+SQLite enforces one logical run with a scoped `UNIQUE` constraint on
+`(project_id, operation_kind, idempotency_key)`. Submission uses one
+transactional insert-or-return-existing operation: it inserts one queued run,
+or, on uniqueness conflict, returns the existing run without creating a second
+run or attempt. If the existing key has a different input fingerprint, the
+submission returns `conflict` rather than reusing it.
+
+Worker claims use an atomic guarded update from a claimable status and record
+the owner in the same transaction. Only the worker whose update succeeds may
+execute the attempt. Concurrent duplicate submissions or worker claims
+therefore cannot create or execute two runs for one scoped idempotency key.
+
 Failures use these explicit retry classes:
 
 - `retryable`: the recorded policy permits another bounded attempt.
