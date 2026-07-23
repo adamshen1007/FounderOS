@@ -35,13 +35,20 @@ untrusted sources
       |                                             [providers]
       v                                                  |
 [local canonical files] <--> [SQLite operational state] |
-      ^                         |                        v
-      |                 [proposal-only outputs and derived artifacts]
-      |
-[authorized mutation service] <---- human decisions ---- [Creator Studio]
-      ^
-      |
-[Notion derived review surface]
+      ^                         ^                        v
+      |                         |       [proposal-only provider outputs]
+      |                         |
+[authorized mutation service] <- [append-only human decision]
+                                      ^
+                                      |
+                              [immutable proposal]
+                                      ^
+                                      |
+                   [Notion Review Bridge and normalized
+                         three-way proposal import]
+                                      ^
+                                      |
+                      [Notion derived review surface]
 
 [immutable staged release] --> [Ghost or approved storage] --> [subscriber]
 ```
@@ -256,10 +263,13 @@ make its content trusted.
   non-allowlisted users, and fail closed during identity-provider outages.
 - **Deletion and retention failure:** Personal data or private artifacts remain
   in logs, backups, provider storage, or obsolete releases. Maintain a data map
-  and per-store retention schedule, automatically expire operational records,
-  support verified deletion and legal holds, record deletion requests and
+  and per-store schedule for the shortest lawful retention period that satisfies
+  the declared purpose and applicable obligations. Automatically expire
+  operational records, support verified deletion, record deletion requests and
   exceptions, garbage-collect unreferenced releases, and preserve only minimal
-  tombstone evidence after destructive removal.
+  tombstone evidence after destructive removal. An active legal hold suspends
+  deletion only for covered records until the hold is released; deletion or
+  irreversible redaction then resumes under the applicable schedule.
 - **Object-store or Ghost compromise:** An external administrator or attacker
   changes artifacts, visibility, or the active release. Use least-privilege
   service identities, separate staging and production authority, enable
@@ -290,9 +300,12 @@ evidence sufficient to reconstruct:
 
 Evidence must omit secrets, complete signed URLs, raw subscriber tokens,
 unnecessary personal data, and prohibited source or prompt content. Access to
-incident evidence is least privilege and audited. Retention follows the
-shortest applicable project, privacy, security, rights, and legal-hold rule;
-expired evidence is deleted or irreversibly redacted.
+incident evidence is least privilege and audited. Retain it for the shortest
+lawful period that satisfies the declared project, privacy, security, and
+rights purposes and applicable obligations. An active legal hold prevents
+deletion only for covered evidence until release; deletion or irreversible
+redaction resumes under the applicable schedule as soon as the hold is
+released.
 
 Response playbooks must support containment, credential and session revocation,
 provider and connector suspension, source quarantine, mutation freeze,
@@ -315,7 +328,8 @@ incident blocks Publish.
   errors despite pinned versions and review.
 - Short-lived links reduce exposure but an authorized subscriber can still
   copy an accessible work.
-- Backups and legal holds can delay deletion; tombstones can prove an action
+- Backups and active legal holds can delay deletion; after a hold is released,
+  scheduled deletion or redaction resumes. Tombstones can prove an action
   without proving every provider erased every physical copy.
 
 Residual risk is accepted only through the applicable lifecycle decision with

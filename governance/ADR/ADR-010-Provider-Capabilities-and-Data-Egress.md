@@ -50,6 +50,21 @@ proposal, change canonical content, publish, or expand its own capabilities.
 Schema and policy validation must succeed before output can enter a proposal or
 derived-artifact workflow.
 
+### Provider Implementations
+
+OpenAI is the first live provider implementation. Its adapter has no special
+authority: it must implement the same versioned capability contracts,
+classification, consent, budget, evidence, and failure rules required of every
+provider. It may expose only the capabilities and contract versions that it can
+prove it supports. Selecting OpenAI does not make its models, responses, terms,
+or capability names canonical and does not prevent a later compatible adapter.
+
+The fake provider remains the deterministic baseline for tests and continuous
+integration. It implements controlled fixtures behind the same contracts but
+is not represented as live processing. Neither the OpenAI adapter nor the fake
+provider may silently substitute for the other or select an unapproved model,
+region, prompt, or capability version.
+
 ### Data Classification and Egress
 
 Every transferable field receives one of these classifications before

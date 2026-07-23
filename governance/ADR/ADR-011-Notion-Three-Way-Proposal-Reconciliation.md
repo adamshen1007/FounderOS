@@ -70,7 +70,8 @@ converter-version incompatibility, or missing revision evidence also fails
 closed as a conflict or blocked import.
 
 Every imported change becomes an individual, immutable proposal at the
-smallest safe semantic unit. Each proposal records:
+smallest safe semantic unit. Each proposal has a stable proposal ID and an
+immutable payload whose proposal hash binds:
 
 - Proposal type and stable affected IDs
 - Export-base, current-Markdown, and current-Notion values and hashes
@@ -78,14 +79,31 @@ smallest safe semantic unit. Each proposal records:
 - Notion page, block, and revision evidence
 - Author or reviewer identity when the connector supplies it
 - Import run and idempotency identities
-- Conflict, dependency, and unsupported-content status
-- Decision, rationale, actor, timestamps, and resulting canonical hash
+- Creation-time conflict, dependency, and unsupported-content classification
+- Creation timestamp and proposal schema version
 
 Comments are review proposals or evidence attached to a proposal; they never
 become publication text automatically. Proposal dependencies make structural
 changes, such as a parent deletion and child edits, reviewable without unsafe
 application order. Reimporting the same revisions and hashes returns the
-existing proposals instead of duplicating them.
+existing proposals instead of duplicating them. Proposal payloads and hashes
+are never updated, including after a decision, retry, conflict resolution, or
+canonical application.
+
+Human decisions are separate append-only records linked by proposal ID and
+proposal hash. Each decision record contains a decision ID, accept, reject,
+defer, or revised-resolution choice, actor, rationale, timestamp, expected
+canonical hash and lifecycle version, and the selected or revised normalized
+result and hash. A later decision may explicitly supersede an earlier decision
+by decision ID, but it cannot edit or erase that decision or the proposal.
+
+Application attempts are a third append-only record type. Each attempt links
+the proposal ID and hash, decision ID, expected canonical and lifecycle
+versions, mutation command and journal identity, timestamps, validator results,
+outcome, and resulting canonical hash when successful. A retry creates a new
+attempt linked to its predecessor. Current review state is a derived view over
+the immutable proposal and append-only decision and application records; it is
+not stored by mutating the proposal.
 
 ### Unsupported Blocks and Conflicts
 
@@ -100,30 +118,30 @@ original Notion content remains untouched. Malformed, oversized, inaccessible,
 or permission-denied blocks produce visible, bounded failures.
 
 A conflict preserves the export base, current Markdown, and current Notion
-versions. The creator may revise the proposal into an explicit resolution,
-reject it, defer it, or produce a new beta export after resolving canonical
-content. The bridge never chooses a side by timestamp, last writer, provider
-output, or Notion revision order.
+versions. The creator may append a decision containing an explicit revised
+resolution, rejection, or deferral, or produce a new beta export after
+resolving canonical content. The bridge never chooses a side by timestamp, last
+writer, provider output, or Notion revision order.
 
 ### Human Decision and Authorized Mutation
 
-The creator can accept, revise, reject, or defer each proposal. Acceptance and
-revision bind the exact proposal hash, current canonical hash, lifecycle
-version, actor, and intended normalized result. A stale hash, changed
-dependency, unresolved blocking conflict, or failed policy check prevents
-application.
+The creator can append an acceptance, revised resolution, rejection, or
+deferral decision for each proposal. The decision binds the exact immutable
+proposal hash, current canonical hash, lifecycle version, actor, and intended
+normalized result. A stale hash, changed dependency, unresolved blocking
+conflict, or failed policy check prevents application.
 
 Only the authorized local mutation service from ADR-008 may apply an accepted
-proposal. It revalidates the decision and expected hashes under the
-per-project writer lock, writes through the durable journal, runs canonical
-validators, and records the immutable audit result. A Notion webhook,
-connector, provider, browser, or import worker cannot write Markdown directly
-or approve a lifecycle gate.
+or revised-resolution decision. It revalidates the immutable proposal, decision
+record, and expected hashes under the per-project writer lock, writes through
+the durable journal, runs canonical validators, and appends an application
+attempt with the audit result. A Notion webhook, connector, provider, browser,
+or import worker cannot write Markdown directly or approve a lifecycle gate.
 
 Acceptance does not mutate Notion automatically. A later explicit export may
 update the derived review surface from canonical Markdown and creates a new
-immutable base. Failed, rejected, deferred, and superseded proposals remain in
-decision history.
+immutable base. Failed attempts and rejected, deferred, or superseded decisions
+remain in the append-only decision history; their proposals remain unchanged.
 
 ### Amendment to ADR-007
 
@@ -139,8 +157,9 @@ is replaced by:
 
 > A Notion change returns as an individually reviewable proposal produced by an
 > immutable-base, normalized-AST three-way comparison. It becomes effective
-> only after a human accepts or revises it and the authorized local mutation
-> service validates and applies the exact proposal to current Markdown.
+> only after a human appends an acceptance or revised-resolution decision and
+> the authorized local mutation service validates that decision and the exact
+> immutable proposal before applying it to current Markdown.
 
 ADR-007 remains active in every other respect. Markdown is the only canonical
 publication source, Notion remains private and derived, Notion identifiers
@@ -162,8 +181,10 @@ return path remains the operational rule.
   stale decisions fail closed without data loss or duplicate proposals.
 - Accepted proposals can be applied only through ADR-008's authorized mutation
   and recovery protocol.
-- Audit fixtures preserve all three versions, human decisions, application
-  results, and superseded proposals.
+- Audit fixtures prove proposal payloads and hashes never change and preserve
+  separate append-only human decisions and application attempts.
+- Audit fixtures preserve all three compared versions, superseded decisions,
+  retry lineage, and canonical application results.
 - End-to-end tests show that rejected, deferred, conflicted, unsupported, or
   unapproved content cannot change Markdown.
 
