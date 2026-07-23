@@ -94,16 +94,21 @@ Human decisions are separate append-only records linked by proposal ID and
 proposal hash. Each decision record contains a decision ID, accept, reject,
 defer, or revised-resolution choice, actor, rationale, timestamp, expected
 canonical hash and lifecycle version, and the selected or revised normalized
-result and hash. A later decision may explicitly supersede an earlier decision
-by decision ID, but it cannot edit or erase that decision or the proposal.
+result and hash. Each proposal's decision stream assigns a monotonically
+increasing `proposal_decision_revision` in the same transaction that appends a
+decision. The append command supplies the expected current revision; a stale
+revision cannot create a competing decision. A later decision may explicitly
+supersede an earlier decision by decision ID, but it cannot edit or erase that
+decision or the proposal.
 
 Application attempts are a third append-only record type. Each attempt links
-the proposal ID and hash, decision ID, expected canonical and lifecycle
-versions, mutation command and journal identity, timestamps, validator results,
-outcome, and resulting canonical hash when successful. A retry creates a new
-attempt linked to its predecessor. Current review state is a derived view over
-the immutable proposal and append-only decision and application records; it is
-not stored by mutating the proposal.
+the proposal ID and hash, decision ID and hash, expected
+`proposal_decision_revision`, expected canonical and lifecycle versions,
+mutation command and journal identity, timestamps, observed decision revisions,
+validator results, outcome, and resulting canonical hash when successful. A
+retry creates a new attempt linked to its predecessor. Current review state is
+a derived view over the immutable proposal and append-only decision and
+application records; it is not stored by mutating the proposal.
 
 ### Unsupported Blocks and Conflicts
 
@@ -131,12 +136,34 @@ proposal hash, current canonical hash, lifecycle version, actor, and intended
 normalized result. A stale hash, changed dependency, unresolved blocking
 conflict, or failed policy check prevents application.
 
+The command that queues application binds the immutable proposal ID and hash,
+the accepted or revised-resolution decision ID and hash, and the expected
+`proposal_decision_revision`. When a decision is superseded, every queued
+application bound to it is stale and cannot be retargeted to the replacement
+decision.
+
+Decision appends and decision applications serialize through the same
+per-project writer lock. After acquiring that lock, the mutation service must
+verify that the expected decision revision is still the latest revision and
+that the referenced decision is current, has not been superseded, and is an
+acceptance or revised resolution. A mismatch appends a stale
+application-attempt result and fails closed before temporary-file preparation
+or canonical replacement.
+
 Only the authorized local mutation service from ADR-008 may apply an accepted
-or revised-resolution decision. It revalidates the immutable proposal, decision
-record, and expected hashes under the per-project writer lock, writes through
-the durable journal, runs canonical validators, and appends an application
-attempt with the audit result. A Notion webhook, connector, provider, browser,
-or import worker cannot write Markdown directly or approve a lifecycle gate.
+or revised-resolution decision. While retaining the writer lock through journal
+completion, it revalidates the proposal hash, decision ID and hash, expected
+decision revision, current canonical hash, lifecycle version, and policy
+results at every durable commit boundary. This includes a check immediately
+before canonical replacement and a guarded comparison in the SQLite commit
+that records the application result. Because decision appends require the same
+writer lock, the decision revision cannot legitimately advance between those
+checks. A failed lock-time or pre-replacement check aborts before canonical
+replacement. An unexpected guarded-commit mismatch leaves the mutation journal
+incomplete and recovery must restore the pre-operation canonical state before
+new mutations are accepted. The service then appends the application attempt
+with the audit result. A Notion webhook, connector, provider, browser, or import
+worker cannot write Markdown directly or approve a lifecycle gate.
 
 Acceptance does not mutate Notion automatically. A later explicit export may
 update the derived review surface from canonical Markdown and creates a new
@@ -179,6 +206,12 @@ return path remains the operational rule.
   changes, incompatible changes, comments, reorderings, and deletions.
 - Concurrent Notion revisions, stale canonical hashes, duplicate imports, and
   stale decisions fail closed without data loss or duplicate proposals.
+- A queued application whose decision is superseded fails as stale before
+  canonical replacement; concurrent decision and application commands are
+  serialized by the project writer lock.
+- Crash and concurrency fixtures verify the current decision ID, hash, and
+  `proposal_decision_revision` at lock acquisition, immediately before
+  canonical replacement, and in the durable application-result commit.
 - Accepted proposals can be applied only through ADR-008's authorized mutation
   and recovery protocol.
 - Audit fixtures prove proposal payloads and hashes never change and preserve
