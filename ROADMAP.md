@@ -25,6 +25,8 @@ report, and release decision.
 - Migrate the YC Playbook through a machine-readable semantic comparison and
   human visual review.
 - Complete an early, time-boxed Ghost capability spike.
+- Implement the minimum guarded Blueprint, Beta, and Publish approvals and move
+  the YC migration through them in that order.
 - Run the single local Publish Gate and generate the Publish-bound immutable
   final manifest for the approved release.
 
@@ -39,7 +41,8 @@ publication.
 - Add the Tier 1 Evidence Gateway, evidence and claim relationships,
   composition, visual enrichment, provider contracts, and governed Editorial
   Memory.
-- Add the Beta gate and three-way Notion proposal reconciliation.
+- Deepen and automate beta-quality evaluation through the existing Beta Gate,
+  and add three-way Notion proposal reconciliation.
 - Take a short second pilot from approved research through accepted canonical
   proposals against a predeclared scorecard.
 
@@ -56,7 +59,9 @@ Blueprint, Beta, and Publish are the only lifecycle approval gates. Final
 publication always requires an explicit human Publish action. That single
 action occurs in Increment 1 against the exact local candidate; Increment 3
 verifies and activates the resulting immutable release without requesting
-approval again.
+approval again. Increment 1 implements all three gates in mandatory order;
+Increment 2 improves beta evidence and automation but does not introduce a
+gate.
 
 Old M5B requirements remain deferred, including teams, billing, remote
 projects, and general cloud workspace features. The only exception is the

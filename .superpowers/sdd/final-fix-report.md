@@ -4,13 +4,14 @@
 
 DONE_WITH_CONCERNS
 
-The requested governance integration fixes are complete. The only concerns are
-the two intentionally unresolved implementation prerequisites and transient
-external-link network warnings described below.
+The requested governance integration fixes, including the final whole-branch
+lifecycle-allocation follow-up, are complete. The only concerns are the two
+intentionally unresolved implementation prerequisites and transient external-
+link network warnings described below.
 
 ## Commit
 
-`HEAD` — `docs: reconcile governance package integration`
+`HEAD` — `docs: align lifecycle increment boundaries`
 
 The immutable commit SHA is reported by the Git handoff after this report is
 committed. A commit cannot contain its own final SHA.
@@ -35,10 +36,11 @@ committed. A commit cannot contain its own final SHA.
 ## Finding Resolutions
 
 1. **Increment decision:** The single Publish Gate now occurs in Increment 1
-   after local validation and binds the immutable final manifest. Increment 3
-   consumes that approved release for hosted staging and activation without a
-   second Publish gate. RFC-006, RFC-007, the roadmap, design, governance
-   supersession map, and completed plan all use the same allocation.
+   after the prerequisite minimum Blueprint and Beta approvals and binds the
+   immutable final manifest. Increment 2 deepens beta quality through the
+   existing gate. Increment 3 consumes the approved release for hosted staging
+   and activation without another gate. RFC-006, RFC-007, the roadmap, design,
+   governance supersession map, and completed plan all use the same allocation.
 2. **ADR-008 recovery:** Canonical mutation now requires durable
    content-addressed preimages or a verified prior snapshot before replacement,
    normative file and directory `fsync` ordering, explicit mutation phases and
@@ -64,9 +66,12 @@ committed. A commit cannot contain its own final SHA.
 6. **Authority:** The hosted adapter release-state store owns the active
    release pointer and monotonic revision; local SQLite holds derived,
    append-only observations. Local SQLite is the append-only operational
-   authority for staging attempts and evidence, reserves an attempt before
-   dispatch, appends immutable observations and one finalization, and creates a
-   new linked attempt for retry. Immutable export is optional.
+   authority for staging attempts and evidence. Increment 1 may include only an
+   unreserved deterministic future-staging hint. Increment 3 reconciles the
+   pointer and transactionally reserves the authoritative attempt ID with its
+   expected revision before outbox creation or dispatch, appends immutable
+   observations and one finalization, and creates a new linked attempt for
+   retry. Immutable export is optional.
 7. **Browser and local mutation security:** The local boundary now requires
    loopback-only binding, a strict loopback `Host` and port allowlist,
    DNS-rebinding defense, same-origin and Fetch Metadata checks, CSRF, an
@@ -83,6 +88,11 @@ committed. A commit cannot contain its own final SHA.
     classifications and concurrency conditions to `failed-retryable`,
     `blocked`, `cancelled`, `failed-terminal`, `stale`, `conflict`, and
     `queued`, with required next actions.
+11. **Gate sequencing follow-up:** Increment 1 now implements durable human
+    Blueprint, Beta, and Publish approvals and moves the YC migration through
+    them in mandatory order. Publish fails closed without a current Beta
+    approval. Increment 2 adds evidence, automation, and stronger beta-quality
+    policies around that existing gate rather than introducing it.
 
 ## Validation
 
@@ -96,7 +106,9 @@ committed. A commit cannot contain its own final SHA.
   links checked. The restricted environment reported transient fetch warnings
   for all 28 external links; the checker found no blocking link error.
 - `node --test tests/*.test.mjs` with permission to bind its temporary
-  loopback server — exit 0; 61 tests passed, 0 failed.
+  loopback server — first run exited 1 with 60 passed and the timing-sensitive
+  live-index test reporting one extra increment; an immediate isolated full
+  rerun exited 0 with 61 passed and 0 failed.
 - `git diff --check` — exit 0.
 
 ## Concerns
@@ -112,3 +124,6 @@ committed. A commit cannot contain its own final SHA.
 - External link targets could not be fetched from the restricted validation
   environment. The repository link checker treats these as transient warnings
   and exited successfully; internal documentation and links passed.
+- The first full Node run exposed a non-repeating live-index timing failure.
+  The immediate isolated full rerun passed 61 of 61; no runtime code changed in
+  this documentation-only follow-up.

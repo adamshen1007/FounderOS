@@ -46,7 +46,8 @@ The approved product decisions are:
 - Import Notion edits and comments as proposals rather than direct canonical
   changes.
 - Use three lifecycle approval gates: Blueprint, Beta, and Publish.
-- Place the single Publish Gate in Increment 1; it binds the validated local
+- Implement the minimum Blueprint, Beta, and Publish approvals in Increment 1
+  and require that order. The single Publish Gate binds the validated local
   candidate and creates the immutable final manifest consumed by Increment 3.
 - Publish HTML, PDF, and EPUB. DOCX is no longer a supported release format.
 - Migrate the YC Playbook first, then create a short second pilot book.
@@ -422,6 +423,13 @@ The three lifecycle gates are:
 Source, claim, chapter, and visual decisions occur inside lifecycle stages;
 they are review decisions, not additional lifecycle gates.
 
+Increment 1 implements the minimum guarded transitions, durable approval
+records, and human actions for all three gates. The YC migration traverses
+Blueprint, Beta, and Publish in that order, and Publish fails closed without a
+current Beta approval. Increment 2 may deepen and automate beta-quality
+preparation and evaluation, but it reuses the existing Beta Gate and cannot
+introduce or defer it.
+
 The book lifecycle is:
 
 1. Brief and Blueprint Gate
@@ -545,11 +553,14 @@ version mismatch is `conflict`. A retry reserves a new linked attempt and
 becomes `queued` rather than rewriting the failed attempt.
 
 Local SQLite is the append-only operational authority for hosted staging
-attempts and evidence. It reserves the attempt ID before dispatch, appends
-immutable observations and one terminal finalization, and assigns every retry
-a new attempt linked to its predecessor. Immutable export is optional. The
-hosted adapter release-state store, not SQLite, is authoritative for the active
-release pointer and monotonic revision.
+attempts and evidence. Increment 1 may emit only an unreserved deterministic
+future-staging hint. In Increment 3, after authoritative pointer
+reconciliation, one transaction reserves the real attempt ID with the expected
+pointer revision before outbox creation or dispatch. It then appends immutable
+observations and one terminal finalization; every retry receives a new attempt
+linked to its predecessor. Immutable export is optional. The hosted adapter
+release-state store, not SQLite, is authoritative for the active release
+pointer and monotonic revision.
 
 ### 14.2 Artifact Graph
 
@@ -584,21 +595,26 @@ memory.
 
 ## 15. Publication and Subscriber Delivery
 
-Increment 1 owns local release preparation and the single Publish Gate:
+Increment 1 owns the minimum gate sequence and local release preparation:
 
-1. Revalidate research and manuscript integrity.
-2. Rebuild and validate affected visuals.
-3. Generate HTML, PDF, and EPUB in a bounded staging directory.
-4. Verify content, metadata, accessibility, links, and file integrity.
-5. Create the immutable candidate envelope and calculate its hash.
-6. Record the human Publish approval against that exact hash and lifecycle
+1. Record the human Blueprint approval before governed work.
+2. Revalidate research and manuscript integrity.
+3. Rebuild and validate affected visuals.
+4. Generate HTML, PDF, and EPUB in a bounded staging directory.
+5. Verify content, metadata, accessibility, links, and file integrity.
+6. Record the human Beta approval for the complete local beta.
+7. Create the immutable candidate envelope and calculate its hash.
+8. Record the human Publish approval against that exact hash and lifecycle
    version.
-7. Generate and checksum the immutable final manifest bound to that approval.
+9. Generate and checksum the immutable final manifest bound to that approval.
+   Any future-staging reference in it is a deterministic, unreserved hint only.
 
 Increment 3 consumes that approved immutable release. It does not add another
 Publish gate:
 
-1. Reserve a local append-only staging attempt before remote dispatch.
+1. Reconcile the authoritative active pointer and transactionally reserve the
+   local append-only staging-attempt ID with its expected revision before
+   outbox creation or remote dispatch.
 2. Stream artifacts to a staged release ID.
 3. Verify hosted artifacts and access controls against the local manifest.
 4. Reconcile the authoritative hosted active-pointer pair.
@@ -699,6 +715,8 @@ Includes Stage A and the minimum publication foundation needed to:
 - Produce HTML, PDF, and EPUB locally
 - Migrate the YC Playbook through the semantic oracle
 - Complete the Ghost capability spike
+- Implement the minimum guarded Blueprint, Beta, and Publish approvals and move
+  the YC migration through them in order
 - Run the single Publish Gate locally and generate the Publish-bound immutable
   final manifest
 
@@ -710,7 +728,8 @@ Includes Stages B-F:
 - Research planning, evidence graph, composition, and visual enrichment
 - Provider contracts and OpenAI implementation
 - Governed Editorial Memory
-- Beta Gate and three-way Notion reconciliation
+- Deeper and more automated beta-quality evaluation through the existing Beta
+  Gate, plus three-way Notion reconciliation
 - A complete short pilot through accepted canonical proposals
 
 ### Increment 3 — Subscriber Delivery

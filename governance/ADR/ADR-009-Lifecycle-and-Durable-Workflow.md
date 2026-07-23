@@ -57,15 +57,23 @@ The only lifecycle approval gates are:
    before research or other expensive work.
 2. **Beta Gate:** a human approves a complete beta before export to Notion.
 3. **Publish Gate:** a human explicitly performs the Publish action after all
-   blocking proposals and quality policies pass. The action approves the exact
-   local release-candidate envelope and authorizes creation of its final
-   immutable manifest; later hosted staging and activation consume that
-   approved release and do not create a second Publish gate.
+   blocking proposals and quality policies pass and the same lifecycle has a
+   current Beta approval. The action approves the exact local
+   release-candidate envelope and authorizes creation of its final immutable
+   manifest; later hosted staging and activation consume that approved release
+   and do not create a second Publish gate.
 
 Source, claim, chapter, visual, proposal, and Editorial Memory decisions are
 granular review decisions within lifecycle stages. They may satisfy or block a
 guard, but they do not create additional lifecycle gates. No agent, provider,
 connector, or adapter may record or bypass a gate approval.
+
+Increment 1 implements the minimum guarded transitions, durable human approval
+records, and interface actions for Blueprint, Beta, and Publish, and the YC
+migration must traverse them in that order. Increment 2 may add evidence,
+automation, and stronger beta-quality policies around the existing Beta Gate,
+but it cannot introduce, duplicate, or defer that gate. No increment may expose
+Publish while its prerequisite Beta transition is unavailable.
 
 The architecture approved at the Blueprint Gate is an initial hypothesis, not
 a claim that evidence collection is complete. Evidence may refine parts,

@@ -50,10 +50,13 @@ release-candidate envelope and calculates its SHA-256 hash. The envelope binds:
 The human Publish decision binds the exact candidate-envelope hash and
 lifecycle version. After approval, the final release manifest derives from
 that envelope without changing, adding to, or removing any material release
-field. It may add only the Publish approval reference, a preallocated immutable
-staging-attempt ID. A changed artifact, checksum, source, format,
-validator result, rights or quality result, lifecycle version, or access policy
-requires a new candidate envelope, hash, and Publish decision.
+field. It may add only the Publish approval reference and an unreserved,
+deterministic future-staging reference derived from the release, manifest, and
+configured destination scope. That reference is a hint only: it is not a
+staging-attempt ID, reservation, idempotency key, expected pointer revision, or
+evidence authority. A changed artifact, checksum, source, format, validator
+result, rights or quality result, lifecycle version, or access policy requires
+a new candidate envelope, hash, and Publish decision.
 
 The manifest itself receives a SHA-256 checksum. An implementation may add a
 signature, but a signature cannot replace the required artifact and manifest
@@ -87,11 +90,13 @@ checksum mismatch.
 ### Staging Attempt and Evidence Authority
 
 Local SQLite is the operational authority for release-staging attempts and
-their evidence. Before any hosted request, it reserves a globally unique
+their evidence. Increment 1 does not reserve an attempt. In Increment 3, after
+an authoritative read of the current active pointer and immediately before the
+outbox or any hosted request, one SQLite transaction reserves a globally unique
 attempt ID and appends an immutable attempt-start record binding the release
-ID, manifest checksum, destination, expected active-pointer pair, lifecycle and
-approval references, input fingerprint, idempotency key, and prior-attempt ID
-when this is a retry.
+ID, manifest checksum, destination, expected active-pointer pair and revision,
+lifecycle and approval references, input fingerprint, idempotency key,
+optional future-staging hint, and prior-attempt ID when this is a retry.
 
 Every dispatch, remote observation, checksum, access result, reconciliation,
 compensation, and error is a new immutable observation linked to that attempt.
@@ -150,12 +155,14 @@ after:
 
 1. The versioned local release-candidate envelope passes every required
    validator and receives its stable SHA-256 hash.
-2. The existing Increment 1 human Publish action and lifecycle guards approved
+2. The existing Increment 1 human Beta approval precedes the Publish action in
+   the same guarded lifecycle.
+3. The existing Increment 1 human Publish action and lifecycle guards approved
    that exact envelope hash and lifecycle version.
-3. The immutable manifest binds that approval and passes its checksum check.
-4. Every remote artifact matches its manifest checksum.
-5. Hosted visibility, subscriber authorization, and download controls pass.
-6. The current pointer still matches the caller's expected release ID and
+4. The immutable manifest binds that approval and passes its checksum check.
+5. Every remote artifact matches its manifest checksum.
+6. Hosted visibility, subscriber authorization, and download controls pass.
+7. The current pointer still matches the caller's expected release ID and
    pointer revision.
 
 Activation, rollback, and unpublish must compare both values in the expected
@@ -305,10 +312,12 @@ review.
   the previous pointer.
 - Duplicate, interrupted, timed-out, and uncertain remote operations prove
   idempotent resume, authoritative reconciliation, or safe manual blocking.
-- Staging-attempt tests reserve the attempt ID before dispatch, append immutable
-  observations and one terminal record, and prove a retry creates a new linked
-  attempt without changing prior evidence. Optional exports are reproducible
-  copies, not an operational authority.
+- Staging-attempt tests prove an Increment 1 future-staging reference is
+  deterministic but unreserved and cannot authorize hosted work. Increment 3
+  transactionally reserves the authoritative attempt ID with the reconciled
+  expected pointer revision before dispatch, appends immutable observations and
+  one terminal record, and creates a new linked attempt for retry. Optional
+  exports are reproducible copies, not an operational authority.
 - Activation, rollback, and unpublish tests cover stale pointers, two
   concurrent operators, partial uploads, access-check failures, and crashes at
   every durable boundary. Unpublish fixtures prove compare-and-set conflict

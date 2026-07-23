@@ -33,8 +33,12 @@ link checker, Node test runner
 - Ghost is the first hosted adapter, subject to a capability spike.
 - Hosted activation changes one active-release pointer to an immutable release
   ID.
+- Increment 1 implements the minimum Blueprint, Beta, and Publish approvals and
+  the YC migration traverses them in that order.
 - The single human Publish action and Publish-bound local final-manifest
   generation occur in Increment 1.
+- Increment 2 deepens beta quality through the existing Beta Gate; it does not
+  introduce the gate.
 - Increment 3 consumes the approved immutable release for hosted staging and
   activation; it does not add another Publish gate.
 - No document may silently erase prior decisions; superseded records stay
@@ -134,8 +138,9 @@ granular review decisions from gates. Require a versioned guarded state
 machine, append-only transitions, expected versions, durable run/stage/attempt
 IDs, idempotency keys, explicit retry classes, cancellation, stale-job
 recovery, resource budgets, normative retry-to-visible-state mappings, initial
-Blueprint-hypothesis revision semantics, and user-visible operation states.
-Reject module-owned status fields and in-memory-only jobs.
+Blueprint-hypothesis revision semantics, the minimum three-gate Increment 1
+sequence, and user-visible operation states. Reject module-owned status fields
+and in-memory-only jobs.
 
 - [x] **Step 3: Validate Task 2**
 
@@ -221,7 +226,9 @@ git commit -m "docs: govern providers Notion and research security"
 
 Set status to `Accepted subject to Ghost capability spike`. Require immutable
 release IDs, checksummed manifests, disk-backed staging, streaming transfer,
-an authoritative hosted active-release pointer, an append-only local SQLite
+an authoritative hosted active-release pointer, an unreserved deterministic
+Increment 1 future-staging hint, transactionally reserved Increment 3 local
+SQLite attempt IDs with expected pointer revisions, an append-only
 staging-attempt ledger, idempotent compensation, previous-release preservation,
 protected short-lived downloads, and separation of immutable content from
 mutable access/privacy records. Define the spike matrix and a sidecar or
@@ -236,9 +243,11 @@ checks, an explicitly selected PDF accessibility profile before implementation,
 release manifests, YC semantic migration oracle, output-specific tests,
 staging, activation, rollback, unpublish, retention, and failure behavior.
 Place the single Publish Gate and Publish-bound local final manifest in
-Increment 1; Increment 3 consumes that approved immutable release without a
-second Publish gate. Require an accepted RFC-007 amendment to name and version
-the PDF profile before PDF implementation.
+Increment 1 together with its prerequisite minimum Blueprint and Beta
+approvals; Increment 2 reuses the existing Beta Gate and Increment 3 consumes
+the approved immutable release without another gate. Require an accepted
+RFC-007 amendment to name and version the PDF profile before PDF
+implementation.
 
 - [x] **Step 3: Validate Task 4**
 

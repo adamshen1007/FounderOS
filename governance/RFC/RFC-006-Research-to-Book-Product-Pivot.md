@@ -61,13 +61,16 @@ The following increments are the canonical sequence after M5A.3:
    discovery, establish safe local mutations and operational state, replace
    DOCX with verified PDF, produce HTML, PDF, and EPUB locally, migrate the YC
    Playbook through a semantic comparison, complete the Ghost capability
-   spike, and place the single Publish Gate after local validation so approval
-   creates the Publish-bound immutable final manifest.
+   spike, implement the minimum guarded Blueprint, Beta, and Publish approvals,
+   move the YC migration through them in that order, and create the
+   Publish-bound immutable final manifest.
 2. **Increment 2 — Short-Book Evidence-to-Beta.** Add the Tier 1 Evidence
    Gateway, research planning, evidence and claim relationships, composition,
    visual enrichment, provider contracts, governed Editorial Memory, Notion
-   proposal reconciliation, and a complete short second pilot through accepted
-   canonical proposals.
+   proposal reconciliation, deeper and more automated beta-quality evaluation
+   through the existing Beta Gate, and a complete short second pilot through
+   accepted canonical proposals. This increment does not introduce a lifecycle
+   gate.
 3. **Increment 3 — Subscriber Delivery.** Consume an approved immutable
    Increment 1 release through the Ghost adapter and proven fallbacks, add
    allowlisted subscriber access, protected HTML, PDF, and EPUB, activation and
@@ -98,6 +101,11 @@ The product has exactly three lifecycle approval gates:
 Source, claim, chapter, and visual decisions are review decisions inside the
 lifecycle, not additional gates. No agent, provider, connector, or adapter may
 bypass a gate, and final publication always requires the human Publish action.
+Increment 1 must implement the minimum guarded state, durable approval records,
+and human action for Blueprint, Beta, and Publish in that order. The Publish
+action fails closed unless the same lifecycle has a current Beta approval.
+Increment 2 may deepen or automate beta preparation and evaluation, but it
+reuses the existing Beta Gate and cannot introduce or defer it.
 
 Thresholds must be declared before the YC migration and the short second pilot.
 The scorecard must cover evidence quality, unsupported claims and publication
@@ -198,6 +206,9 @@ This RFC is accepted when:
 - The single Publish Gate and Publish-bound local final manifest occur in
   Increment 1; Increment 3 consumes the approved immutable release without
   another gate.
+- The minimum Blueprint, Beta, and Publish gates all exist in Increment 1 and
+  the YC migration traverses them in order; Increment 2 only deepens the
+  existing Beta path.
 - Ghost-first delivery, HTML/PDF/EPUB output, YC migration, the short pilot, and
   predeclared scorecard evaluation are normative requirements.
 - ADR-008 through ADR-012 and RFC-007 are required before Increment 1 code.
@@ -211,10 +222,12 @@ This RFC is accepted when:
 1. Accept ADR-008 through ADR-012, RFC-007, and the expanded threat model.
 2. Plan and deliver Increment 1 with the YC semantic migration oracle, local
    HTML/PDF/EPUB validation, Ghost capability-spike evidence, the single Publish
-   Gate, and Publish-bound immutable final manifests.
+   Gate, its prerequisite minimum Blueprint and Beta approvals, and
+   Publish-bound immutable final manifests.
 3. Make a release decision for Increment 1 before planning the complete
    Increment 2 implementation.
-4. Run the short second pilot through the Blueprint and Beta gates against its
+4. Deepen the existing beta-quality workflow and run the short second pilot
+   through the already implemented Blueprint and Beta gates against its
    predeclared scorecard.
 5. Implement Increment 3 subscriber delivery from the approved immutable
    release, without a second Publish gate, and record the final end-to-end pilot
