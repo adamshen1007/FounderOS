@@ -252,10 +252,13 @@ Required shared tests cover:
   before access
 - A fixture of at least 512 MiB with streaming chunks no larger than 8 MiB and
   a peak RSS (resident set size) increase no greater than 128 MiB above the
-  measured idle process during rendering, checksum, and transfer. The result
-  records the operating system, architecture, runtime and tool versions,
-  memory-sampling method and interval, idle baseline, peak RSS, and fixture
-  composition.
+  measured idle aggregate for the complete process tree during rendering,
+  checksum, and transfer. It includes the orchestrator plus every renderer,
+  adapter, and other child process, or uses an equivalent container or cgroup
+  boundary containing them all. The result records the operating system,
+  architecture, runtime and tool versions, process-tree or container boundary,
+  memory-sampling method and interval, aggregate idle baseline, aggregate peak
+  RSS or equivalent peak, and fixture composition.
 
 Required HTML tests cover semantics, sanitization, navigation, keyboard use,
 WCAG 2.2 Level AA automated rules, links, responsive reflow, assistive
@@ -277,9 +280,12 @@ Hosted adapter contract and staging tests cover every ADR-012 capability row,
 including denial cases, API limits, interrupted upload, uncertain response,
 duplicate delivery, drift, stale pointer, rollback, unpublish, expired
 credentials, revoked subscriber, and replayed download grant. Unpublish tests
-must prove a stale expected active release returns `conflict`, a successful
-compare-and-set moves only that expected release to `null` or disabled, and
-revocation affects only access state bound to the unpublished release ID.
+must prove a stale expected active release ID or pointer revision returns
+`conflict`, a successful compare-and-set moves only that expected release to
+`null` or disabled while incrementing the revision, and revocation affects only
+access state bound to the unpublished release ID. After A to B to A pointer
+mutations, stale activation and unpublish commands holding A's original
+revision must both conflict without mutation or revocation.
 
 ## Staging, Activation, and Failure Behavior
 
@@ -291,8 +297,13 @@ Publish action against that exact release input and lifecycle version.
 Remote staging streams content under a new release ID and verifies each hosted
 artifact and access rule against the immutable local manifest. Staging is not
 activation. The only activation mutation is ADR-012's guarded compare-and-set
-of one active-release pointer after the human Publish action and repeated
-lifecycle and policy checks.
+of `(release_id, monotonic_pointer_revision)` after the human Publish action and
+repeated lifecycle and policy checks.
+
+Activation, rollback, and unpublish compare both tuple values. Every successful
+pointer mutation increments the revision by one; a mismatch in either value
+returns `conflict` without mutation. The revision never resets, including when
+the release ID returns to an earlier value.
 
 All remote side effects use ADR-009's durable outbox, stable idempotency key,
 attempt lineage, and reconciliation rules. A known retryable failure may resume
@@ -306,21 +317,25 @@ Failure behavior is atomic at the release level:
 - A partial or mismatched upload remains inactive and is quarantined or handled
   through idempotent compensation.
 - An access-control or hosted-verification failure blocks activation.
-- A stale or failed pointer comparison leaves the prior release active.
+- A stale release ID or pointer revision leaves the pointer pair unchanged.
 - A compensation failure preserves evidence and becomes visible blocked work.
 - A process crash resumes from a verified durable checkpoint and never infers
   success from an incomplete response.
 
 Rollback verifies a retained prior manifest and changes only the guarded active
-pointer. It does not rebuild or mutate that release.
+pointer. It compare-and-sets the expected release ID and monotonic pointer
+revision to the retained target and increments the revision. It does not
+rebuild or mutate that release.
 
-Unpublish supplies the expected active release ID and compare-and-sets that
-exact pointer to `null` or disabled. A stale expected release returns
-`conflict` without changing the pointer or revoking a newer release. After a
-successful pointer change, session, grant, cache, visibility, and other access
-revocation is scoped to the unpublished release ID and uses the same durable
-idempotency identity. Neither rollback nor unpublish bypasses current rights,
-integrity, lifecycle, or incident-policy checks.
+Unpublish supplies the expected active release ID and monotonic pointer
+revision, then compare-and-sets that pair to `null` or disabled while
+incrementing the revision. A stale release ID or revision returns `conflict`
+without changing the pointer or revoking the current release, even after an A
+to B to A sequence returns to the expected release ID. After a successful
+pointer change, session, grant, cache, visibility, and other access revocation
+is scoped to the unpublished release ID and uses the same durable idempotency
+identity. Neither rollback nor unpublish bypasses current rights, integrity,
+lifecycle, or incident-policy checks.
 
 ## Retention and Removal
 
@@ -406,8 +421,10 @@ silently ignored or replaced by a broader hosted system.
   changed, or mismatched material fields and artifacts.
 - A fixture of at least 512 MiB demonstrates disk-backed rendering, validation,
   checksum, and transfer with chunks no larger than 8 MiB and a peak
-  RSS (resident set size) increase no greater than 128 MiB above idle, with
-  the measurement platform and method recorded.
+  RSS (resident set size) increase no greater than 128 MiB above the idle
+  aggregate for the complete process tree or equivalent container or cgroup.
+  The boundary includes the orchestrator, renderer, and adapter children, and
+  the measurement platform and method are recorded.
 - The Ghost spike stops when every ADR-012 matrix row is classified `direct`,
   `fallback-required`, or `infeasible`, and no later than two working days or
   16 human hours. It records the evidence, selects the sidecar or object-storage

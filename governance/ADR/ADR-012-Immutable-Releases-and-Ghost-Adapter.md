@@ -91,7 +91,7 @@ The hosted-library adapter exposes versioned operations for:
 - Capability discovery and compatibility proof
 - Idempotent release staging or authoritative stage reconciliation
 - Hosted artifact, metadata, and access-control verification
-- One guarded active-release pointer read and compare-and-set
+- One guarded active-release pointer and revision read and compare-and-set
 - Rollback to a retained verified release
 - Unpublish and access revocation
 - Protected HTML access and short-lived binary download grants
@@ -107,14 +107,18 @@ an uncertain side effect becomes `blocked-awaiting-action`; it is not repeated
 automatically.
 
 Compensation is explicit, bounded, and idempotent. It may remove an incomplete
-staging release, revoke grants, or restore the expected pointer, but it must
-never delete or overwrite the previously active release. A failed compensation
-is durable blocked work with a creator-visible next action.
+staging release, revoke grants, or restore the intended release through a new
+compare-and-set against the current pointer pair, but it must never reset or
+reuse a pointer revision, delete, or overwrite the previously active release. A
+failed compensation is durable blocked work with a creator-visible next
+action.
 
 ### Activation, Rollback, and Unpublish
 
 There is exactly one mutable active-release pointer per published book
-destination. Activation is one guarded compare-and-set after:
+destination. Its value is the pair
+`(release_id, monotonic_pointer_revision)`. The revision begins at zero and
+never decreases or resets. Activation is one guarded compare-and-set after:
 
 1. The versioned local release-candidate envelope passes every required
    validator and receives its stable SHA-256 hash.
@@ -123,25 +127,37 @@ destination. Activation is one guarded compare-and-set after:
 3. The immutable manifest binds that approval and passes its checksum check.
 4. Every remote artifact matches its manifest checksum.
 5. Hosted visibility, subscriber authorization, and download controls pass.
-6. The current pointer still matches the caller's expected value.
+6. The current pointer still matches the caller's expected release ID and
+   pointer revision.
 
-The pointer change and its expected and resulting values are append-only audit
-evidence. Uploading or staging content does not activate it. A failed upload,
-verification, access check, or pointer change leaves the previous pointer
-active.
+Activation, rollback, and unpublish must compare both values in the expected
+pair. Every successful pointer mutation atomically writes the target release
+ID or unpublished value and increments `monotonic_pointer_revision` by one.
+A mismatch in either value returns `conflict` and changes neither value. The
+expected and resulting pairs are append-only audit evidence. This prevents a
+stale operation that observed release A from succeeding after an A to B to A
+sequence.
+
+Uploading or staging content does not activate it. A failed upload,
+verification, access check, or pointer mutation leaves the previous pair
+unchanged.
 
 Rollback verifies a retained prior release against its immutable manifest, then
-performs the same guarded pointer change. It does not rebuild, edit, or copy the
+compare-and-sets the expected release ID and pointer revision to the retained
+target while incrementing the revision. It does not rebuild, edit, or copy the
 prior bundle.
 
-Unpublish is a guarded compare-and-set from the caller's expected active
-release ID to `null` or an explicitly disabled state. A stale expected release
-returns `conflict`; it does not clear a newer pointer or revoke that newer
-release. After the pointer comparison succeeds, access revocation is scoped to
-the unpublished release ID. Its sessions, grants, cache entries, and visibility
-are revoked without changing another release's access state or rewriting
-release content. Compensation and retry use the same expected release ID and
-idempotency key.
+Unpublish compare-and-sets the caller's expected active release ID and pointer
+revision to `null` or an explicitly disabled value while incrementing the
+revision. A stale release ID or revision returns `conflict`; it does not clear
+or revoke the current release, including when the current release ID has
+returned to the expected value after an intervening activation. After the
+pointer comparison succeeds, access revocation is scoped to the unpublished
+release ID. Its sessions, grants, cache entries, and visibility are revoked
+without changing another release's access state or rewriting release content.
+Compensation and retry retain the original expected pair and idempotency key;
+a duplicate reconciles the recorded outcome rather than issuing a new pointer
+mutation.
 
 Re-publishing uses a retained verified release or a new release ID; it never
 reconstructs identity from mutable hosted state.
@@ -152,9 +168,9 @@ Immutable release content and mutable operational or privacy records use
 separate schemas and storage authority:
 
 - Release bundles, manifests, and their checksums are immutable while retained.
-- The active pointer, visibility, allowlists, sessions, grants, subscriber
-  records, and access decisions are mutable and must not be embedded in a
-  release manifest as current state.
+- The active pointer, monotonic pointer revision, visibility, allowlists,
+  sessions, grants, subscriber records, and access decisions are mutable and
+  must not be embedded in a release manifest as current state.
 - Subscriber identity is not required to verify release integrity and cannot
   enter release artifacts, checksums, or general release logs.
 
@@ -250,9 +266,13 @@ review.
 - A fixture of at least 512 MiB must prove disk-backed rendering, checksum, and
   transfer with streaming chunks no larger than 8 MiB and a peak RSS
   (resident set size) increase no greater than 128 MiB above the measured idle
-  process. The test report records the operating system, architecture, runtime
-  and tool versions, memory-sampling method and interval, idle baseline, peak
-  RSS, and fixture composition.
+  aggregate for the complete process tree. Measurement includes the
+  orchestrator plus every renderer, adapter, and other child process, or uses
+  an equivalent container or cgroup boundary that contains them all. The test
+  report records the operating system, architecture, runtime and tool versions,
+  process-tree or container boundary, memory-sampling method and interval,
+  aggregate idle baseline, aggregate peak RSS or equivalent peak, and fixture
+  composition.
 - Multi-format failure tests keep the complete release inactive and preserve
   the previous pointer.
 - Duplicate, interrupted, timed-out, and uncertain remote operations prove
@@ -260,7 +280,9 @@ review.
 - Activation, rollback, and unpublish tests cover stale pointers, two
   concurrent operators, partial uploads, access-check failures, and crashes at
   every durable boundary. Unpublish fixtures prove compare-and-set conflict
-  behavior and release-scoped access revocation.
+  behavior and release-scoped access revocation. An A to B to A fixture proves
+  that activation and unpublish commands holding A's old pointer revision both
+  return `conflict` without mutation or revocation.
 - Authorization tests deny non-allowlisted, revoked, expired, replayed, and
   cross-subscriber HTML and download access.
 - Retention tests distinguish immutable content from mutable privacy records
