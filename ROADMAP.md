@@ -5,37 +5,57 @@ Decimal milestone names such as M0.1–M0.3 were working-draft labels and are no
 longer part of the canonical roadmap. Each milestone must satisfy its exit
 criteria before the next milestone becomes the primary implementation focus.
 
-## Current Priority — Volume 1 Publication Preparation
+## Current Priority — Research-to-Book Increment 1 — YC Migration and Publishing Foundation
 
-The canonical 23-chapter manuscript of *The FounderOS Playbook for AI Founders*
-is a version 0.3.0 publication candidate. The explicit decision to pursue public
-publication was made on 2026-07-21. This content track uses the existing M1
-publishing foundation; it does not create a decimal product milestone or imply
-a new platform phase.
+RFC-006 changes FounderOS from a general founder workspace into a local-first
+research-to-book Creator Studio with a private subscriber library. The three
+increments below are the canonical delivery sequence after M5A.3. Each
+increment requires its own implementation plan, test artifact, acceptance
+report, and release decision.
 
-Completed work:
+### Increment 1 — YC Migration and Publishing Foundation
 
-- Canonical reader, promise, scope, independence note, and editorial criteria
-- Six-part, 23-chapter table of contents with a decision output per chapter
-- Primary-source registry and chapter research map
-- Automated chapter contract, authoring template, tests, and runbook
-- Complete Parts I–VI with worksheets, checklists, callouts, and sources
-- Reproducible HTML, EPUB, and DOCX internal-review artifacts
-- Private Notion Book Headquarters with derived pages and worksheets for all 23
-  chapters, searchable sources, review findings, release gates, and source-hash
-  freshness checks
+**Status:** Accepted for planning
 
-Before the 0.9.0 Public Preview:
+- Introduce reusable, versioned Book Projects and Book Blueprints.
+- Generalize project and chapter discovery beyond one volume and chapter count.
+- Establish Markdown and SQLite authority plus safe local mutations.
+- Produce verified HTML, PDF, and EPUB from canonical Markdown; PDF replaces
+  DOCX in the new release contract.
+- Migrate the YC Playbook through a machine-readable semantic comparison and
+  human visual review.
+- Complete an early, time-boxed Ghost capability spike.
 
-- Complete substantive and copy editing by human reviewers.
-- Obtain sensitivity, accessibility, legal, and trademark review where needed.
-- Run real beginner beta reading and record observed confusion and outcomes.
-- Resolve blocking findings, rebuild artifacts, and record preview approval.
+The existing 23-chapter YC Playbook, publishing checks, research records,
+governed agents, local workspace, and private Notion editorial workspace are
+the starting foundation. Their completion does not claim beta reading, legal or
+accessibility approval, Y Combinator endorsement, public preview, or final
+publication.
 
-Version 1.0.0 follows the Public Preview only after preview findings are
-resolved and final publication approval is recorded. No beta reading, legal
-approval, Y Combinator endorsement, public preview, or final publication is
-claimed by the decision to pursue publication.
+### Increment 2 — Short-Book Evidence-to-Beta
+
+- Add the Tier 1 Evidence Gateway, evidence and claim relationships,
+  composition, visual enrichment, provider contracts, and governed Editorial
+  Memory.
+- Add the Beta gate and three-way Notion proposal reconciliation.
+- Take a short second pilot from approved research through accepted canonical
+  proposals against a predeclared scorecard.
+
+### Increment 3 — Subscriber Delivery
+
+- Add the Publish gate, immutable release manifests, and one active-release
+  pointer.
+- Deliver protected HTML, PDF, and EPUB through the Ghost adapter and proven
+  fallbacks to allowlisted subscribers.
+- Verify activation, rollback, unpublish, and retention controls.
+- Record the final end-to-end pilot scorecard and release decision.
+
+Blueprint, Beta, and Publish are the only lifecycle approval gates. Final
+publication always requires an explicit human Publish action.
+
+Old M5B requirements remain deferred, including teams, billing, remote
+projects, and general cloud workspace features. The only exception is the
+bounded, allowlisted Ghost publishing adapter accepted by RFC-006.
 
 ## M0 — Strategy and Governance
 
