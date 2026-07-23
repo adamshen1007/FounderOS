@@ -96,6 +96,22 @@ the owner in the same transaction. Only the worker whose update succeeds may
 execute the attempt. Concurrent duplicate submissions or worker claims
 therefore cannot create or execute two runs for one scoped idempotency key.
 
+Before every side-effecting provider or adapter request, the worker commits a
+durable dispatch/outbox record containing the run, stage, attempt, destination,
+operation, input fingerprint, and stable scoped idempotency key. Only a worker
+that owns the attempt and its committed dispatch record may send the request.
+When the external capability supports idempotency, the adapter must propagate
+that stable key unchanged on every reconciliation or retry for the logical
+request.
+
+After a crash, timeout, or lost response leaves the result uncertain, the
+worker must query or reconcile the provider or adapter's external state before
+deciding whether another request is safe. The outbox records the reconciled
+external identity and outcome before the attempt advances. If an adapter
+supports neither idempotent requests nor authoritative reconciliation, an
+uncertain dispatch becomes `blocked-awaiting-action` for manual recovery; the
+system must not repeat an unprovable side effect.
+
 Failures use these explicit retry classes:
 
 - `retryable`: the recorded policy permits another bounded attempt.

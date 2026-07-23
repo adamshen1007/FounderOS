@@ -68,12 +68,15 @@ rollback limits.
 
 The authorized local mutation service is the only path by which a Creator
 Studio action may change canonical files. Before validating expected hashes,
-it must atomically acquire an exclusive SQLite-backed mutation lease for the
-Book Project. The lease identifies the owner and operation with a fencing
-token. No two mutation commands may overlap the protected interval for one
-project.
+it must acquire one per-project OS/filesystem exclusive writer lock shared by
+every process that can invoke the mutation service. The lock does not expire
+while its owning process lives. While holding that lock, the service atomically
+acquires an SQLite-backed mutation lease for durable owner, operation, and
+fencing-token identity. No two mutation commands may overlap the protected
+interval for one project.
 
-While holding the lease, each command performs this sequence:
+While holding both the writer lock and lease, each command performs this
+sequence:
 
 1. Validate the command, actor, expected hashes, and lifecycle guard.
 2. Calculate all Markdown and SQLite effects without writing.
@@ -83,10 +86,13 @@ While holding the lease, each command performs this sequence:
 6. Commit the corresponding SQLite state and immutable audit record.
 7. Mark the journal operation complete.
 
-The service releases the lease only after step 7. Lease ownership and the
-fencing token must be verified at every durable commit boundary. The protected
-interval therefore spans expected-hash validation, file replacement, the
-SQLite commit, and journal completion as one serialized project mutation.
+The service releases the SQLite lease and then the writer lock only after step
+7. Lease ownership and the fencing token must be verified at every durable
+commit boundary. The protected interval therefore spans expected-hash
+validation, file replacement, the SQLite commit, and journal completion as one
+serialized project mutation. The SQLite lease supplies durable identity and
+audit evidence, but it cannot by itself authorize a filesystem replacement;
+the process must still own the per-project writer lock.
 
 Canonical replacement must use same-filesystem temporary files so the final
 replacement is atomic. Expected content hashes provide optimistic concurrency.
@@ -97,10 +103,18 @@ At startup, the mutation service inspects every incomplete journal entry. Using
 the recorded intent, expected hashes, and observed file and database state, it
 must deterministically complete the operation or roll it back. Recovery must be
 idempotent, must preserve an audit trail, and must finish before new mutations
-are accepted. An expired or abandoned lease is never simply stolen. Recovery
-must first fence its prior owner, claim recovery ownership atomically, reconcile
-the associated journal entry, and only then release the project for a new
-mutation.
+are accepted. Recovery must acquire the same per-project writer lock before it
+may fence or take over an abandoned SQLite lease. It must also verify that the
+prior writer process has terminated, or that explicit cancellation completed
+and the prior writer relinquished the lock. Acquiring the non-expiring lock is
+required proof that the prior writer no longer owns the critical section.
+Recovery then fences the prior lease owner, claims recovery ownership
+atomically, reconciles the associated journal entry, and only then releases
+the project for a new mutation.
+
+A live but hung writer continues to own the lock and blocks takeover. Recovery
+must wait for explicit termination or successful cancellation of that owner;
+lease expiry alone must never permit a competing file replacement.
 
 SQLite transactions cannot make filesystem writes atomic. The durable journal,
 verified temporary files, atomic replacement, and startup recovery together
