@@ -660,19 +660,29 @@ contracts without migrations and a recorded architectural decision.
 
 ## 18. Governance Prerequisites
 
-Before Stage A implementation, create:
+The governance package required for Stage A planning is complete. The accepted
+records are:
 
-- One pivot RFC that formally changes FounderOS into a research-to-book product
-- An ADR for Markdown/SQLite authority and the mutation service
-- An ADR for lifecycle states, approvals, and the durable job model
-- An ADR for provider capability and egress boundaries
-- An ADR for Notion three-way reconciliation
-- An ADR for immutable release bundles, Ghost, and activation pointers
-- A publishing RFC that pins HTML, PDF, EPUB, accessibility, and validators
-- A threat model for ingestion, connectors, local mutation, and hosted delivery
+- [RFC-006 — Research-to-Book Product Pivot](../../../governance/RFC/RFC-006-Research-to-Book-Product-Pivot.md)
+- [ADR-008 — Markdown, SQLite Authority, and Mutations](../../../governance/ADR/ADR-008-Markdown-SQLite-Authority-and-Mutations.md)
+- [ADR-009 — Lifecycle and Durable Workflow](../../../governance/ADR/ADR-009-Lifecycle-and-Durable-Workflow.md)
+- [ADR-010 — Provider Capabilities and Data Egress](../../../governance/ADR/ADR-010-Provider-Capabilities-and-Data-Egress.md)
+- [ADR-011 — Notion Three-Way Proposal Reconciliation](../../../governance/ADR/ADR-011-Notion-Three-Way-Proposal-Reconciliation.md)
+- [ADR-012 — Immutable Releases and Ghost Adapter](../../../governance/ADR/ADR-012-Immutable-Releases-and-Ghost-Adapter.md)
+- [RFC-007 — Research-to-Book Publishing](../../../governance/RFC/RFC-007-Research-to-Book-Publishing.md)
+- [Research-to-Book Threat Model](../../../governance/policies/RESEARCH-TO-BOOK-THREAT-MODEL.md)
 
-The root roadmap must identify superseded milestones and preserve links to the
-older decisions rather than silently rewriting history.
+The root roadmap records the new increment sequence. The governance index
+preserves links to the older decisions and their exact replacement scopes. Two
+Increment 1 implementation prerequisites remain open:
+
+- Before PDF implementation begins, select and govern a named, versioned PDF
+  accessibility and archival profile, renderer, validators, and manual review
+  procedure as required by RFC-007.
+- Complete the time-boxed Ghost capability spike, classify every ADR-012 matrix
+  row, prove every required row directly or through a documented fallback, and
+  leave no required row `infeasible` before accepting a production Ghost
+  adapter or claiming Ghost compatibility.
 
 ## 19. Success Criteria
 
