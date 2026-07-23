@@ -12,10 +12,13 @@ FounderOS publishes canonical Markdown as validated HTML, PDF, and EPUB 3.
 DOCX is removed from the research-to-book release contract. Increment 1 must
 generalize the existing pipeline, migrate the YC Playbook through a semantic
 oracle, select and pin the required validators, use safe disk-backed staging,
-and complete the Ghost capability spike.
+complete the Ghost capability spike, and implement the single Publish Gate and
+Publish-bound local final manifest.
 
 This RFC also fixes the release, activation, rollback, unpublish, retention,
 and failure contracts that Increment 3 subscriber delivery must implement.
+Increment 3 consumes the approved immutable release and does not add a second
+Publish gate.
 Defining those contracts now does not represent Ghost compatibility as proven
 or authorize production hosted delivery before ADR-012's spike criteria pass.
 
@@ -34,10 +37,12 @@ validation procedure a blocking Increment 1 implementation prerequisite. No
 claim of PDF accessibility conformance may be made until that profile's
 automated and manual acceptance evidence passes.
 
-Increment 1 covers local publishing foundation, YC migration, and the Ghost
-spike. Subscriber staging, activation, rollback, unpublish, and retention
-controls are contractually defined here but remain Increment 3 implementation
-scope under RFC-006.
+Increment 1 covers local publishing foundation, YC migration, the Ghost spike,
+the single Publish Gate, and Publish-bound immutable final-manifest generation.
+Subscriber staging, activation, rollback, unpublish, and retention controls are
+contractually defined here but remain Increment 3 implementation scope under
+RFC-006. They verify and consume the existing approval rather than requesting
+another one.
 
 ## Publishing Contract
 
@@ -131,9 +136,10 @@ Before PDF implementation begins, the Increment 1 plan must explicitly select:
 - Supported font, language, metadata, link, and tagged-structure behavior
 - Failure, waiver, and regression-fixture rules
 
-The selected profile must be recorded in repository governance or an accepted
-amendment to this RFC. Selecting only a renderer default or an unversioned
-claim such as “accessible PDF” does not satisfy this prerequisite.
+The selected profile must be named and versioned by an accepted amendment to
+this RFC before PDF implementation begins. Selecting only a renderer default
+or an unversioned claim such as “accessible PDF” does not satisfy this
+prerequisite.
 
 Regardless of the selected profile, pinned checks must verify:
 
@@ -188,16 +194,19 @@ approval.
 
 The final manifest required by ADR-012 derives from the approved envelope. It
 must preserve every material field exactly and may add only the Publish
-approval reference and a preallocated immutable staging-evidence record ID.
+approval reference and a preallocated immutable staging-attempt ID.
 Manifest creation fails when a required field or result is absent or when a
 derived field differs from the approved envelope. The manifest's SHA-256
 checksum binds the bundle.
 
 Hosted destination identities, transferred bytes, verified remote checksums,
 provider observations, and access-test results are always stored in the
-preallocated immutable staging-evidence record linked to the preexisting
-manifest checksum. They are never included in or appended to the final
-manifest.
+local SQLite append-only staging-attempt ledger linked to the preexisting
+manifest checksum. The attempt ID is reserved before dispatch; every
+observation and one terminal finalization are immutable appends. A retry gets a
+new attempt linked to its predecessor. An immutable audit export is optional
+and is not a second operational authority. Hosted evidence is never included
+in or appended to the final manifest.
 
 Release content includes only manifest-allowlisted artifacts and minimum
 publication metadata. Mutable subscriber, session, allowlist, visibility, and
@@ -291,19 +300,24 @@ revision must both conflict without mutation or revocation.
 
 Release preparation is a dry run. It never changes hosted visibility. A
 release may enter remote staging only after all local formats, validators,
-rights checks, checksums, and manifest checks pass and a human completes the
-Publish action against that exact release input and lifecycle version.
+rights checks, checksums, and manifest checks pass and the immutable manifest
+proves the existing Increment 1 human Publish action against that exact release
+input and lifecycle version. Hosted staging does not invoke a second Publish
+action.
 
 Remote staging streams content under a new release ID and verifies each hosted
 artifact and access rule against the immutable local manifest. Staging is not
 activation. The only activation mutation is ADR-012's guarded compare-and-set
-of `(release_id, monotonic_pointer_revision)` after the human Publish action and
-repeated lifecycle and policy checks.
+of `(release_id, monotonic_pointer_revision)` after verification of the
+existing human Publish action and repeated lifecycle and policy checks.
 
 Activation, rollback, and unpublish compare both tuple values. Every successful
 pointer mutation increments the revision by one; a mismatch in either value
 returns `conflict` without mutation. The revision never resets, including when
-the release ID returns to an earlier value.
+the release ID returns to an earlier value. The hosted adapter release-state
+store is authoritative for this pair and its monotonic revision. Local SQLite
+contains append-only observations that must be reconciled before mutation; it
+cannot authorize a pointer change.
 
 All remote side effects use ADR-009's durable outbox, stable idempotency key,
 attempt lineage, and reconciliation rules. A known retryable failure may resume
@@ -391,13 +405,14 @@ This RFC narrows ADR-001 as follows:
 ADR-001 remains part of the decision history. This RFC does not rewrite M1
 release artifacts already produced under its accepted contract.
 
-This RFC also narrowly supersedes only RFC-006's allocation of immutable
-release-manifest generation to Increment 3. The versioned local
-release-candidate envelope, Publish-bound final manifest, and manifest checksum
-are Increment 1 publishing-foundation outputs. Remote staging, hosted artifact
-and access verification, subscriber delivery, active-pointer activation,
-rollback, unpublish, and hosted retention remain Increment 3. RFC-006's product
-boundary, sequence, gates, remaining increment contents, and decision history
+This RFC also narrowly supersedes RFC-006's original allocation of the Publish
+Gate and immutable release-manifest generation to Increment 3. The versioned
+local release-candidate envelope, single Publish Gate, Publish-bound final
+manifest, and manifest checksum are Increment 1 publishing-foundation outputs.
+Remote staging, hosted artifact and access verification, subscriber delivery,
+active-pointer activation, rollback, unpublish, and hosted retention remain
+Increment 3 and consume that approved immutable release. RFC-006's product
+boundary, three-gate model, remaining increment contents, and decision history
 remain active.
 
 Ghost is the first adapter candidate, not a guaranteed implementation.
@@ -409,8 +424,9 @@ silently ignored or replaced by a broader hosted system.
 
 - A fresh clone discovers reusable Book Projects without fixed volume or
   chapter-count assumptions.
-- The repository records the selected PDF accessibility profile and pins every
-  required renderer and validator before PDF implementation begins.
+- An accepted amendment to this RFC names and versions the selected PDF
+  accessibility profile and pins every required renderer and validator before
+  PDF implementation begins.
 - The same public local and CI command surface builds and validates HTML, PDF,
   and EPUB from one source snapshot.
 - Output-specific tests and an integrated multi-format failure test pass.
@@ -419,6 +435,12 @@ silently ignored or replaced by a broader hosted system.
 - Candidate envelopes and release manifests are deterministic, complete, bind
   the exact Publish decision, and fail closed on stale, missing, extra,
   changed, or mismatched material fields and artifacts.
+- Hosted staging tests reserve an append-only local SQLite attempt before
+  dispatch, append immutable observations and finalization, and create a new
+  linked attempt for each retry.
+- Pointer tests prove the hosted adapter release-state store owns the active
+  pair and monotonic revision and that stale local SQLite observations cannot
+  authorize activation, rollback, or unpublish.
 - A fixture of at least 512 MiB demonstrates disk-backed rendering, validation,
   checksum, and transfer with chunks no larger than 8 MiB and a peak
   RSS (resident set size) increase no greater than 128 MiB above the idle

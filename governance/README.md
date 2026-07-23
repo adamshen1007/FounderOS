@@ -25,7 +25,7 @@ when a later record narrows or supersedes them.
 | [RFC-004 — Local Founder Workspace](RFC/RFC-004-Local-Founder-Workspace.md) | Provide the local workspace and its derived read model |
 | [RFC-005 — Notion Editorial Workspace](RFC/RFC-005-Notion-Editorial-Workspace.md) | Provide a private, derived Notion review workspace |
 | [RFC-006 — Research-to-Book Product Pivot](RFC/RFC-006-Research-to-Book-Product-Pivot.md) | Define the research-to-book product boundary, increments, and approval gates |
-| [RFC-007 — Research-to-Book Publishing](RFC/RFC-007-Research-to-Book-Publishing.md) | Define the HTML, PDF, EPUB, release, and hosted-delivery contracts |
+| [RFC-007 — Research-to-Book Publishing](RFC/RFC-007-Research-to-Book-Publishing.md) | Define the HTML, PDF, EPUB, single Publish gate, release, and hosted-delivery contracts |
 
 ## Architecture Decision Records
 
@@ -39,11 +39,11 @@ when a later record narrows or supersedes them.
 | [ADR-005 — Local Derived Read Model](ADR/ADR-005-Local-Derived-Read-Model.md) | Keep the local interface derived from canonical sources |
 | [ADR-006 — Local External Project Overlay](ADR/ADR-006-Local-External-Project-Overlay.md) | Admit explicitly approved external projects through a local overlay |
 | [ADR-007 — Markdown Canonical, Notion Derived](ADR/ADR-007-Markdown-Canonical-Notion-Derived.md) | Keep Markdown canonical and Notion private and derived |
-| [ADR-008 — Markdown, SQLite Authority, and Mutations](ADR/ADR-008-Markdown-SQLite-Authority-and-Mutations.md) | Assign data authority and define recoverable canonical mutations |
+| [ADR-008 — Markdown, SQLite Authority, and Mutations](ADR/ADR-008-Markdown-SQLite-Authority-and-Mutations.md) | Assign data authority and define snapshot-consistent recoverable mutations |
 | [ADR-009 — Lifecycle and Durable Workflow](ADR/ADR-009-Lifecycle-and-Durable-Workflow.md) | Define the three approval gates and durable workflow semantics |
 | [ADR-010 — Provider Capabilities and Data Egress](ADR/ADR-010-Provider-Capabilities-and-Data-Egress.md) | Bound provider capabilities, classified egress, consent, and fallback |
 | [ADR-011 — Notion Three-Way Proposal Reconciliation](ADR/ADR-011-Notion-Three-Way-Proposal-Reconciliation.md) | Import Notion changes as immutable, human-decided proposals |
-| [ADR-012 — Immutable Releases and Ghost Adapter](ADR/ADR-012-Immutable-Releases-and-Ghost-Adapter.md) | Define immutable releases, guarded activation, and the conditional Ghost adapter |
+| [ADR-012 — Immutable Releases and Ghost Adapter](ADR/ADR-012-Immutable-Releases-and-Ghost-Adapter.md) | Define immutable releases, staging evidence, authoritative hosted activation, and the conditional Ghost adapter |
 
 ## Policies and Threat Models
 
@@ -61,7 +61,8 @@ when a later record narrows or supersedes them.
 | Earlier record | Replacement scope | Scope that remains active |
 | --- | --- | --- |
 | [RFC-004](RFC/RFC-004-Local-Founder-Workspace.md) | [RFC-006](RFC/RFC-006-Research-to-Book-Product-Pivot.md) lifts the hosted-expansion pause only for the bounded, allowlisted publishing adapter. | Teams, billing, remote projects, general cloud workspace features, and all other M5B capabilities remain deferred. |
+| [RFC-006](RFC/RFC-006-Research-to-Book-Product-Pivot.md) original increment allocation | [RFC-007](RFC/RFC-007-Research-to-Book-Publishing.md) moves the single Publish Gate and Publish-bound immutable final-manifest generation into Increment 1. | Increment 3 consumes that approved immutable release for remote staging, hosted verification, activation, rollback, unpublish, and retention; it has no second Publish gate. |
 | [RFC-005](RFC/RFC-005-Notion-Editorial-Workspace.md) | After [ADR-011](ADR/ADR-011-Notion-Three-Way-Proposal-Reconciliation.md)'s implementation acceptance criteria pass, its manual-only return path is replaced by normalized three-way import that creates proposals for human decision and authorized local application. | Until those criteria pass, RFC-005's one-way manual reconciliation remains operational. Notion remains private and derived; it never writes Markdown or grants approval. |
-| [ADR-001](ADR/ADR-001-Publishing-Toolchain.md) | [RFC-006](RFC/RFC-006-Research-to-Book-Product-Pivot.md) and [RFC-007](RFC/RFC-007-Research-to-Book-Publishing.md) replace DOCX with PDF for research-to-book releases and bring PDF, local release manifests, and the Ghost spike into Increment 1. | Markdown authority, derived output directories, required HTML and EPUB, local/CI command parity, and repeatable quality gates remain active. Prior M1 release artifacts are not rewritten, and production hosted delivery remains Increment 3. |
+| [ADR-001](ADR/ADR-001-Publishing-Toolchain.md) | [RFC-006](RFC/RFC-006-Research-to-Book-Product-Pivot.md) and [RFC-007](RFC/RFC-007-Research-to-Book-Publishing.md) replace DOCX with PDF for research-to-book releases and bring PDF, the single Publish Gate, local final manifests, and the Ghost spike into Increment 1. | Markdown authority, derived output directories, required HTML and EPUB, local/CI command parity, and repeatable quality gates remain active. Prior M1 release artifacts are not rewritten, and production hosted delivery remains Increment 3. |
 | [ADR-005](ADR/ADR-005-Local-Derived-Read-Model.md) | [ADR-008](ADR/ADR-008-Markdown-SQLite-Authority-and-Mutations.md) narrows only the write boundary: approved Creator Studio actions may invoke the fixed-allowlist authorized mutation service. | The browser still cannot write canonical content directly. The dependency-light local application, derived indexes and summaries, and deferral of arbitrary external execution remain active. |
 | [ADR-007](ADR/ADR-007-Markdown-Canonical-Notion-Derived.md) | After [ADR-011](ADR/ADR-011-Notion-Three-Way-Proposal-Reconciliation.md)'s implementation acceptance criteria pass, normalized three-way proposal import replaces only the manual-only return path. | Until those criteria pass, the manual path remains operational. Markdown remains canonical; Notion remains private and derived, its identifiers remain local, and outages do not block local authoring or publishing. |

@@ -25,6 +25,8 @@ report, and release decision.
 - Migrate the YC Playbook through a machine-readable semantic comparison and
   human visual review.
 - Complete an early, time-boxed Ghost capability spike.
+- Run the single local Publish Gate and generate the Publish-bound immutable
+  final manifest for the approved release.
 
 The existing 23-chapter YC Playbook, publishing checks, research records,
 governed agents, local workspace, and private Notion editorial workspace are
@@ -43,15 +45,18 @@ publication.
 
 ### Increment 3 — Subscriber Delivery
 
-- Add the Publish gate, immutable release manifests, and one active-release
-  pointer.
+- Consume an approved immutable Increment 1 release without a second Publish
+  gate, and add the authoritative hosted active-release pointer.
 - Deliver protected HTML, PDF, and EPUB through the Ghost adapter and proven
   fallbacks to allowlisted subscribers.
 - Verify activation, rollback, unpublish, and retention controls.
 - Record the final end-to-end pilot scorecard and release decision.
 
 Blueprint, Beta, and Publish are the only lifecycle approval gates. Final
-publication always requires an explicit human Publish action.
+publication always requires an explicit human Publish action. That single
+action occurs in Increment 1 against the exact local candidate; Increment 3
+verifies and activates the resulting immutable release without requesting
+approval again.
 
 Old M5B requirements remain deferred, including teams, billing, remote
 projects, and general cloud workspace features. The only exception is the

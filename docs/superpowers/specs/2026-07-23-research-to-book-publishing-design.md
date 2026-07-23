@@ -46,6 +46,8 @@ The approved product decisions are:
 - Import Notion edits and comments as proposals rather than direct canonical
   changes.
 - Use three lifecycle approval gates: Blueprint, Beta, and Publish.
+- Place the single Publish Gate in Increment 1; it binds the validated local
+  candidate and creates the immutable final manifest consumed by Increment 3.
 - Publish HTML, PDF, and EPUB. DOCX is no longer a supported release format.
 - Migrate the YC Playbook first, then create a short second pilot book.
 
@@ -69,9 +71,9 @@ Book brief
   -> Notion beta review
   -> proposed reconciliations
   -> canonical Markdown
-  -> Publish Gate
-  -> immutable HTML + PDF + EPUB bundle
-  -> Ghost subscriber-library adapter
+  -> local Publish Gate and immutable HTML + PDF + EPUB release
+  -> hosted staging and verification
+  -> Ghost subscriber-library activation
 ```
 
 This architecture reuses the repository's research records, governed agents,
@@ -100,11 +102,12 @@ Canonical Markdown, structured research records, workflow state, credentials,
 research archives, drafts, rejected proposals, and Editorial Memory persist
 locally.
 
-### 4.2 External Processing
+### 4.2 AI and Media Provider Processing
 
-External processing is distinct from external persistence. Each transferable
-record has a data classification and provider-egress policy. An adapter must
-declare:
+AI and media provider processing is distinct from hosted identity persistence.
+Each field considered for synthesis, drafting, embeddings, image generation,
+transcription, or tool use has a provider-processing classification and egress
+policy. An adapter must declare:
 
 - The exact fields transmitted
 - Processing purpose and destination
@@ -113,9 +116,10 @@ declare:
 - Redaction and minimization behavior
 - Required creator consent
 
-Secrets and prohibited classifications must never be transmitted. Sensitive
-inputs require explicit approval. The run ledger records approved egress
-without storing secret values.
+Secrets, credentials, and subscriber email, identity, authentication, session,
+access, and reading data are prohibited to AI and media providers. Sensitive
+project inputs require explicit approval. The run ledger records approved
+egress without storing secret values.
 
 ### 4.3 Hosted Subscriber Library
 
@@ -129,9 +133,14 @@ Ghost is the first hosted adapter. It initially provides:
 - Release metadata
 - Minimal access and operational analytics
 
-Only approved release artifacts, book metadata, subscriber email addresses,
-authentication state, and explicitly enumerated operational records may leave
-the local environment for hosting.
+Only approved release artifacts, book metadata, and the minimum
+contract-enumerated subscriber fields may leave the local environment for
+hosting. The configured hosted identity adapter may receive only the fields
+needed for the allowlisted access purpose, such as normalized email,
+invitation, provider-subject, authentication, session, revocation, and
+release-access state. Its contract records the exact purpose, consent or other
+legal basis, notice, retention, deletion and revocation procedure, backup
+treatment, region, and minimization rationale. Extra fields fail closed.
 
 Creator Studio sends immutable release bundles; Ghost never reads the local
 FounderOS database, drafts, evidence archive, rejected proposals, or Editorial
@@ -146,6 +155,13 @@ processors, not owners of project state.
 The browser cannot write files directly. Approved Creator Studio actions invoke
 an authorized local mutation service. This supersedes ADR-005's absolute
 read-only UI rule while preserving a narrow, validated file-write boundary.
+
+That service binds only to loopback and accepts only an allowlisted loopback
+`Host` and port. It rejects DNS-rebinding and forwarded-host ambiguity and
+requires same-origin JSON with an exact content type, Origin and Fetch Metadata
+checks, session-bound CSRF, and an authenticated short-lived local capability
+or session. Header, body, field, batch, and operation rates are bounded.
+Credentials never appear in URLs, redirects, logs, or browser history.
 
 ## 5. Canonical Data and Authority
 
@@ -162,7 +178,9 @@ read-only UI rule while preserving a narrow, validated file-write boundary.
 | Search and FTS indexes | SQLite | Rebuildable derived state |
 | Artifact dependency graph | SQLite | Rebuildable from manifests |
 | Release bundle and manifest | Immutable files | Addressed by release ID and hash |
-| Subscriber identity and sessions | Ghost | Minimum hosted operational state |
+| Release staging attempts and evidence | Local SQLite append-only ledger | Operational authority; immutable export optional |
+| Active release pointer and monotonic revision | Hosted adapter release-state store | Local SQLite is a derived observation only |
+| Subscriber identity and sessions | Configured hosted identity adapter | Minimum hosted operational state |
 
 No entity or field may have two simultaneous authorities. New fields require an
 authority assignment before implementation.
@@ -186,6 +204,7 @@ The following records require versioned schemas before their first use:
 - `QualityFinding`
 - `Artifact`
 - `ReleaseManifest`
+- `ReleaseStagingAttempt`
 
 Every record includes a stable ID, `schema_version`, creation and update
 timestamps, actor or producer, and validation rules. Content-bearing or
@@ -194,19 +213,26 @@ forward migrations, fixture coverage, and documented rollback limits.
 
 ### 5.3 Mutation Protocol
 
-Canonical changes use one mutation service:
+Canonical changes use one mutation service and ADR-008's versioned snapshot
+protocol. Lifecycle transitions and canonical mutations share the per-project
+writer lock through durable commit. After lock acquisition, a mutation
+revalidates expected content and lifecycle versions before snapshot visibility
+changes and again in the guarded SQLite commit.
 
-1. Validate the command, actor, expected hashes, and lifecycle guard.
-2. Calculate Markdown and SQLite effects without writing.
-3. Append the intended operation to a durable journal.
-4. Write temporary files and verify their hashes.
-5. Atomically replace canonical files.
-6. Commit the corresponding SQLite state and audit record.
-7. Mark the journal operation complete.
+Before replacement, the service durably writes or verifies content-addressed
+preimages. It builds and verifies a complete next immutable snapshot, `fsync`s
+its files and directories, and publishes every multi-file change through one
+atomic versioned root-pointer replacement. Readers resolve one immutable root
+per operation, so they see either the complete prior snapshot or the complete
+next snapshot.
 
-Startup recovery deterministically completes or rolls back interrupted
-operations. A stale expected hash produces a proposal conflict rather than an
-overwrite.
+The journal records explicit validate, preimage, prepared-snapshot,
+pointer-published, state-committed, and complete phases. Pointer replacement and
+its parent directory are durable before the SQLite state commit. Startup
+recovery uses the phase table and verified prior snapshot to complete or
+physically roll back an interrupted operation before accepting new work. A
+missing or mismatched preimage, stale lifecycle version, or stale expected hash
+fails closed.
 
 ## 6. Reusable Book Model
 
@@ -215,7 +241,8 @@ structured research records, assets, review exports, and release metadata. It
 can be backed up, versioned, reopened without a hosted service, and regenerated
 with another compatible provider.
 
-A Book Blueprint defines:
+A Book Blueprint defines the initial architecture hypothesis approved before
+research:
 
 - Working title, series, edition, and stable project ID
 - Target subscribers and reader outcome
@@ -230,6 +257,13 @@ A Book Blueprint defines:
 - Provider-egress policy, budgets, and approvals
 - Notion destination
 - Release formats and subscriber visibility
+
+Evidence collection may refine parts, ordering, and individual chapter details
+as granular architecture revisions. A material change to the target reader,
+promised outcome, scope boundary, thesis, or a chapter contract invalidates the
+current Blueprint approval. Composition cannot begin or resume until a human
+reapproves the new Blueprint version. Non-material evidence refinements remain
+append-only review decisions and do not create another lifecycle gate.
 
 Organizations such as YC, McKinsey, or Bain may be research subjects or source
 families. FounderOS must not imply endorsement, reproduce protected
@@ -366,15 +400,24 @@ models, or capability levels.
 
 The lifecycle is one versioned, guarded state machine with an append-only
 transition history. Transitions record actor, reason, expected version, and
-policy results. Optimistic concurrency rejects stale actions.
+policy results. Lifecycle transitions and canonical mutations share the
+per-project writer lock through durable commit. A transition or mutation
+revalidates its expected lifecycle version after lock acquisition; stale work
+returns `conflict` without lifecycle or canonical change.
 
 The three lifecycle gates are:
 
-1. **Blueprint Gate:** approves the brief, research plan, source policy, book
-   architecture, budgets, and provider-egress policy before expensive work.
+1. **Blueprint Gate:** approves the brief, research plan, source policy,
+   initial architecture hypothesis, budgets, and provider-egress policy before
+   research or other expensive work. Material reader, outcome, scope, thesis,
+   or chapter-contract changes invalidate approval and require a human to
+   approve the revised Blueprint before composition.
 2. **Beta Gate:** approves a complete beta for Notion export.
 3. **Publish Gate:** requires an explicit human Publish action after all
-   blocking proposals and quality policies pass.
+   blocking proposals and quality policies pass. In Increment 1 it binds the
+   exact local release-candidate envelope and authorizes the immutable final
+   manifest. Increment 3 hosted staging and activation consume that approved
+   release without another Publish gate.
 
 Source, claim, chapter, and visual decisions occur inside lifecycle stages;
 they are review decisions, not additional lifecycle gates.
@@ -383,7 +426,7 @@ The book lifecycle is:
 
 1. Brief and Blueprint Gate
 2. Evidence collection
-3. Book architecture
+3. Evidence-refined architecture
 4. Composition
 5. Visual enrichment
 6. Quality review and Beta Gate
@@ -469,7 +512,8 @@ Release verification uses pinned tool versions and target profiles:
 - HTML targets WCAG 2.2 Level AA, with automated and required manual checks
 - EPUB targets EPUB 3 and passes the pinned W3C EPUBCheck configuration
 - PDF passes pinned structural, font, metadata, link, and accessibility checks;
-  the chosen PDF accessibility profile is recorded in the publishing RFC
+  a named, versioned PDF profile must be accepted through an RFC-007 amendment
+  before PDF implementation begins
 - Download sessions define authentication, expiry, replay, and revocation rules
 - Analytics fields are allowlisted; manuscript content and private research
   never enter analytics
@@ -493,6 +537,19 @@ Errors are classified as retryable, blocked-awaiting-action, cancelled, or
 terminal. Cancellation, restart, stale-job recovery, and crash recovery are
 explicit state transitions. Restarting cannot duplicate records or corrupt
 canonical state.
+
+The normative visible mapping is: retryable to `failed-retryable`,
+blocked-awaiting-action to `blocked`, cancelled to `cancelled`, and terminal to
+`failed-terminal`. Unreconciled expired ownership is `stale`; an expected
+version mismatch is `conflict`. A retry reserves a new linked attempt and
+becomes `queued` rather than rewriting the failed attempt.
+
+Local SQLite is the append-only operational authority for hosted staging
+attempts and evidence. It reserves the attempt ID before dispatch, appends
+immutable observations and one terminal finalization, and assigns every retry
+a new attempt linked to its predecessor. Immutable export is optional. The
+hosted adapter release-state store, not SQLite, is authoritative for the active
+release pointer and monotonic revision.
 
 ### 14.2 Artifact Graph
 
@@ -527,17 +584,26 @@ memory.
 
 ## 15. Publication and Subscriber Delivery
 
-Publish performs a dry run before activation:
+Increment 1 owns local release preparation and the single Publish Gate:
 
 1. Revalidate research and manuscript integrity.
 2. Rebuild and validate affected visuals.
 3. Generate HTML, PDF, and EPUB in a bounded staging directory.
 4. Verify content, metadata, accessibility, links, and file integrity.
-5. Create and sign or checksum an immutable release manifest.
-6. Stream artifacts to a staged release ID.
-7. Verify hosted artifacts and access controls.
-8. Change one mutable active-release pointer.
-9. Reconcile or compensate remaining side effects with idempotent operations.
+5. Create the immutable candidate envelope and calculate its hash.
+6. Record the human Publish approval against that exact hash and lifecycle
+   version.
+7. Generate and checksum the immutable final manifest bound to that approval.
+
+Increment 3 consumes that approved immutable release. It does not add another
+Publish gate:
+
+1. Reserve a local append-only staging attempt before remote dispatch.
+2. Stream artifacts to a staged release ID.
+3. Verify hosted artifacts and access controls against the local manifest.
+4. Reconcile the authoritative hosted active-pointer pair.
+5. Compare-and-set that pair once to activate the approved release.
+6. Reconcile or compensate remaining side effects with idempotent operations.
 
 Ghost compatibility is not assumed. An early, time-boxed spike must test
 invitations, passwordless access, protected HTML, binary downloads, search,
@@ -552,7 +618,9 @@ explicit destructive removal with tombstone metadata.
 
 A failed publication leaves the prior release pointer active. Protected
 downloads use authenticated, short-lived access rather than permanent public
-URLs.
+URLs. The configured hosted release-state store is authoritative for the active
+pointer and its monotonic revision; local SQLite stores only append-only,
+reconciled observations.
 
 ## 16. Testing and Evaluation Strategy
 
@@ -631,6 +699,8 @@ Includes Stage A and the minimum publication foundation needed to:
 - Produce HTML, PDF, and EPUB locally
 - Migrate the YC Playbook through the semantic oracle
 - Complete the Ghost capability spike
+- Run the single Publish Gate locally and generate the Publish-bound immutable
+  final manifest
 
 ### Increment 2 — Short-Book Evidence-to-Beta
 
@@ -647,7 +717,8 @@ Includes Stages B-F:
 
 Includes Stage G:
 
-- Publish Gate and immutable release manifests
+- Consume an approved immutable Increment 1 release without a second Publish
+  gate
 - Ghost adapter plus proven fallbacks
 - Allowlisted subscriber access
 - Protected HTML, PDF, and EPUB
@@ -676,9 +747,9 @@ The root roadmap records the new increment sequence. The governance index
 preserves links to the older decisions and their exact replacement scopes. Two
 Increment 1 implementation prerequisites remain open:
 
-- Before PDF implementation begins, select and govern a named, versioned PDF
-  accessibility and archival profile, renderer, validators, and manual review
-  procedure as required by RFC-007.
+- Before PDF implementation begins, accept an RFC-007 amendment that names and
+  versions the PDF accessibility and archival profile, renderer, validators,
+  and manual review procedure.
 - Complete the time-boxed Ghost capability spike, classify every ADR-012 matrix
   row, prove every required row directly or through a documented fallback, and
   leave no required row `infeasible` before accepting a production Ghost
@@ -748,7 +819,7 @@ contract conflicts.
 
 ## 23. Implementation Tasks
 
-- [ ] **T1 (P1)** — Write the pivot RFC, required ADRs, publishing RFC, and
+- [x] **T1 (P1)** — Write the pivot RFC, required ADRs, publishing RFC, and
   threat model.
 - [ ] **T2 (P1)** — Define and test versioned core schemas and migrations.
 - [ ] **T3 (P1)** — Implement the authority matrix, mutation journal, and
@@ -779,5 +850,9 @@ contract conflicts.
 | DX Review | `plan-devex-review` | Developer experience | 0 | NOT RUN | Optional after Increment 1 |
 
 **VERDICT:** CEO and engineering reviews are clear for implementation planning.
+Two implementation prerequisites remain unresolved:
 
-NO UNRESOLVED DECISIONS
+- The named, versioned PDF profile, renderer, validators, and manual review
+  procedure require an accepted RFC-007 amendment before PDF implementation.
+- The Ghost spike must classify every capability and record whether the
+  production adapter is direct, uses a bounded fallback, or is infeasible.

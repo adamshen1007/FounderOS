@@ -159,11 +159,15 @@ before canonical replacement and a guarded comparison in the SQLite commit
 that records the application result. Because decision appends require the same
 writer lock, the decision revision cannot legitimately advance between those
 checks. A failed lock-time or pre-replacement check aborts before canonical
-replacement. An unexpected guarded-commit mismatch leaves the mutation journal
-incomplete and recovery must restore the pre-operation canonical state before
-new mutations are accepted. The service then appends the application attempt
-with the audit result. A Notion webhook, connector, provider, browser, or import
-worker cannot write Markdown directly or approve a lifecycle gate.
+root-pointer replacement. An unexpected guarded-commit mismatch leaves the
+mutation journal in ADR-008's `pointer_published` phase. Recovery must use the
+journal-bound, content-addressed preimages to atomically restore the verified
+prior snapshot and `fsync` the root-pointer directory before new mutations are
+accepted. If those preimages cannot be verified, the project remains blocked;
+recovery never reconstructs them from partially published files. The service
+then appends the application attempt with the audit result. A Notion webhook,
+connector, provider, browser, or import worker cannot write Markdown directly
+or approve a lifecycle gate.
 
 Acceptance does not mutate Notion automatically. A later explicit export may
 update the derived review surface from canonical Markdown and creates a new
@@ -212,6 +216,9 @@ return path remains the operational rule.
 - Crash and concurrency fixtures verify the current decision ID, hash, and
   `proposal_decision_revision` at lock acquisition, immediately before
   canonical replacement, and in the durable application-result commit.
+- Post-pointer crash fixtures prove ADR-008 recovery restores the verified
+  prior snapshot from durable preimages before accepting another decision or
+  application.
 - Accepted proposals can be applied only through ADR-008's authorized mutation
   and recovery protocol.
 - Audit fixtures prove proposal payloads and hashes never change and preserve

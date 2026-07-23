@@ -51,7 +51,7 @@ The human Publish decision binds the exact candidate-envelope hash and
 lifecycle version. After approval, the final release manifest derives from
 that envelope without changing, adding to, or removing any material release
 field. It may add only the Publish approval reference, a preallocated immutable
-staging-evidence record ID. A changed artifact, checksum, source, format,
+staging-attempt ID. A changed artifact, checksum, source, format,
 validator result, rights or quality result, lifecycle version, or access policy
 requires a new candidate envelope, hash, and Publish decision.
 
@@ -60,7 +60,7 @@ signature, but a signature cannot replace the required artifact and manifest
 checksums. The local immutable manifest is the comparison authority for remote
 reconciliation. Hosted destination identities, transferred bytes, verified
 remote checksums, access-test results, and provider observations always belong
-in the preallocated immutable staging-evidence record linked to the preexisting
+in the local append-only staging-attempt ledger linked to the preexisting
 manifest checksum. They are never added to or embedded in the final manifest.
 Hosted metadata is never trusted as proof of artifact content.
 
@@ -84,6 +84,28 @@ release stays local and inactive if any artifact is missing, empty, stale,
 outside the staging root, fails its format-specific validator, or has a
 checksum mismatch.
 
+### Staging Attempt and Evidence Authority
+
+Local SQLite is the operational authority for release-staging attempts and
+their evidence. Before any hosted request, it reserves a globally unique
+attempt ID and appends an immutable attempt-start record binding the release
+ID, manifest checksum, destination, expected active-pointer pair, lifecycle and
+approval references, input fingerprint, idempotency key, and prior-attempt ID
+when this is a retry.
+
+Every dispatch, remote observation, checksum, access result, reconciliation,
+compensation, and error is a new immutable observation linked to that attempt.
+Finalization appends exactly one immutable terminal record; it does not update
+or delete prior observations. Retrying reserves a new attempt ID linked to the
+prior attempt and preserves both histories. An optional immutable export may
+copy this ledger for audit or portability, but the export is not a second
+operational authority.
+
+Hosted records are evidence sources, not the authority for attempt history.
+Local SQLite may observe the active pointer, but the configured hosted
+adapter's release-state store is authoritative for the active release ID and
+its monotonic revision.
+
 ### Hosted-Library Adapter Contract
 
 The hosted-library adapter exposes versioned operations for:
@@ -99,12 +121,14 @@ The hosted-library adapter exposes versioned operations for:
 - Audit and webhook reconciliation where the provider supports them
 
 Only a release with a current human Publish approval may cross the hosted
-boundary. Every remote mutation follows ADR-009. The worker commits an outbox
+boundary. Increment 3 consumes the exact approved immutable Increment 1 release;
+hosted staging and activation do not request or record a second Publish
+approval. Every remote mutation follows ADR-009. The worker commits an outbox
 record before dispatch, propagates a stable scoped idempotency key when
-supported, and records the remote identity and reconciled result. If Ghost or a
-fallback cannot provide idempotent mutation or authoritative reconciliation,
-an uncertain side effect becomes `blocked-awaiting-action`; it is not repeated
-automatically.
+supported, and appends the remote identity and reconciled result to the local
+staging attempt. If Ghost or a fallback cannot provide idempotent mutation or
+authoritative reconciliation, an uncertain side effect becomes
+`blocked-awaiting-action`; it is not repeated automatically.
 
 Compensation is explicit, bounded, and idempotent. It may remove an incomplete
 staging release, revoke grants, or restore the intended release through a new
@@ -118,12 +142,16 @@ action.
 There is exactly one mutable active-release pointer per published book
 destination. Its value is the pair
 `(release_id, monotonic_pointer_revision)`. The revision begins at zero and
-never decreases or resets. Activation is one guarded compare-and-set after:
+never decreases or resets. The hosted adapter release-state store is the
+authority for this pair and its compare-and-set history. Local SQLite stores
+only timestamped, append-only observations and must reconcile with the hosted
+authority before every mutation. Activation is one guarded compare-and-set
+after:
 
 1. The versioned local release-candidate envelope passes every required
    validator and receives its stable SHA-256 hash.
-2. The human Publish action and lifecycle guards approve that exact envelope
-   hash and lifecycle version.
+2. The existing Increment 1 human Publish action and lifecycle guards approved
+   that exact envelope hash and lifecycle version.
 3. The immutable manifest binds that approval and passes its checksum check.
 4. Every remote artifact matches its manifest checksum.
 5. Hosted visibility, subscriber authorization, and download controls pass.
@@ -277,12 +305,19 @@ review.
   the previous pointer.
 - Duplicate, interrupted, timed-out, and uncertain remote operations prove
   idempotent resume, authoritative reconciliation, or safe manual blocking.
+- Staging-attempt tests reserve the attempt ID before dispatch, append immutable
+  observations and one terminal record, and prove a retry creates a new linked
+  attempt without changing prior evidence. Optional exports are reproducible
+  copies, not an operational authority.
 - Activation, rollback, and unpublish tests cover stale pointers, two
   concurrent operators, partial uploads, access-check failures, and crashes at
   every durable boundary. Unpublish fixtures prove compare-and-set conflict
   behavior and release-scoped access revocation. An A to B to A fixture proves
   that activation and unpublish commands holding A's old pointer revision both
   return `conflict` without mutation or revocation.
+- Pointer tests prove the hosted adapter release-state store, not local SQLite,
+  owns the active pair and monotonic revision. A stale or divergent local
+  observation is reconciled and cannot authorize a compare-and-set.
 - Authorization tests deny non-allowlisted, revoked, expired, replayed, and
   cross-subscriber HTML and download access.
 - Retention tests distinguish immutable content from mutable privacy records
@@ -309,10 +344,12 @@ review.
 
 ## Rejected Alternatives
 
-### Treat Ghost as the Release Authority
+### Treat the Hosted Adapter as Publication Content Authority
 
 Rejected. Ghost content and metadata are mutable hosted state and cannot
-replace canonical Markdown, Git, or the local immutable manifest.
+replace canonical Markdown, Git, or the local immutable manifest. This does
+not change the hosted release-state store's narrow authority for its active
+pointer and monotonic revision.
 
 ### Overwrite the Current Edition
 

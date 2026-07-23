@@ -33,7 +33,10 @@ link checker, Node test runner
 - Ghost is the first hosted adapter, subject to a capability spike.
 - Hosted activation changes one active-release pointer to an immutable release
   ID.
-- Final publication always requires a human Publish action.
+- The single human Publish action and Publish-bound local final-manifest
+  generation occur in Increment 1.
+- Increment 3 consumes the approved immutable release for hosted staging and
+  activation; it does not add another Publish gate.
 - No document may silently erase prior decisions; superseded records stay
   linked and readable.
 
@@ -51,7 +54,7 @@ link checker, Node test runner
 - Consumes: reviewed research-to-book design and RFC-000
 - Produces: accepted product boundary and three-increment delivery sequence
 
-- [ ] **Step 1: Write RFC-006**
+- [x] **Step 1: Write RFC-006**
 
 Use the required RFC sections. Set status to `Accepted for Increment 1
 planning`. State that FounderOS changes from a general founder workspace into a
@@ -60,7 +63,7 @@ Normatively include the three increments, three approval gates, Ghost-first
 adapter, HTML/PDF/EPUB formats, YC migration, short pilot, scorecard, and the
 requirement for ADR-008 through ADR-012 plus RFC-007.
 
-- [ ] **Step 2: Record explicit supersession**
+- [x] **Step 2: Record explicit supersession**
 
 RFC-006 must identify:
 
@@ -75,7 +78,7 @@ RFC-006 must identify:
 - ADR-007 remains canonical for Markdown authority while its manual-only return
   path is superseded by proposal import under ADR-011.
 
-- [ ] **Step 3: Rewrite the roadmap priority**
+- [x] **Step 3: Rewrite the roadmap priority**
 
 Replace the current publication-only priority with
 `Research-to-Book Increment 1 — YC Migration and Publishing Foundation`. Keep
@@ -83,7 +86,7 @@ the completed M0-M5 history. Add the three increments and state that they are
 the canonical sequence after M5A.3; old M5B requirements remain deferred except
 for the bounded Ghost publishing adapter accepted by RFC-006.
 
-- [ ] **Step 4: Validate Task 1**
+- [x] **Step 4: Validate Task 1**
 
 Run:
 
@@ -95,7 +98,7 @@ node scripts/check-style.mjs
 
 Expected: all commands exit 0.
 
-- [ ] **Step 5: Commit Task 1**
+- [x] **Step 5: Commit Task 1**
 
 ```bash
 git add governance/RFC/RFC-006-Research-to-Book-Product-Pivot.md ROADMAP.md
@@ -114,29 +117,32 @@ git commit -m "docs: accept research-to-book product pivot"
 - Consumes: RFC-006 and the reviewed authority/lifecycle decisions
 - Produces: field ownership, safe mutation, state machine, and job contracts
 
-- [ ] **Step 1: Write ADR-008**
+- [x] **Step 1: Write ADR-008**
 
 Set status to `Accepted`. Include the authority matrix from the design,
-versioned core-record envelope, mutation journal sequence, atomic file
-replacement, optimistic hashes, startup recovery, SQLite rebuildable indexes,
-and the exact amendment to ADR-005. Reject direct browser writes,
-best-effort dual writes, and database-first manuscripts.
+versioned core-record envelope, content-addressed durable preimages, file and
+directory `fsync` ordering, versioned snapshot-root visibility, an explicit
+mutation-phase recovery table, optimistic hashes, SQLite rebuildable indexes,
+shared lifecycle serialization, local request security, and the exact
+amendment to ADR-005. Reject direct browser writes, best-effort dual writes,
+and database-first manuscripts.
 
-- [ ] **Step 2: Write ADR-009**
+- [x] **Step 2: Write ADR-009**
 
 Set status to `Accepted`. Define the three lifecycle gates and distinguish
 granular review decisions from gates. Require a versioned guarded state
 machine, append-only transitions, expected versions, durable run/stage/attempt
 IDs, idempotency keys, explicit retry classes, cancellation, stale-job
-recovery, resource budgets, and user-visible operation states. Reject
-module-owned status fields and in-memory-only jobs.
+recovery, resource budgets, normative retry-to-visible-state mappings, initial
+Blueprint-hypothesis revision semantics, and user-visible operation states.
+Reject module-owned status fields and in-memory-only jobs.
 
-- [ ] **Step 3: Validate Task 2**
+- [x] **Step 3: Validate Task 2**
 
 Run markdownlint and CSpell on both files, then `node scripts/check-style.mjs`.
 Expected: all commands exit 0.
 
-- [ ] **Step 4: Commit Task 2**
+- [x] **Step 4: Commit Task 2**
 
 ```bash
 git add governance/ADR/ADR-008-Markdown-SQLite-Authority-and-Mutations.md governance/ADR/ADR-009-Lifecycle-and-Durable-Workflow.md
@@ -157,15 +163,18 @@ git commit -m "docs: decide canonical state and workflow architecture"
 - Produces: provider capability, classified egress, reconciliation, and threat
   controls
 
-- [ ] **Step 1: Write ADR-010**
+- [x] **Step 1: Write ADR-010**
 
 Set status to `Accepted`. Define task-specific capability contracts for
 research synthesis, structured drafting, embeddings, image generation,
 transcription, and tool use. Require provider/model/prompt/capability versions,
 input classification, minimized fields, consent, retention/training metadata,
 cost and token budgets, output hashes, and no silent fallback.
+Separate AI and media provider-processing classification from minimum hosted
+identity-adapter fields governed by purpose, consent or other legal basis,
+retention, deletion, and minimization.
 
-- [ ] **Step 2: Write ADR-011**
+- [x] **Step 2: Write ADR-011**
 
 Set status to `Accepted for implementation after RFC-006`. Preserve Markdown
 authority. Define immutable export bases, stable section/block IDs, Notion
@@ -173,7 +182,7 @@ revision IDs, normalized AST conversion, three-way comparison, individual
 proposals, unsupported-block reports, conflicts, and authorized mutation after
 human acceptance. Explicitly supersede only ADR-007's manual-only return path.
 
-- [ ] **Step 3: Write the expanded threat model**
+- [x] **Step 3: Write the expanded threat model**
 
 Cover local assets, source ingestion, external providers, Notion, the mutation
 service, rendering, Ghost, object storage, and subscriber PII. Include trust
@@ -183,12 +192,12 @@ archives, malformed media, path traversal, HTML sanitization, OAuth scopes,
 secrets, provider egress, log redaction, rights expiry, release integrity,
 short-lived downloads, rate limits, retention, and deletion.
 
-- [ ] **Step 4: Validate Task 3**
+- [x] **Step 4: Validate Task 3**
 
 Run markdownlint and CSpell on all three files, then
 `node scripts/check-style.mjs`. Expected: all commands exit 0.
 
-- [ ] **Step 5: Commit Task 3**
+- [x] **Step 5: Commit Task 3**
 
 ```bash
 git add governance/ADR/ADR-010-Provider-Capabilities-and-Data-Egress.md governance/ADR/ADR-011-Notion-Three-Way-Proposal-Reconciliation.md governance/policies/RESEARCH-TO-BOOK-THREAT-MODEL.md
@@ -208,16 +217,17 @@ git commit -m "docs: govern providers Notion and research security"
 - Produces: immutable release, Ghost adapter, format, validator, retention, and
   rollback contracts
 
-- [ ] **Step 1: Write ADR-012**
+- [x] **Step 1: Write ADR-012**
 
 Set status to `Accepted subject to Ghost capability spike`. Require immutable
 release IDs, checksummed manifests, disk-backed staging, streaming transfer,
-one mutable active-release pointer, idempotent compensation, previous-release
-preservation, protected short-lived downloads, and separation of immutable
-content from mutable access/privacy records. Define the spike matrix and a
-sidecar/object-storage fallback.
+an authoritative hosted active-release pointer, an append-only local SQLite
+staging-attempt ledger, idempotent compensation, previous-release preservation,
+protected short-lived downloads, and separation of immutable content from
+mutable access/privacy records. Define the spike matrix and a sidecar or
+object-storage fallback.
 
-- [ ] **Step 2: Write RFC-007**
+- [x] **Step 2: Write RFC-007**
 
 Set status to `Accepted for Increment 1 implementation`. Define HTML, PDF, and
 EPUB as required outputs and DOCX as removed. Require WCAG 2.2 Level AA targets
@@ -225,13 +235,17 @@ for HTML, pinned EPUBCheck for EPUB 3, pinned PDF structural/font/metadata/link
 checks, an explicitly selected PDF accessibility profile before implementation,
 release manifests, YC semantic migration oracle, output-specific tests,
 staging, activation, rollback, unpublish, retention, and failure behavior.
+Place the single Publish Gate and Publish-bound local final manifest in
+Increment 1; Increment 3 consumes that approved immutable release without a
+second Publish gate. Require an accepted RFC-007 amendment to name and version
+the PDF profile before PDF implementation.
 
-- [ ] **Step 3: Validate Task 4**
+- [x] **Step 3: Validate Task 4**
 
 Run markdownlint and CSpell on both files, then `node scripts/check-style.mjs`.
 Expected: all commands exit 0.
 
-- [ ] **Step 4: Commit Task 4**
+- [x] **Step 4: Commit Task 4**
 
 ```bash
 git add governance/ADR/ADR-012-Immutable-Releases-and-Ghost-Adapter.md governance/RFC/RFC-007-Research-to-Book-Publishing.md
@@ -252,25 +266,25 @@ git commit -m "docs: decide research-to-book release architecture"
 - Produces: discoverable canonical governance map with no stale prerequisite
   language
 
-- [ ] **Step 1: Expand the governance index**
+- [x] **Step 1: Expand the governance index**
 
 List the constitution/process, RFCs, ADRs, and policies by purpose. Add a
 supersession table for ADR-001, ADR-005, ADR-007, RFC-004, and RFC-005 with the
 exact replacement scope.
 
-- [ ] **Step 2: Expand the architecture index**
+- [x] **Step 2: Expand the architecture index**
 
 Add a `Research-to-book architecture` section linking the reviewed design,
 RFC-006, RFC-007, ADR-008 through ADR-012, and the threat model.
 
-- [ ] **Step 3: Mark governance prerequisites complete**
+- [x] **Step 3: Mark governance prerequisites complete**
 
 In the reviewed design, replace the instruction to create the governance
 package with a list of the accepted files. Keep implementation prerequisites
 that still remain, including the Ghost spike and PDF accessibility-profile
 selection.
 
-- [ ] **Step 4: Run complete verification**
+- [x] **Step 4: Run complete verification**
 
 Run:
 
@@ -285,7 +299,7 @@ git diff --check
 
 Expected: documentation checks exit 0 and all 61 baseline tests pass.
 
-- [ ] **Step 5: Commit Task 5**
+- [x] **Step 5: Commit Task 5**
 
 ```bash
 git add governance/README.md docs/01-architecture/README.md docs/superpowers/specs/2026-07-23-research-to-book-publishing-design.md

@@ -84,12 +84,25 @@ make its content trusted.
   Only ADR-008's mutation service may write them. It requires fixed commands,
   actor and lifecycle authorization, exact proposal and content hashes, the
   per-project writer lock, SQLite lease and fencing token, durable journal,
-  atomic replacement, validators, and immutable audit evidence.
+  versioned snapshot-root replacement, validators, and immutable audit
+  evidence. Lifecycle transitions use the same writer lock through durable
+  commit, so a stale transition or mutation fails closed.
+- **Local HTTP confusion or request forgery:** A malicious site, rebinding
+  hostname, oversized request, stolen URL, or unauthenticated local process
+  invokes a mutation. Bind only to loopback; enforce a strict loopback `Host`
+  and port allowlist; reject forwarded-host ambiguity; require same-origin JSON
+  requests, Origin and Fetch Metadata checks, session-bound CSRF, and a
+  short-lived authenticated local capability or session; bound headers,
+  bodies, fields, and batches; rate-limit by session and operation; reject
+  replay; and never place credentials in URLs, redirects, logs, or browser
+  history.
 - **Crash or storage failure:** Termination, disk exhaustion, or a database
-  lock occurs between file and SQLite commits. Preflight storage, use verified
-  same-filesystem temporary files, inject failures at every durable boundary,
-  and complete deterministic startup recovery before accepting new writes.
-  Never infer success from a model or browser message.
+  lock occurs between snapshot and SQLite commits. Preflight storage, durably
+  preserve content-addressed preimages, `fsync` files and directories in
+  ADR-008 order, publish multi-file changes through one versioned root pointer,
+  inject failures at every durable boundary, and complete phase-table recovery
+  before accepting new writes. If a preimage cannot be verified, block rather
+  than guess. Never infer success from a model or browser message.
 - **Malicious local content:** Markdown or configuration attempts command,
   template, or script execution. Parse with bounded, pinned libraries; treat
   code and directives as data; prohibit arbitrary shell interpolation; and
@@ -151,10 +164,12 @@ make its content trusted.
 
 - **Excessive or unintended egress:** An adapter sends whole files, private
   drafts, credentials, subscriber data, or rights-restricted content. Enforce
-  ADR-010 field-level classification, contract allowlists, minimization,
-  redaction, explicit sensitive-data consent, approved provider, model, region,
-  purpose, retention, training, and deletion terms. Unclassified and prohibited
-  data fail closed.
+  ADR-010 AI/media field-level classification, contract allowlists,
+  minimization, redaction, explicit sensitive-data consent, approved provider,
+  model, region, purpose, retention, training, and deletion terms. Subscriber
+  email, identity, authentication, session, access, and reading data are
+  prohibited to AI and media providers. Unclassified and prohibited
+  provider-processing data fails closed.
 - **Provider substitution or downgrade:** An outage causes an adapter to choose
   another model, region, or capability. Negotiate the exact contract version
   before dispatch and forbid silent fallback. A changed destination requires a
@@ -253,9 +268,14 @@ make its content trusted.
   that do not expose manuscript content in logs.
 - **Excess subscriber personal data:** Analytics, backups, support exports, or
   providers receive unnecessary identity or reading data. Allowlist fields,
-  collect the minimum email and operational state, separate identity from
-  release analytics, prohibit manuscript and research content in analytics,
-  document purpose and retention, and restrict administrative exports.
+  permit only minimum email, invitation, provider-subject, authentication,
+  session, revocation, and release-access fields to the configured hosted
+  identity adapter, and separate identity from release analytics. Record the
+  exact purpose, consent or other legal basis, collection notice, retention,
+  deletion and revocation procedure, backup treatment, region, and
+  minimization rationale. Reject extra fields, prohibit manuscript and research
+  content in analytics, and restrict administrative exports. This hosted
+  allowance never permits subscriber data in AI or media provider calls.
 - **Cross-subscriber authorization failure:** A session or cached response
   exposes another subscriber's data or an unapproved edition. Enforce
   authorization server-side on every page and artifact request, bind cache keys
@@ -347,8 +367,14 @@ invariant.
   exact human decision.
 - Blueprint, Beta, and Publish are the only lifecycle approval gates, and only
   a human can approve them.
-- Unclassified or prohibited data never crosses a provider or hosted boundary;
-  sensitive egress requires specific recorded consent.
+- Unclassified or prohibited data never crosses an AI or media
+  provider-processing boundary; sensitive provider egress requires specific
+  recorded consent. Subscriber email, identity, authentication, session,
+  access, and reading data are always prohibited to those providers.
+- Only the minimum contract-enumerated subscriber fields may cross to the
+  configured hosted identity adapter for the recorded access purpose, consent
+  or other legal basis, retention, and deletion policy; extra fields fail
+  closed.
 - Provider, model, region, prompt, capability, retention, or training changes
   never occur as a silent fallback.
 - Every network hop, redirect, resolved address, archive entry, local path, and

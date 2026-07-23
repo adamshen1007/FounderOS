@@ -65,9 +65,10 @@ is not represented as live processing. Neither the OpenAI adapter nor the fake
 provider may silently substitute for the other or select an unapproved model,
 region, prompt, or capability version.
 
-### Data Classification and Egress
+### AI and Media Provider-Processing Classification
 
-Every transferable field receives one of these classifications before
+Every field considered for an AI, embedding, image, transcription, or other
+media-processing provider receives one of these classifications before
 dispatch:
 
 - `public`: already approved for public disclosure.
@@ -75,13 +76,14 @@ dispatch:
   processing purpose under the approved project egress policy.
 - `sensitive`: private material requiring explicit, informed creator consent
   for the exact provider, purpose, and dispatch.
-- `prohibited`: secrets, credentials, subscriber personal data, or material
-  whose rights or policy prohibit external processing.
+- `prohibited`: secrets, credentials, subscriber email, identity,
+  authentication, session, access, or reading data, or material whose rights or
+  policy prohibit this external processing.
 
-Unclassified input fails closed. Prohibited data never leaves the local
-environment. Subscriber identity and authentication data are outside these
-provider capabilities and cannot be included in model, embedding, image, or
-transcription requests.
+Unclassified input fails closed. Prohibited data never crosses an AI or media
+provider-processing boundary. Subscriber personal data is outside these
+provider capabilities and cannot be included in model, embedding, image,
+transcription, synthesis, drafting, or tool-use requests.
 
 Before a request is dispatched, the runtime must:
 
@@ -100,6 +102,30 @@ A material change invalidates consent. Sensitive input requires explicit
 consent for each dispatch or for a narrowly bounded batch whose membership and
 expiry are recorded. General acceptance of terms is not sensitive-data
 consent.
+
+### Hosted Identity Adapter Data
+
+The configured hosted identity adapter is a distinct operational boundary, not
+an AI or media provider capability. It may receive only the minimum fields
+needed for allowlisted subscriber access, such as normalized email, invitation
+status, provider subject ID, authentication state, session or revocation
+identifiers, and release-specific access decisions. Reading history, analytics,
+profile enrichment, manuscript text, research, prompts, and provider inputs are
+denied unless a later governance decision separately names and justifies them.
+
+Before any hosted identity field is transmitted, the adapter contract must
+record its exact schema, destination, purpose, consent or other documented
+legal basis, collection notice, retention period, deletion and revocation
+procedure, backup handling, regional constraints, and minimization rationale.
+The adapter must reject extra and unclassified fields. A change to purpose,
+legal basis, field set, destination, or retention requires renewed review and,
+where the recorded basis requires it, renewed consent before dispatch.
+
+Hosted identity records follow their declared per-store retention and deletion
+schedule. FounderOS records deletion requests, observed outcomes, and
+exceptions without claiming physical erasure that the adapter cannot prove.
+This narrow allowance does not permit subscriber data to enter AI or media
+provider calls.
 
 The runtime records policy and consent evidence without copying prohibited
 values or unnecessary prompt content into logs. Provider policies are recorded
