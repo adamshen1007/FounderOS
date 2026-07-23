@@ -1,5 +1,7 @@
 # ADR-012 — Immutable Releases and Ghost Adapter
 
+<!-- cspell:words MiB -->
+
 ## Status
 
 Accepted subject to Ghost capability spike
@@ -23,27 +25,44 @@ Ghost, object storage, or subscriber state as canonical publication content.
 
 ### Immutable Release Identity and Manifest
 
-Every prepared release receives a globally unique, stable release ID before
-staging. A release ID is never reused, even after an upload fails, a release is
-unpublished, or retained artifacts are deleted. An edition correction creates
-a new release ID and bundle; no artifact or manifest is replaced in place.
+Every release candidate receives a globally unique, stable release ID before
+the Publish action or remote staging. A release ID is never reused, even after
+an upload fails, a release is unpublished, or retained artifacts are deleted.
+An edition correction creates a new release ID and bundle; no artifact or
+manifest is replaced in place.
 
-Each release has one immutable, versioned manifest. The manifest binds:
+Before the Publish action, the pipeline creates one versioned, immutable
+release-candidate envelope and calculates its SHA-256 hash. The envelope binds:
 
-- Project, edition, release, schema, and parent-release IDs
-- Canonical Git revision and normalized source-snapshot hash
+- Envelope schema version plus project, edition, release, and parent-release
+  IDs
+- Canonical Git revision, ordered canonical input hashes, and normalized
+  source-snapshot hash
 - Ordered artifact paths, media types, byte sizes, and SHA-256 checksums
-- HTML, PDF, and EPUB format and validator-profile versions
+- Required HTML, PDF, and EPUB formats
+- Validator profiles, versions, configurations, and results
 - Renderer, template, policy, configuration, and dependency-lock hashes
-- Rights, accessibility, citation, link, and release-integrity results
-- Publish approval, lifecycle version, build run, and creation evidence
+- Rights, accessibility, citation, link, quality-policy, and release-integrity
+  results
+- Lifecycle version, versioned hosted-access policy, build run, and creation
+  evidence
+
+The human Publish decision binds the exact candidate-envelope hash and
+lifecycle version. After approval, the final release manifest derives from
+that envelope without changing, adding to, or removing any material release
+field. It may add only the Publish approval reference, a preallocated immutable
+staging-evidence record ID. A changed artifact, checksum, source, format,
+validator result, rights or quality result, lifecycle version, or access policy
+requires a new candidate envelope, hash, and Publish decision.
 
 The manifest itself receives a SHA-256 checksum. An implementation may add a
 signature, but a signature cannot replace the required artifact and manifest
 checksums. The local immutable manifest is the comparison authority for remote
-reconciliation. Hosted destination identities and verified checksums belong in
-separate immutable staging evidence linked to the manifest checksum. Hosted
-metadata is never trusted as proof of artifact content.
+reconciliation. Hosted destination identities, transferred bytes, verified
+remote checksums, access-test results, and provider observations always belong
+in the preallocated immutable staging-evidence record linked to the preexisting
+manifest checksum. They are never added to or embedded in the final manifest.
+Hosted metadata is never trusted as proof of artifact content.
 
 Release content consists only of allowlisted, approved artifacts and the
 minimum publication metadata declared by the manifest. Drafts, research,
@@ -97,10 +116,10 @@ is durable blocked work with a creator-visible next action.
 There is exactly one mutable active-release pointer per published book
 destination. Activation is one guarded compare-and-set after:
 
-1. The local release candidate passes every required validator and receives a
-   stable input fingerprint.
-2. The human Publish action and lifecycle guards approve that exact candidate
-   fingerprint.
+1. The versioned local release-candidate envelope passes every required
+   validator and receives its stable SHA-256 hash.
+2. The human Publish action and lifecycle guards approve that exact envelope
+   hash and lifecycle version.
 3. The immutable manifest binds that approval and passes its checksum check.
 4. Every remote artifact matches its manifest checksum.
 5. Hosted visibility, subscriber authorization, and download controls pass.
@@ -113,11 +132,19 @@ active.
 
 Rollback verifies a retained prior release against its immutable manifest, then
 performs the same guarded pointer change. It does not rebuild, edit, or copy the
-prior bundle. Unpublish clears or disables the active pointer and revokes new
-access without rewriting release content. Existing sessions and download
-grants are revoked as policy requires. Re-publishing uses a retained verified
-release or a new release ID; it never reconstructs identity from mutable hosted
-state.
+prior bundle.
+
+Unpublish is a guarded compare-and-set from the caller's expected active
+release ID to `null` or an explicitly disabled state. A stale expected release
+returns `conflict`; it does not clear a newer pointer or revoke that newer
+release. After the pointer comparison succeeds, access revocation is scoped to
+the unpublished release ID. Its sessions, grants, cache entries, and visibility
+are revoked without changing another release's access state or rewriting
+release content. Compensation and retry use the same expected release ID and
+idempotency key.
+
+Re-publishing uses a retained verified release or a new release ID; it never
+reconstructs identity from mutable hosted state.
 
 ### Content, Access, and Retention Separation
 
@@ -139,6 +166,15 @@ removal, the system deletes the complete unreferenced bundle rather than
 editing it and preserves only a minimal, non-content tombstone with release ID,
 manifest checksum, deletion decision, time, and applicable exception.
 
+After every successful activation, the immediately preceding active release,
+when one exists, is the verified rollback target. It remains protected until
+either its configured rollback window ends, which defaults to 30 days, or a
+human explicitly retires it after another retained release has passed manifest,
+artifact, access, and rollback verification and is recorded as the replacement
+target. Before one of those conditions is satisfied, no retention schedule,
+storage pressure, routine cleanup, or provider default may garbage-collect the
+immediate predecessor.
+
 A legal hold pauses deletion only for covered records. Privacy deletion,
 irreversible redaction, or release garbage collection resumes when the hold is
 released under the applicable schedule. Provider deletion requests and their
@@ -150,10 +186,12 @@ buckets, directory listing, and complete signed URLs in logs are prohibited.
 
 ### Ghost Capability Spike
 
-Ghost remains a candidate adapter until a time-boxed spike proves the required
-capabilities in an isolated staging environment. The spike records the Ghost
-version, API and plan, configuration, limits, observed behavior, sanitized
-fixtures, and repeatable commands for this matrix:
+Ghost remains a candidate adapter until a time-boxed spike classifies the
+required capabilities in an isolated staging environment. The spike may use no
+more than two working days and no more than 16 human hours, and it stops earlier
+when every matrix row is classified. It records the Ghost version, API and
+plan, configuration, limits, observed behavior, sanitized fixtures, and
+repeatable commands for this matrix:
 
 | Capability | Required proof |
 | --- | --- |
@@ -168,15 +206,17 @@ fixtures, and repeatable commands for this matrix:
 | API limits and failures | Rate limits, payload ceilings, partial uploads, timeouts, retries, and uncertain outcomes have bounded recovery |
 | Webhooks and reconciliation | Events are authenticated and deduplicated where available; authoritative reads detect drift without trusting event bodies |
 
-Each row receives `pass`, `fallback-required`, or `fail` with evidence. A pass
-requires both the successful path and its denial or failure cases. An
+Each row receives `direct`, `fallback-required`, or `infeasible` with evidence.
+`direct` requires both the successful path and its denial or failure cases. An
 unavailable webhook may be `fallback-required` when polling supplies bounded,
-authoritative reconciliation. A security invariant, protected-access
+authoritative reconciliation. At either time limit, every unresolved row is
+classified `infeasible` with evidence that it was not proved within the spike;
+the spike does not silently extend. A security invariant, protected-access
 requirement, or safe activation requirement cannot be waived.
 
-No production Ghost adapter is accepted until every required row passes either
-through Ghost or through a documented fallback behind the same adapter
-contract.
+No production Ghost adapter is accepted while a required row is `infeasible`
+or until every other row is proved either `direct` or through a documented
+fallback behind the same adapter contract.
 
 ### Sidecar and Object-Storage Fallback
 
@@ -204,20 +244,29 @@ review.
 
 - Contract tests prove release IDs and manifest payloads cannot be reused or
   mutated and detect every artifact or manifest checksum mismatch.
-- Large-fixture tests enforce bounded-memory, disk-backed rendering, checksum,
-  and transfer behavior.
+- Candidate-envelope tests prove Publish binds the exact versioned envelope
+  hash and that the final manifest preserves every material field while adding
+  only the permitted approval and staging references.
+- A fixture of at least 512 MiB must prove disk-backed rendering, checksum, and
+  transfer with streaming chunks no larger than 8 MiB and a peak RSS
+  (resident set size) increase no greater than 128 MiB above the measured idle
+  process. The test report records the operating system, architecture, runtime
+  and tool versions, memory-sampling method and interval, idle baseline, peak
+  RSS, and fixture composition.
 - Multi-format failure tests keep the complete release inactive and preserve
   the previous pointer.
 - Duplicate, interrupted, timed-out, and uncertain remote operations prove
   idempotent resume, authoritative reconciliation, or safe manual blocking.
 - Activation, rollback, and unpublish tests cover stale pointers, two
   concurrent operators, partial uploads, access-check failures, and crashes at
-  every durable boundary.
+  every durable boundary. Unpublish fixtures prove compare-and-set conflict
+  behavior and release-scoped access revocation.
 - Authorization tests deny non-allowlisted, revoked, expired, replayed, and
   cross-subscriber HTML and download access.
 - Retention tests distinguish immutable content from mutable privacy records
-  and cover legal hold, destructive deletion, garbage collection, and
-  tombstones.
+  and cover legal hold, destructive deletion, tombstones, the default 30-day
+  rollback window, configured windows, replacement-target verification, human
+  retirement, and blocked early garbage collection.
 - The Ghost spike matrix and selected fallback architecture are recorded before
   a production Ghost implementation is accepted.
 

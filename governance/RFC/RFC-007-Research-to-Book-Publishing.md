@@ -1,6 +1,6 @@
 # RFC-007 — Research-to-Book Publishing
 
-<!-- cspell:words WCAG -->
+<!-- cspell:words MiB WCAG -->
 
 ## Status
 
@@ -164,26 +164,40 @@ filenames and structure, stable source and configuration fingerprints, and
 documented treatment of allowed timestamp or container metadata. Byte identity
 is required only when the selected output profile declares it.
 
-## Release Manifest
+## Release Candidate and Manifest
 
-After all formats pass, the pipeline computes a stable release-candidate
-fingerprint. A human Publish action approves that exact fingerprint and
-lifecycle version. The pipeline then creates the immutable manifest required by
-ADR-012 and binds the approval evidence. At minimum it records:
+After all formats pass and before the Publish action, the pipeline creates a
+versioned, immutable release-candidate envelope. It records:
 
-- Project, edition, release, schema, and parent-release IDs
+- Envelope schema version plus project, edition, release, and parent-release
+  IDs
 - Git revision, source-snapshot hash, and ordered canonical input hashes
 - Artifact paths, media types, bytes, and SHA-256 checksums
-- Renderer, template, font, sanitizer, validator, profile, and policy versions
-- Format-specific results and human-review evidence references
-- Rights, citations, links, visual provenance, and quality-policy results
-- Lifecycle version, Publish approval, build run, and creation evidence
+- The complete required format set
+- Validator profiles, versions, configurations, and machine-readable results
+- Renderer, template, font, sanitizer, policy, and dependency-lock hashes
+- Rights, citations, links, visual provenance, accessibility,
+  quality-policy, and release-integrity results
+- Lifecycle version, versioned hosted-access policy, build run, and creation
+  evidence
 
-Manifest creation fails when a required field or result is absent. The
-manifest's SHA-256 checksum binds the bundle. Hosted identities and verified
-remote checksums are appended to a separate immutable staging evidence record
-or included when a final manifest representation can remain immutable; a
-manifest already identified and checksummed is never edited in place.
+The pipeline calculates a SHA-256 hash over the canonical serialization of the
+complete envelope. The human Publish action binds that exact envelope hash and
+lifecycle version. Any material change requires a new envelope, hash, and
+approval.
+
+The final manifest required by ADR-012 derives from the approved envelope. It
+must preserve every material field exactly and may add only the Publish
+approval reference and a preallocated immutable staging-evidence record ID.
+Manifest creation fails when a required field or result is absent or when a
+derived field differs from the approved envelope. The manifest's SHA-256
+checksum binds the bundle.
+
+Hosted destination identities, transferred bytes, verified remote checksums,
+provider observations, and access-test results are always stored in the
+preallocated immutable staging-evidence record linked to the preexisting
+manifest checksum. They are never included in or appended to the final
+manifest.
 
 Release content includes only manifest-allowlisted artifacts and minimum
 publication metadata. Mutable subscriber, session, allowlist, visibility, and
@@ -226,6 +240,8 @@ Required shared tests cover:
 
 - Schema validation, source-snapshot hashing, content-addressed invalidation,
   deterministic filenames, and clean staging
+- Candidate-envelope canonical serialization, hashing, stale approval, and
+  rejection of every material change between approval and final manifest
 - Missing tools, disk exhaustion, permissions, symlinks, traversal, malformed
   content, process termination, and stale intermediates
 - One format failing while two pass; the bundle remains inactive and no
@@ -234,6 +250,12 @@ Required shared tests cover:
   crash recovery at every durable checkpoint
 - Artifact and manifest checksum mismatch before staging, after transfer, and
   before access
+- A fixture of at least 512 MiB with streaming chunks no larger than 8 MiB and
+  a peak RSS (resident set size) increase no greater than 128 MiB above the
+  measured idle process during rendering, checksum, and transfer. The result
+  records the operating system, architecture, runtime and tool versions,
+  memory-sampling method and interval, idle baseline, peak RSS, and fixture
+  composition.
 
 Required HTML tests cover semantics, sanitization, navigation, keyboard use,
 WCAG 2.2 Level AA automated rules, links, responsive reflow, assistive
@@ -254,7 +276,10 @@ semantic difference must fail the migration gate.
 Hosted adapter contract and staging tests cover every ADR-012 capability row,
 including denial cases, API limits, interrupted upload, uncertain response,
 duplicate delivery, drift, stale pointer, rollback, unpublish, expired
-credentials, revoked subscriber, and replayed download grant.
+credentials, revoked subscriber, and replayed download grant. Unpublish tests
+must prove a stale expected active release returns `conflict`, a successful
+compare-and-set moves only that expected release to `null` or disabled, and
+revocation affects only access state bound to the unpublished release ID.
 
 ## Staging, Activation, and Failure Behavior
 
@@ -287,9 +312,15 @@ Failure behavior is atomic at the release level:
   success from an incomplete response.
 
 Rollback verifies a retained prior manifest and changes only the guarded active
-pointer. It does not rebuild or mutate that release. Unpublish disables the
-pointer and revokes access without editing retained artifacts. Neither action
-bypasses current rights, integrity, lifecycle, or incident-policy checks.
+pointer. It does not rebuild or mutate that release.
+
+Unpublish supplies the expected active release ID and compare-and-sets that
+exact pointer to `null` or disabled. A stale expected release returns
+`conflict` without changing the pointer or revoking a newer release. After a
+successful pointer change, session, grant, cache, visibility, and other access
+revocation is scoped to the unpublished release ID and uses the same durable
+idempotency identity. Neither rollback nor unpublish bypasses current rights,
+integrity, lifecycle, or incident-policy checks.
 
 ## Retention and Removal
 
@@ -309,11 +340,20 @@ Rights withdrawal or unpublish revokes access first, then creates a corrected
 release or destructively removes the complete affected bundle when policy
 requires it.
 
-Garbage collection cannot remove the active release, a rollback target still
-required by policy, a referenced audit object, or held records. Authorized
-destructive removal deletes the complete bundle and preserves only the minimal
-non-content tombstone defined by ADR-012. Legal holds suspend only covered
-deletion; the applicable deletion or redaction schedule resumes after release.
+After activation, the immediate predecessor, when one exists, is the verified
+rollback target. It remains ineligible for garbage collection until either its
+configured rollback window ends, which defaults to 30 days, or a human
+explicitly retires it after another retained release passes manifest, artifact,
+access, and rollback verification and is recorded as the replacement target.
+
+Garbage collection cannot remove the active release, that protected immediate
+predecessor, any rollback target still required by policy, a referenced audit
+object, or held records. Storage pressure, routine cleanup, a shorter provider
+default, or an unpublish operation cannot bypass the rollback window.
+Authorized destructive removal deletes the complete bundle and preserves only
+the minimal non-content tombstone defined by ADR-012. Legal holds suspend only
+covered deletion; the applicable deletion or redaction schedule resumes after
+release.
 
 Protected binary downloads require current authorization and short-lived,
 audience-bound access. Permanent public URLs are prohibited. Provider deletion
@@ -336,6 +376,15 @@ This RFC narrows ADR-001 as follows:
 ADR-001 remains part of the decision history. This RFC does not rewrite M1
 release artifacts already produced under its accepted contract.
 
+This RFC also narrowly supersedes only RFC-006's allocation of immutable
+release-manifest generation to Increment 3. The versioned local
+release-candidate envelope, Publish-bound final manifest, and manifest checksum
+are Increment 1 publishing-foundation outputs. Remote staging, hosted artifact
+and access verification, subscriber delivery, active-pointer activation,
+rollback, unpublish, and hosted retention remain Increment 3. RFC-006's product
+boundary, sequence, gates, remaining increment contents, and decision history
+remain active.
+
 Ghost is the first adapter candidate, not a guaranteed implementation.
 Production support requires the recorded capability matrix and selected
 fallback architecture required by ADR-012. A missing capability cannot be
@@ -352,12 +401,17 @@ silently ignored or replaced by a broader hosted system.
 - Output-specific tests and an integrated multi-format failure test pass.
 - The YC migration machine report and human visual review preserve every
   required semantic dimension or record an approved difference.
-- Release manifests and checksums are deterministic, complete, and fail closed
-  on stale, missing, extra, or mismatched artifacts.
-- Rendering, validation, checksum, and transfer fixtures demonstrate
-  disk-backed, bounded-memory behavior.
-- The Ghost spike records evidence for every ADR-012 matrix row and selects the
-  sidecar or object-storage fallback where required.
+- Candidate envelopes and release manifests are deterministic, complete, bind
+  the exact Publish decision, and fail closed on stale, missing, extra,
+  changed, or mismatched material fields and artifacts.
+- A fixture of at least 512 MiB demonstrates disk-backed rendering, validation,
+  checksum, and transfer with chunks no larger than 8 MiB and a peak
+  RSS (resident set size) increase no greater than 128 MiB above idle, with
+  the measurement platform and method recorded.
+- The Ghost spike stops when every ADR-012 matrix row is classified `direct`,
+  `fallback-required`, or `infeasible`, and no later than two working days or
+  16 human hours. It records the evidence, selects the sidecar or object-storage
+  fallback where required, and treats `infeasible` as a production blocker.
 - No production activation is represented as complete unless a later
   Increment 3 acceptance report proves staging, authorization, activation,
   rollback, unpublish, retention, and failure contracts.
