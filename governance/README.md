@@ -6,6 +6,8 @@ when a later record narrows or supersedes them.
 
 ## Constitution and Process
 
+- [FounderOS Constitution](../CONSTITUTION.md) is the only canonical FounderOS
+  constitution and the authority for FounderOS source-of-truth rules.
 - [FounderOS agent instructions](../AGENTS.md) define the repository-wide
   operating rules and required chapter elements.
 - [RFC-000 — FounderOS RFC Process](RFC/RFC-000-Process.md) defines how major
