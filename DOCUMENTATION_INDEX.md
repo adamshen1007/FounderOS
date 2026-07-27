@@ -1,0 +1,58 @@
+# FounderOS Documentation Index
+
+The documents below are the official FounderOS v1.0 bootstrap specification, organized by architectural domain. Read them in the listed domain order before implementation.
+
+## 1. Governance
+
+- [FounderOS Constitution v1.0](./docs/governance/FounderOS_Constitution_v1.0.md)
+- [FounderOS Design Principles v1.0](./docs/governance/FounderOS_Design_Principles_v1.0.md)
+- [FounderOS Decision Framework v1.0](./docs/governance/FounderOS_Decision_Framework_v1.0.md)
+
+## 2. KnowledgeOS
+
+- [KnowledgeOS Architecture Specification v1.0](./docs/knowledgeos/KnowledgeOS_Architecture_Specification_v1.0.md)
+- [KnowledgeOS Knowledge Object Model Specification v1.0](./docs/knowledgeos/KnowledgeOS_Knowledge_Object_Model_Specification_v1.0.md)
+- [KnowledgeOS Metadata System Specification v1.0](./docs/knowledgeos/KnowledgeOS_Metadata_System_Specification_v1.0.md)
+- [KnowledgeOS Vault Architecture Specification v1.0](./docs/knowledgeos/KnowledgeOS_Vault_Architecture_Specification_v1.0.md)
+- [KnowledgeOS Retrieval Engine Specification v1.0](./docs/knowledgeos/KnowledgeOS_Retrieval_Engine_Specification_v1.0.md)
+- [KnowledgeOS Knowledge Graph Architecture Specification v1.0](./docs/knowledgeos/KnowledgeOS_Knowledge_Graph_Architecture_Specification_v1.0.md)
+
+## 3. Agent system
+
+- [FounderOS Agent Runtime Specification v1.0](./docs/agents/FounderOS_Agent_Runtime_Specification_v1.0.md)
+- [Hermes Chief of Staff Specification v1.0](./docs/agents/Hermes_Chief_of_Staff_Specification_v1.0.md)
+- [AI Task Routing Framework v1.0](./docs/agents/AI_Task_Routing_Framework_v1.0.md)
+- [Agent Communication Protocol v1.0](./docs/agents/Agent_Communication_Protocol_v1.0.md)
+- [Agent Evaluation Framework v1.0](./docs/agents/Agent_Evaluation_Framework_v1.0.md)
+
+## 4. System architecture
+
+- [FounderOS System Architecture Specification v1.0](./docs/architecture/FounderOS_System_Architecture_Specification_v1.0.md)
+- [FounderOS Repository Architecture Specification v1.0](./docs/architecture/FounderOS_Repository_Architecture_Specification_v1.0.md)
+- [FounderOS Data Architecture Specification v1.0](./docs/architecture/FounderOS_Data_Architecture_Specification_v1.0.md)
+- [FounderOS MCP Architecture Specification v1.0](./docs/architecture/FounderOS_MCP_Architecture_Specification_v1.0.md)
+- [FounderOS Security and Governance Architecture Specification v1.0](./docs/architecture/FounderOS_Security_and_Governance_Architecture_Specification_v1.0.md)
+
+## 5. Engineering
+
+- [FounderOS Engineering Strategy Specification v1.0](./docs/engineering/FounderOS_Engineering_Strategy_Specification_v1.0.md)
+- [FounderOS Coding Standards Specification v1.0](./docs/engineering/FounderOS_Coding_Standards_Specification_v1.0.md)
+- [FounderOS Testing Strategy Specification v1.0](./docs/engineering/FounderOS_Testing_Strategy_Specification_v1.0.md)
+- [FounderOS CI/CD Architecture Specification v1.0](./docs/engineering/FounderOS_CI_CD_Architecture_Specification_v1.0.md)
+- [FounderOS Codex Execution Framework v1.0](./docs/engineering/FounderOS_Codex_Execution_Framework_v1.0.md)
+- [Repository Initialization Plan](./docs/engineering/REPOSITORY_INITIALIZATION_PLAN.md)
+
+## 6. Migration and execution
+
+- [FounderOS Codex First Execution Prompt v1.0](./docs/migration/FounderOS_Codex_First_Execution_Prompt_v1.0.md)
+- [FounderOS Milestone 00 Repository Initialization Specification v1.0](./docs/migration/FounderOS_Milestone_00_Repository_Initialization_Specification_v1.0.md)
+- [FounderOS Knowledge Migration Strategy v1.0](./docs/migration/FounderOS_Knowledge_Migration_Strategy_v1.0.md)
+- [FounderOS Vault Initialization Specification v1.0](./docs/migration/FounderOS_Vault_Initialization_Specification_v1.0.md)
+- [OpportunityOS Migration Specification v1.0](./docs/migration/OpportunityOS_Migration_Specification_v1.0.md)
+- [Speculor AI Migration Specification v1.0](./docs/migration/Speculor_AI_Migration_Specification_v1.0.md)
+
+## Repository governance
+
+- [Architecture decisions](./ARCHITECTURE_DECISIONS.md)
+- [Contribution guide](./CONTRIBUTING.md)
+- [Changelog](./CHANGELOG.md)
