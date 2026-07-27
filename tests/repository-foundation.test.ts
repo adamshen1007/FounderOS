@@ -16,6 +16,10 @@ describe("Milestone 00 repository foundation", () => {
   });
 
   it("preserves all official bootstrap specifications in the documentation domains", () => {
+    const postBootstrapDocuments = new Set([
+      "FounderOS_Milestone_02_Vault_Ingestion_Foundation_Specification_v1.0.md",
+      "REPOSITORY_INITIALIZATION_PLAN.md",
+    ]);
     const documentationDomains = [
       "governance",
       "knowledgeos",
@@ -27,9 +31,7 @@ describe("Milestone 00 repository foundation", () => {
 
     const specificationFiles = documentationDomains.flatMap((domain) => {
       const files = readdirSync(resolve(REPOSITORY_ROOT, "docs", domain));
-      return files.filter(
-        (file) => file.endsWith(".md") && file !== "REPOSITORY_INITIALIZATION_PLAN.md",
-      );
+      return files.filter((file) => file.endsWith(".md") && !postBootstrapDocuments.has(file));
     });
 
     const documentationIndex = readFileSync(

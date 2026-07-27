@@ -145,6 +145,16 @@ export const RelationshipObjectSchema = z
     }
   });
 
+export const KnowledgeObjectSchemas = {
+  decision: DecisionObjectSchema,
+  experiment: ExperimentObjectSchema,
+  knowledge: GeneralKnowledgeObjectSchema,
+  principle: PrincipleObjectSchema,
+  project: ProjectObjectSchema,
+  relationship: RelationshipObjectSchema,
+  research: ResearchObjectSchema,
+} as const;
+
 export const KnowledgeObjectSchema = z.union([
   GeneralKnowledgeObjectSchema,
   DecisionObjectSchema,

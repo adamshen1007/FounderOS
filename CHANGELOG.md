@@ -11,3 +11,5 @@ All notable changes to FounderOS will be documented here.
 - Continuous integration foundation.
 - KnowledgeOS metadata, relationship, and seven-object runtime schema foundation.
 - Runtime parsing APIs and focused KnowledgeOS contract tests.
+- Read-only Markdown and YAML frontmatter ingestion with canonical key normalization.
+- File-level acceptance and rejection reports with deterministic source evidence.

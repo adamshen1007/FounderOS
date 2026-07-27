@@ -42,6 +42,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Implement the shared knowledge contract with strict Zod schemas and inferred TypeScript types in `@founderos/knowledge-schema`. Use camel-case fields at the TypeScript boundary, preserve source provenance in every metadata record, and reject undocumented fields. Model `draft`, `review`, `active`, `archived`, and `deprecated` as persistent knowledge states; represent creation and modification as timestamps.
 - **Consequences:** Runtime and compile-time contracts remain synchronized, invalid inputs fail at the boundary, and schema evolution must be explicit. Markdown/frontmatter adapters will need to translate specification-style field names into this canonical TypeScript model. Zod becomes the package's only runtime dependency.
 
+## ADR-0006: Preserve source Markdown through a read-only ingestion boundary
+
+- **Status:** Accepted
+- **Date:** 2026-07-27
+- **Context:** KnowledgeOS must transform founder-owned Markdown into canonical objects without making AI-derived edits to the human source of truth. Frontmatter uses specification-style keys while the TypeScript contracts use camel case.
+- **Decision:** Implement single-file ingestion in `@founderos/knowledge-engine`. Parse YAML 1.2 with the dependency-free `yaml` library, normalize keys recursively, validate through `@founderos/knowledge-schema`, and return accepted or rejected reports with source path, byte length, and SHA-256 evidence. Never rewrite the input file.
+- **Consequences:** Source provenance is deterministic and validation errors are actionable. Canonical object creation remains separate from vault crawling, persistence, retrieval, graph storage, and agents. Official documents can remain immutable while frontmatter-enabled fixture copies validate the mapping contract.
+
 ## ADR template
 
 ```markdown

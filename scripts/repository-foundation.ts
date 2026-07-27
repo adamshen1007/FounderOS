@@ -40,7 +40,6 @@ export const EXCLUDED_MILESTONE_00_IMPLEMENTATIONS = [
   "apps/web/src",
   "services/agent-router/src",
   "services/hermes-runtime/src",
-  "services/knowledge-engine/src",
   "services/mcp-gateway/src",
 ] as const;
 
