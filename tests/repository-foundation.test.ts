@@ -15,6 +15,17 @@ describe("Milestone 00 repository foundation", () => {
     });
   });
 
+  it("builds workspace packages before CI type checking and tests", () => {
+    const workflow = readFileSync(resolve(REPOSITORY_ROOT, ".github/workflows/ci.yml"), "utf8");
+    const buildStep = workflow.indexOf("- name: Build");
+    const typecheckStep = workflow.indexOf("- name: Type check");
+    const testStep = workflow.indexOf("- name: Test");
+
+    expect(buildStep).toBeGreaterThan(-1);
+    expect(buildStep).toBeLessThan(typecheckStep);
+    expect(buildStep).toBeLessThan(testStep);
+  });
+
   it("preserves all official bootstrap specifications in the documentation domains", () => {
     const postBootstrapDocuments = new Set([
       "FounderOS_Milestone_02_Vault_Ingestion_Foundation_Specification_v1.0.md",
