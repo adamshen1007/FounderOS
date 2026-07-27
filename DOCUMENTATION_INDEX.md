@@ -51,6 +51,7 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [OpportunityOS Migration Specification v1.0](./docs/migration/OpportunityOS_Migration_Specification_v1.0.md)
 - [Speculor AI Migration Specification v1.0](./docs/migration/Speculor_AI_Migration_Specification_v1.0.md)
 - [Milestone 02 Vault Ingestion Foundation Specification v1.0](./docs/migration/FounderOS_Milestone_02_Vault_Ingestion_Foundation_Specification_v1.0.md)
+- [Milestone 03 Core Migration Dry Run Specification v1.0](./docs/migration/FounderOS_Milestone_03_Core_Migration_Dry_Run_Specification_v1.0.md)
 
 ## Repository governance
 

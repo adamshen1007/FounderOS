@@ -50,6 +50,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Implement single-file ingestion in `@founderos/knowledge-engine`. Parse YAML 1.2 with the dependency-free `yaml` library, normalize keys recursively, validate through `@founderos/knowledge-schema`, and return accepted or rejected reports with source path, byte length, and SHA-256 evidence. Never rewrite the input file.
 - **Consequences:** Source provenance is deterministic and validation errors are actionable. Canonical object creation remains separate from vault crawling, persistence, retrieval, graph storage, and agents. Official documents can remain immutable while frontmatter-enabled fixture copies validate the mapping contract.
 
+## ADR-0007: Make migration batches deterministic and conflict-intolerant
+
+- **Status:** Accepted
+- **Date:** 2026-07-27
+- **Context:** A migration dry run must process multiple founder-selected files without hiding invalid inputs, reading outside the selected boundary, or producing machine-dependent output.
+- **Decision:** Recursively ingest regular Markdown files from one explicit directory in stable relative-path order, never follow symbolic links, and return a deterministic aggregate report. Reject every member of duplicate object-ID or source-hash sets so accepted objects have unique identity and source content.
+- **Consequences:** Migration reports are reproducible and safe to review before persistence. Directory ingestion remains an explicit, read-only operation rather than a vault crawler, watcher, scheduler, or storage system.
+
 ## ADR template
 
 ```markdown
