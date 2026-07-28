@@ -58,6 +58,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Recursively ingest regular Markdown files from one explicit directory in stable relative-path order, never follow symbolic links, and return a deterministic aggregate report. Reject every member of duplicate object-ID or source-hash sets so accepted objects have unique identity and source content.
 - **Consequences:** Migration reports are reproducible and safe to review before persistence. Directory ingestion remains an explicit, read-only operation rather than a vault crawler, watcher, scheduler, or storage system.
 
+## ADR-0008: Materialize the core corpus through a reviewed manifest
+
+- **Status:** Accepted
+- **Date:** 2026-07-28
+- **Context:** Milestone 03 proved deterministic directory ingestion with derived fixtures, but the complete Priority 1 corpus needs a controlled contract that detects source drift and preserves human review without modifying or duplicating canonical specifications.
+- **Decision:** Use a strict, versioned YAML manifest to bind each knowledge object ID and type to one canonical source path, logical `knowledge/` destination, expected SHA-256 digest, schema metadata, migration status, and review status. Execute the manifest within one physical repository root, reject traversal and symbolic links, and materialize validated objects only in a deterministic report artifact.
+- **Consequences:** The eight Priority 1 documents become reproducibly auditable without adding persistence or changing canonical Markdown. Manifest hashes must be deliberately updated when approved source documents change, and report content is a normalized schema representation rather than a byte-for-byte source replica.
+
 ## ADR template
 
 ```markdown

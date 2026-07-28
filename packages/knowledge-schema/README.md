@@ -20,6 +20,8 @@ Persistent lifecycle states use `draft`, `review`, `active`, `archived`, and `de
 
 The package intentionally contains no persistence, Markdown parsing, retrieval, embedding, graph database, or agent behavior.
 
+Milestone 04 adds strict migration-manifest contracts for object identity, object type, canonical and logical destination paths, SHA-256 evidence, metadata, migration status, and human-review status. These contracts validate migration intent only; filesystem execution remains in `@founderos/knowledge-engine`.
+
 ## Usage
 
 ```typescript
@@ -27,6 +29,12 @@ import { KnowledgeObjectSchema, parseKnowledgeObject } from "@founderos/knowledg
 
 const result = KnowledgeObjectSchema.safeParse(input);
 const knowledgeObject = parseKnowledgeObject(input);
+```
+
+```typescript
+import { KnowledgeMigrationManifestSchema } from "@founderos/knowledge-schema";
+
+const manifest = KnowledgeMigrationManifestSchema.parse(input);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.

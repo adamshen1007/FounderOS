@@ -21,8 +21,9 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 ## Implemented foundations
 
 - [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, relationships, and the seven official knowledge object categories.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only file and directory ingestion, deterministic migration reports, conflict detection, and source evidence.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only file and directory ingestion, manifest-controlled Priority 1 corpus migration, deterministic reports, path containment, conflict detection, and source evidence.
 - [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
+- [`knowledge/migration-manifest.yaml`](./knowledge/migration-manifest.yaml) binds the eight canonical FounderOS Priority 1 documents to reviewed object identities, logical destinations, metadata, and source hashes.
 
 Vault watching, persistence, retrieval, embeddings, graph storage, agent behavior, connectors, and interfaces remain unimplemented.
 
@@ -55,6 +56,9 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm knowledge:migrate
 ```
+
+`pnpm knowledge:migrate` validates the approved manifest and writes the deterministic, Git-ignored `migration-report.json` artifact without modifying canonical documents.
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) before making changes.

@@ -15,3 +15,6 @@ All notable changes to FounderOS will be documented here.
 - File-level acceptance and rejection reports with deterministic source evidence.
 - Deterministic directory-ingestion reports with duplicate identity and source detection.
 - Canonical templates for all seven knowledge object types and a five-document FounderOS Core migration pilot.
+- Strict migration-manifest schemas with identity, path, hash, metadata, lifecycle, and review validation.
+- Manifest-controlled migration of all eight FounderOS Priority 1 canonical documents.
+- Path-contained migration CLI and deterministic `migration-report.json` generation.
