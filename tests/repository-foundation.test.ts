@@ -29,6 +29,7 @@ describe("Milestone 00 repository foundation", () => {
   it("preserves all official bootstrap specifications in the documentation domains", () => {
     const postBootstrapDocuments = new Set([
       "FounderOS_Milestone_02_Vault_Ingestion_Foundation_Specification_v1.0.md",
+      "FounderOS_Milestone_03_Core_Migration_Dry_Run_Specification_v1.0.md",
       "REPOSITORY_INITIALIZATION_PLAN.md",
     ]);
     const documentationDomains = [

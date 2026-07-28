@@ -1,6 +1,8 @@
 import type { KnowledgeObject } from "@founderos/knowledge-schema";
 
 export type IngestionErrorCode =
+  | "duplicate_object_id"
+  | "duplicate_source_hash"
   | "file_read_error"
   | "missing_frontmatter"
   | "frontmatter_parse_error"

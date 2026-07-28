@@ -101,7 +101,10 @@ export function ingestMarkdownDocument(sourcePath: string, markdown: string): In
   }
 }
 
-export async function ingestMarkdownFile(filePath: string): Promise<IngestionReport> {
+export async function ingestMarkdownFile(
+  filePath: string,
+  sourcePath = filePath,
+): Promise<IngestionReport> {
   let markdown: string;
 
   try {
@@ -114,10 +117,10 @@ export async function ingestMarkdownFile(filePath: string): Promise<IngestionRep
           message: error instanceof Error ? error.message : "Unable to read Markdown file",
         },
       ],
-      source: { path: filePath },
+      source: { path: sourcePath },
       status: "rejected",
     };
   }
 
-  return ingestMarkdownDocument(filePath, markdown);
+  return ingestMarkdownDocument(sourcePath, markdown);
 }

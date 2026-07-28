@@ -21,9 +21,10 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 ## Implemented foundations
 
 - [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, relationships, and the seven official knowledge object categories.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only, single-file Markdown/frontmatter ingestion and schema validation reports.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only file and directory ingestion, deterministic migration reports, conflict detection, and source evidence.
+- [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
 
-Vault crawling, persistence, retrieval, embeddings, graph storage, agent behavior, connectors, and interfaces remain unimplemented.
+Vault watching, persistence, retrieval, embeddings, graph storage, agent behavior, connectors, and interfaces remain unimplemented.
 
 ## Repository layout
 
