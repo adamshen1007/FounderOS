@@ -23,3 +23,4 @@ All notable changes to FounderOS will be documented here.
 - Versioned candidate-source and Knowledge Repository contracts.
 - Validated in-memory candidate provider, deterministic repository access, and repository-backed query execution.
 - Approved-corpus candidate source, immutable repository snapshots, corpus-backed repository initialization, and deterministic change detection.
+- Governed immutable snapshot lifecycle, deterministic comparison and change sets, and human-controlled approval/activation readiness.

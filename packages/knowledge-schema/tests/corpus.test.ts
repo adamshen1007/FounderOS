@@ -108,6 +108,9 @@ describe("Milestone 07 corpus contracts", () => {
       safeParseKnowledgeRepositorySnapshot({ ...snapshot(), snapshotId: "snapshot-arbitrary" })
         .success,
     ).toBe(false);
+    const milestone08FieldLeakedIntoV1 = snapshot();
+    (milestone08FieldLeakedIntoV1.objects[0] as Record<string, unknown>).contentFingerprint = A;
+    expect(safeParseKnowledgeRepositorySnapshot(milestone08FieldLeakedIntoV1).success).toBe(false);
   });
 
   it("rejects duplicate IDs, duplicate paths, and unsorted snapshot records", () => {

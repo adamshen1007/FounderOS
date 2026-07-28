@@ -90,6 +90,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Implement an engine-owned corpus candidate source that delegates canonical reads, approval gates, path safety, source hashes, and object validation to the Milestone 04 migration workflow. Materialize its accepted objects through the existing in-memory repository and create a schema-validated, deeply immutable snapshot whose identity is derived from corpus version, manifest reference, and deterministic per-object fingerprints. Compare snapshots through a pure, sorted change-set contract.
 - **Consequences:** The Priority 1 corpus can be queried through the existing repository abstraction with traceable, reproducible knowledge-state identity. Creation metadata does not alter content identity. Change detection is observable but inert: durable storage, automatic refresh, watchers, synchronization, retrieval intelligence, and agent integration remain future decisions.
 
+## ADR-0012: Govern immutable snapshots through deterministic lifecycle evidence
+
+- **Status:** Accepted
+- **Date:** 2026-07-28
+- **Context:** Milestone 07 provides immutable, content-addressed snapshots and deterministic comparison, but controlled knowledge evolution also needs explicit lifecycle and human-review evidence without introducing durable workflow infrastructure.
+- **Decision:** Preserve the Milestone 07 snapshot contract and content-derived identity, and carry Milestone 08 per-object content fingerprints in separate comparison evidence. Bind that evidence to the canonical validated Knowledge Object payload, and have the engine verify its metadata, whole-object, and non-metadata content digests against the snapshot descriptor before comparison or workflow progression. Immutable snapshots advance through validated lifecycle operations and human-approved governed change sets. Same-identity comparison is a valid no-op, while workflow initialization requires a material governed change. Review and activation states are reachable only through the workflow, which binds immutable approval or rejection evidence to the proposed snapshot and change set. Successful activation atomically returns the previous baseline as superseded and the proposal as active. `@founderos/knowledge-schema` owns the contracts; `@founderos/knowledge-engine` owns pure orchestration over them.
+- **Consequences:** Snapshot compatibility, lifecycle history, comparison evidence, review decisions, and activation outcomes are reproducible, immutable, and independently testable. Callers must supply valid snapshots, separate matching comparison evidence, transition evidence, an active baseline lifecycle, and a validated proposed lifecycle; no state is retained between calls. Durable workflow storage, authorization, notifications, automatic synchronization or activation, background processing, and audit integrations remain deferred.
+
 ## ADR template
 
 ```markdown

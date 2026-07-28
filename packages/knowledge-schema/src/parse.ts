@@ -18,6 +18,20 @@ import {
   type KnowledgeCandidateSourceDescriptor,
   type KnowledgeRepositoryFindRequest,
 } from "./repository.js";
+import {
+  KnowledgeGovernedChangeSetSchema,
+  KnowledgeSnapshotApprovalWorkflowSchema,
+  KnowledgeSnapshotComparisonEvidenceSchema,
+  KnowledgeSnapshotComparisonRequestSchema,
+  KnowledgeSnapshotLifecycleRecordSchema,
+  KnowledgeSnapshotReviewDecisionSchema,
+  type KnowledgeGovernedChangeSet,
+  type KnowledgeSnapshotApprovalWorkflow,
+  type KnowledgeSnapshotComparisonEvidence,
+  type KnowledgeSnapshotComparisonRequest,
+  type KnowledgeSnapshotLifecycleRecord,
+  type KnowledgeSnapshotReviewDecision,
+} from "./snapshot-lifecycle.js";
 
 export function parseKnowledgeMetadata(input: unknown): KnowledgeMetadata {
   return KnowledgeMetadataSchema.parse(input);
@@ -101,4 +115,62 @@ export function parseKnowledgeCorpusChangeSet(input: unknown): KnowledgeCorpusCh
 
 export function safeParseKnowledgeCorpusChangeSet(input: unknown) {
   return KnowledgeCorpusChangeSetSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotLifecycleRecord(
+  input: unknown,
+): KnowledgeSnapshotLifecycleRecord {
+  return KnowledgeSnapshotLifecycleRecordSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotLifecycleRecord(input: unknown) {
+  return KnowledgeSnapshotLifecycleRecordSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotComparisonEvidence(
+  input: unknown,
+): KnowledgeSnapshotComparisonEvidence {
+  return KnowledgeSnapshotComparisonEvidenceSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotComparisonEvidence(input: unknown) {
+  return KnowledgeSnapshotComparisonEvidenceSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotComparisonRequest(
+  input: unknown,
+): KnowledgeSnapshotComparisonRequest {
+  return KnowledgeSnapshotComparisonRequestSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotComparisonRequest(input: unknown) {
+  return KnowledgeSnapshotComparisonRequestSchema.safeParse(input);
+}
+
+export function parseKnowledgeGovernedChangeSet(input: unknown): KnowledgeGovernedChangeSet {
+  return KnowledgeGovernedChangeSetSchema.parse(input);
+}
+
+export function safeParseKnowledgeGovernedChangeSet(input: unknown) {
+  return KnowledgeGovernedChangeSetSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotApprovalWorkflow(
+  input: unknown,
+): KnowledgeSnapshotApprovalWorkflow {
+  return KnowledgeSnapshotApprovalWorkflowSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotApprovalWorkflow(input: unknown) {
+  return KnowledgeSnapshotApprovalWorkflowSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotReviewDecision(
+  input: unknown,
+): KnowledgeSnapshotReviewDecision {
+  return KnowledgeSnapshotReviewDecisionSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotReviewDecision(input: unknown) {
+  return KnowledgeSnapshotReviewDecisionSchema.safeParse(input);
 }

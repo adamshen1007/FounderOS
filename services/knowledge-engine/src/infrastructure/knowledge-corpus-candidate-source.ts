@@ -1,10 +1,9 @@
-import { createHash } from "node:crypto";
-
 import {
   KnowledgeCandidateBatchSchema,
   KnowledgeCorpusSourceSchema,
   KnowledgeRepositorySnapshotCreationSchema,
   KnowledgeRepositorySnapshotSchema,
+  KnowledgeSnapshotComparisonEvidenceSchema,
   MigrationPathSchema,
   NonEmptyStringSchema,
   type KnowledgeCandidateBatch,
@@ -12,46 +11,23 @@ import {
   type KnowledgeCorpusSource,
   type KnowledgeRepositorySnapshot,
   type KnowledgeRepositorySnapshotObject,
+  type KnowledgeSnapshotComparisonEvidence,
 } from "@founderos/knowledge-schema";
 
 import { executeKnowledgeMigration } from "../application/execute-knowledge-migration.js";
+import {
+  createCanonicalSha256Fingerprint,
+  createKnowledgeObjectContentFingerprint,
+} from "../domain/canonical-fingerprint.js";
+import { findKnowledgeSnapshotComparisonEvidenceIntegrityIssue } from "../domain/knowledge-snapshot-comparison-evidence.js";
 import type {
   AcceptedMigrationDocumentReport,
   KnowledgeMigrationReport,
 } from "../interfaces/migration-report.js";
+import { deepFreeze } from "../domain/snapshot-lifecycle.js";
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
-}
-
-function canonicalize(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value) ?? "null";
-  }
-
-  if (Array.isArray(value)) {
-    return `[${value.map(canonicalize).join(",")}]`;
-  }
-
-  const entries = Object.entries(value)
-    .filter(([, entryValue]) => entryValue !== undefined)
-    .sort(([left], [right]) => compareStrings(left, right));
-
-  return `{${entries
-    .map(([key, entryValue]) => `${JSON.stringify(key)}:${canonicalize(entryValue)}`)
-    .join(",")}}`;
-}
-
-function sha256(value: unknown): string {
-  return createHash("sha256").update(canonicalize(value)).digest("hex");
-}
-
-function deepFreeze<T>(value: T, visited = new WeakSet<object>()): T {
-  if (value === null || typeof value !== "object" || visited.has(value)) return value;
-
-  visited.add(value);
-  for (const child of Object.values(value)) deepFreeze(child, visited);
-  return Object.freeze(value);
 }
 
 export class KnowledgeCorpusMigrationRejectedError extends Error {
@@ -82,15 +58,15 @@ export function createKnowledgeRepositorySnapshot(
   const creation = KnowledgeRepositorySnapshotCreationSchema.parse(input.creation);
   const objects: KnowledgeRepositorySnapshotObject[] = input.documents
     .map((document) => ({
-      metadataFingerprint: sha256(document.object.metadata),
-      objectFingerprint: sha256(document.object),
+      metadataFingerprint: createCanonicalSha256Fingerprint(document.object.metadata),
+      objectFingerprint: createCanonicalSha256Fingerprint(document.object),
       objectId: document.object.metadata.id,
       objectType: document.object.metadata.objectType,
       sourceHash: document.actualSourceHash,
       sourcePath: document.sourcePath,
     }))
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
-  const contentFingerprint = sha256({
+  const contentFingerprint = createCanonicalSha256Fingerprint({
     corpusId: corpus.corpusId,
     corpusVersion: corpus.corpusVersion,
     objects,
@@ -111,6 +87,45 @@ export function createKnowledgeRepositorySnapshot(
   return deepFreeze(snapshot);
 }
 
+export interface CreateKnowledgeSnapshotComparisonEvidenceInput {
+  snapshot: KnowledgeRepositorySnapshot;
+  documents: readonly AcceptedMigrationDocumentReport[];
+}
+
+export function createKnowledgeSnapshotComparisonEvidence(
+  input: CreateKnowledgeSnapshotComparisonEvidenceInput,
+): KnowledgeSnapshotComparisonEvidence {
+  const snapshot = KnowledgeRepositorySnapshotSchema.parse(input.snapshot);
+  const snapshotObjectsById = new Map(snapshot.objects.map((object) => [object.objectId, object]));
+  const objects = input.documents
+    .map((document) => {
+      const snapshotObject = snapshotObjectsById.get(document.object.metadata.id);
+      if (snapshotObject === undefined) {
+        throw new Error(
+          `Cannot create comparison evidence for missing snapshot object ${document.object.metadata.id}`,
+        );
+      }
+      return {
+        ...snapshotObject,
+        contentFingerprint: createKnowledgeObjectContentFingerprint(document.object),
+        object: document.object,
+      };
+    })
+    .sort((left, right) => compareStrings(left.objectId, right.objectId));
+
+  const evidence = KnowledgeSnapshotComparisonEvidenceSchema.parse({
+    schemaVersion: "1.0",
+    snapshotId: snapshot.snapshotId,
+    objects,
+  });
+  const integrityIssue = findKnowledgeSnapshotComparisonEvidenceIntegrityIssue(evidence);
+  if (integrityIssue !== null) {
+    throw new Error(`Cannot create snapshot comparison evidence: ${integrityIssue}`);
+  }
+
+  return deepFreeze(evidence);
+}
+
 export interface CreateKnowledgeCorpusCandidateSourceOptions {
   rootPath: string;
   manifestPath: string;
@@ -124,17 +139,20 @@ export class KnowledgeCorpusCandidateSource implements KnowledgeCandidateSource 
   public readonly corpus: KnowledgeCorpusSource;
   public readonly report: KnowledgeMigrationReport;
   public readonly snapshot: KnowledgeRepositorySnapshot;
+  public readonly snapshotComparisonEvidence: KnowledgeSnapshotComparisonEvidence;
 
   private constructor(
     batch: KnowledgeCandidateBatch,
     corpus: KnowledgeCorpusSource,
     report: KnowledgeMigrationReport,
     snapshot: KnowledgeRepositorySnapshot,
+    snapshotComparisonEvidence: KnowledgeSnapshotComparisonEvidence,
   ) {
     this.#batch = batch;
     this.corpus = corpus;
     this.report = report;
     this.snapshot = snapshot;
+    this.snapshotComparisonEvidence = snapshotComparisonEvidence;
   }
 
   public static async create(
@@ -188,8 +206,18 @@ export class KnowledgeCorpusCandidateSource implements KnowledgeCandidateSource 
       creation,
       documents: acceptedDocuments,
     });
+    const snapshotComparisonEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot,
+      documents: acceptedDocuments,
+    });
 
-    return new KnowledgeCorpusCandidateSource(batch, corpus, report, snapshot);
+    return new KnowledgeCorpusCandidateSource(
+      batch,
+      corpus,
+      report,
+      snapshot,
+      snapshotComparisonEvidence,
+    );
   }
 
   public async loadCandidates(): Promise<KnowledgeCandidateBatch> {

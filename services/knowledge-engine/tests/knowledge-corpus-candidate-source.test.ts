@@ -172,6 +172,17 @@ describe("KnowledgeCorpusCandidateSource", () => {
 
     expect(second.snapshot.snapshotId).toBe(initialized.snapshot.snapshotId);
     expect(second.snapshot.contentFingerprint).toBe(initialized.snapshot.contentFingerprint);
+    expect(
+      second.snapshotComparisonEvidence.objects.map((object) => object.contentFingerprint),
+    ).toEqual(
+      initialized.snapshotComparisonEvidence.objects.map((object) => object.contentFingerprint),
+    );
+    expect(
+      initialized.snapshotComparisonEvidence.objects.every((object) =>
+        /^[a-f0-9]{64}$/.test(object.contentFingerprint),
+      ),
+    ).toBe(true);
+    expect("contentFingerprint" in initialized.snapshot.objects[0]!).toBe(false);
     expect(second.snapshot.creation).not.toEqual(initialized.snapshot.creation);
     expect(Object.isFrozen(initialized.snapshot)).toBe(true);
     expect(Object.isFrozen(initialized.snapshot.objects)).toBe(true);

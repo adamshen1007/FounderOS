@@ -1,4 +1,7 @@
-import type { KnowledgeRepositorySnapshot } from "@founderos/knowledge-schema";
+import type {
+  KnowledgeRepositorySnapshot,
+  KnowledgeSnapshotComparisonEvidence,
+} from "@founderos/knowledge-schema";
 
 import {
   KnowledgeCorpusCandidateSource,
@@ -10,6 +13,7 @@ export interface InitializedCorpusKnowledgeRepository {
   candidateSource: KnowledgeCorpusCandidateSource;
   repository: InMemoryKnowledgeRepository;
   snapshot: KnowledgeRepositorySnapshot;
+  snapshotComparisonEvidence: KnowledgeSnapshotComparisonEvidence;
 }
 
 export async function initializeCorpusKnowledgeRepository(
@@ -18,5 +22,10 @@ export async function initializeCorpusKnowledgeRepository(
   const candidateSource = await KnowledgeCorpusCandidateSource.create(options);
   const repository = await InMemoryKnowledgeRepository.create([candidateSource]);
 
-  return { candidateSource, repository, snapshot: candidateSource.snapshot };
+  return {
+    candidateSource,
+    repository,
+    snapshot: candidateSource.snapshot,
+    snapshotComparisonEvidence: candidateSource.snapshotComparisonEvidence,
+  };
 }
