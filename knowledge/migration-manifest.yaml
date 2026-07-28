@@ -1,0 +1,163 @@
+schemaVersion: "1.0"
+corpusId: founderos-priority-1
+documents:
+  - id: founderos-constitution-v1
+    objectType: knowledge
+    sourcePath: docs/governance/FounderOS_Constitution_v1.0.md
+    destinationPath: knowledge/governance/founderos-constitution-v1.md
+    sourceHash: d51a6b734a4838655b5d56e0e2a309f8845c9b50a3925d2727a3f69a1d13bf7a
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS Constitution v1.0
+      domain: FounderOS
+      category: governance
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, constitution, governance]
+      relationships: []
+  - id: founderos-decision-framework-v1
+    objectType: knowledge
+    sourcePath: docs/governance/FounderOS_Decision_Framework_v1.0.md
+    destinationPath: knowledge/governance/founderos-decision-framework-v1.md
+    sourceHash: c9e36e4dd1cccb6edb67d55d2d48097e3689592555289641ceff67f2d965fd35
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS Decision Framework v1.0
+      domain: FounderOS
+      category: governance
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, decisions, governance]
+      relationships: []
+  - id: founderos-design-principles-v1
+    objectType: knowledge
+    sourcePath: docs/governance/FounderOS_Design_Principles_v1.0.md
+    destinationPath: knowledge/governance/founderos-design-principles-v1.md
+    sourceHash: 06da2bb91c072ec9a310582a7447ec8113bff362e62f199ba73e93468b6a4b14
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS Design Principles v1.0
+      domain: FounderOS
+      category: governance
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, design-principles, governance]
+      relationships: []
+  - id: founderos-data-architecture-v1
+    objectType: knowledge
+    sourcePath: docs/architecture/FounderOS_Data_Architecture_Specification_v1.0.md
+    destinationPath: knowledge/architecture/founderos-data-architecture-v1.md
+    sourceHash: dd125f3a0a64deff27fba45c74d96925c649bc46d06bc03b410a417c8614e591
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS Data Architecture Specification v1.0
+      domain: FounderOS
+      category: architecture
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, architecture, data]
+      relationships: []
+  - id: founderos-mcp-architecture-v1
+    objectType: knowledge
+    sourcePath: docs/architecture/FounderOS_MCP_Architecture_Specification_v1.0.md
+    destinationPath: knowledge/architecture/founderos-mcp-architecture-v1.md
+    sourceHash: 924833e968d00194868eef1ee660fe0907b60b421de1a24238b98e96f34d3a21
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS MCP Architecture Specification v1.0
+      domain: FounderOS
+      category: architecture
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, architecture, MCP]
+      relationships: []
+  - id: founderos-repository-architecture-v1
+    objectType: knowledge
+    sourcePath: docs/architecture/FounderOS_Repository_Architecture_Specification_v1.0.md
+    destinationPath: knowledge/architecture/founderos-repository-architecture-v1.md
+    sourceHash: 68f91dcb5ae9eef684d71be6ea5427b40f42905dde0ecf83c371aa57f6984253
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS Repository Architecture Specification v1.0
+      domain: FounderOS
+      category: architecture
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, architecture, repository]
+      relationships: []
+  - id: founderos-security-governance-architecture-v1
+    objectType: knowledge
+    sourcePath: docs/architecture/FounderOS_Security_and_Governance_Architecture_Specification_v1.0.md
+    destinationPath: knowledge/architecture/founderos-security-governance-architecture-v1.md
+    sourceHash: 85f6b5d6e703e298fee49873b51d94bcbe2b01a9d83d42eb0557f975ea382658
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS Security and Governance Architecture Specification v1.0
+      domain: FounderOS
+      category: architecture
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, architecture, governance, security]
+      relationships: []
+  - id: founderos-system-architecture-v1
+    objectType: knowledge
+    sourcePath: docs/architecture/FounderOS_System_Architecture_Specification_v1.0.md
+    destinationPath: knowledge/architecture/founderos-system-architecture-v1.md
+    sourceHash: 75766e04bb32c55d964dc88c461937486eb55464c70abfc76b47ce767f80d93d
+    migrationStatus: ready
+    reviewStatus: approved
+    metadata:
+      title: FounderOS System Architecture Specification v1.0
+      domain: FounderOS
+      category: architecture
+      createdAt: 2026-07-27
+      updatedAt: 2026-07-27
+      status: active
+      confidence: high
+      importance: critical
+      freshness: current
+      validationStatus: validated
+      tags: [FounderOS, architecture, system]
+      relationships: []

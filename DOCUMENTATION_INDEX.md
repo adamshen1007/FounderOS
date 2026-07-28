@@ -53,8 +53,19 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 02 Vault Ingestion Foundation Specification v1.0](./docs/migration/FounderOS_Milestone_02_Vault_Ingestion_Foundation_Specification_v1.0.md)
 - [Milestone 03 Core Migration Dry Run Specification v1.0](./docs/migration/FounderOS_Milestone_03_Core_Migration_Dry_Run_Specification_v1.0.md)
 
+### Milestone 04 — Core Vault Materialization
+
+- [Core Vault Materialization Specification v1.0](./docs/milestones/milestone-04/FounderOS_Milestone_04_Core_Vault_Materialization_Specification_v1.0.md)
+- [Knowledge Migration Manifest Specification v1.0](./docs/milestones/milestone-04/FounderOS_Knowledge_Migration_Manifest_Specification_v1.0.md)
+- [Knowledge Corpus Structure v1.0](./docs/milestones/milestone-04/FounderOS_Knowledge_Corpus_Structure_v1.0.md)
+- [Knowledge Object Lifecycle Specification v1.0](./docs/milestones/milestone-04/FounderOS_Knowledge_Object_Lifecycle_Specification_v1.0.md)
+- [Milestone 04 Acceptance Criteria v1.0](./docs/milestones/milestone-04/FounderOS_Milestone_04_Acceptance_Criteria_v1.0.md)
+- [Milestone 04 Verification Checklist v1.0](./docs/milestones/milestone-04/FounderOS_Milestone_04_Verification_Checklist_v1.0.md)
+- [Milestone 04 Codex Execution Prompt v1.0](./docs/milestones/milestone-04/FounderOS_Milestone_04_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)
 - [Contribution guide](./CONTRIBUTING.md)
 - [Changelog](./CHANGELOG.md)
+- [Repository Audit v1.0](./docs/reviews/REPOSITORY_AUDIT_v1.0.md)
