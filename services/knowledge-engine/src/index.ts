@@ -2,6 +2,14 @@ export * from "./application/ingest-markdown.js";
 export * from "./application/ingest-markdown-directory.js";
 export * from "./application/execute-knowledge-migration.js";
 export * from "./application/compare-knowledge-repository-snapshots.js";
+export * from "./application/generate-knowledge-governed-change-set.js";
+export * from "./application/manage-knowledge-snapshot-lifecycle.js";
+export * from "./application/manage-snapshot-approval-workflow.js";
+export {
+  KnowledgeSnapshotApprovalWorkflowError,
+  KnowledgeSnapshotComparisonError,
+  KnowledgeSnapshotLifecycleError,
+} from "./domain/snapshot-lifecycle.js";
 export * from "./application/initialize-corpus-knowledge-repository.js";
 export * from "./application/normalize-frontmatter.js";
 export * from "./application/query-knowledge.js";

@@ -19,6 +19,7 @@ import type {
   AcceptedMigrationDocumentReport,
   KnowledgeMigrationReport,
 } from "../interfaces/migration-report.js";
+import { deepFreeze } from "../domain/snapshot-lifecycle.js";
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -44,14 +45,6 @@ function canonicalize(value: unknown): string {
 
 function sha256(value: unknown): string {
   return createHash("sha256").update(canonicalize(value)).digest("hex");
-}
-
-function deepFreeze<T>(value: T, visited = new WeakSet<object>()): T {
-  if (value === null || typeof value !== "object" || visited.has(value)) return value;
-
-  visited.add(value);
-  for (const child of Object.values(value)) deepFreeze(child, visited);
-  return Object.freeze(value);
 }
 
 export class KnowledgeCorpusMigrationRejectedError extends Error {
@@ -81,14 +74,18 @@ export function createKnowledgeRepositorySnapshot(
   const corpus = KnowledgeCorpusSourceSchema.parse(input.corpus);
   const creation = KnowledgeRepositorySnapshotCreationSchema.parse(input.creation);
   const objects: KnowledgeRepositorySnapshotObject[] = input.documents
-    .map((document) => ({
-      metadataFingerprint: sha256(document.object.metadata),
-      objectFingerprint: sha256(document.object),
-      objectId: document.object.metadata.id,
-      objectType: document.object.metadata.objectType,
-      sourceHash: document.actualSourceHash,
-      sourcePath: document.sourcePath,
-    }))
+    .map((document) => {
+      const { metadata, ...content } = document.object;
+      return {
+        contentFingerprint: sha256(content),
+        metadataFingerprint: sha256(metadata),
+        objectFingerprint: sha256(document.object),
+        objectId: metadata.id,
+        objectType: metadata.objectType,
+        sourceHash: document.actualSourceHash,
+        sourcePath: document.sourcePath,
+      };
+    })
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
   const contentFingerprint = sha256({
     corpusId: corpus.corpusId,
