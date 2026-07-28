@@ -63,6 +63,15 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 04 Verification Checklist v1.0](./docs/milestones/milestone-04/FounderOS_Milestone_04_Verification_Checklist_v1.0.md)
 - [Milestone 04 Codex Execution Prompt v1.0](./docs/milestones/milestone-04/FounderOS_Milestone_04_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 05 — Knowledge Query Foundation
+
+- [Knowledge Query Foundation Specification v1.0](./docs/milestones/milestone-05/FounderOS_Milestone_05_Knowledge_Query_Foundation_Specification_v1.0.md)
+- [Knowledge Query Contract v1.0](./docs/milestones/milestone-05/FounderOS_Knowledge_Query_Contract_v1.0.md)
+- [Knowledge Result Contract v1.0](./docs/milestones/milestone-05/FounderOS_Knowledge_Result_Contract_v1.0.md)
+- [Knowledge Evaluation Framework v1.0](./docs/milestones/milestone-05/FounderOS_Knowledge_Evaluation_Framework_v1.0.md)
+- [Milestone 05 Acceptance Criteria v1.0](./docs/milestones/milestone-05/FounderOS_Milestone_05_Acceptance_Criteria_v1.0.md)
+- [Milestone 05 Codex Execution Prompt v1.0](./docs/milestones/milestone-05/FounderOS_Milestone_05_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

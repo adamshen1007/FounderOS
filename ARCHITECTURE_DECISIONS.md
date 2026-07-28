@@ -66,6 +66,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Use a strict, versioned YAML manifest to bind each knowledge object ID and type to one canonical source path, logical `knowledge/` destination, expected SHA-256 digest, schema metadata, migration status, and review status. Execute the manifest within one physical repository root, reject traversal and symbolic links, and materialize validated objects only in a deterministic report artifact.
 - **Consequences:** The eight Priority 1 documents become reproducibly auditable without adding persistence or changing canonical Markdown. Manifest hashes must be deliberately updated when approved source documents change, and report content is a normalized schema representation rather than a byte-for-byte source replica.
 
+## ADR-0009: Establish deterministic queries before retrieval infrastructure
+
+- **Status:** Accepted
+- **Date:** 2026-07-28
+- **Context:** Future agents and retrieval services need a stable, provenance-preserving way to select validated Knowledge Objects, but Milestone 05 excludes storage engines, semantic search, ranking, and agent integration.
+- **Decision:** Define strict query and result contracts in `@founderos/knowledge-schema` and execute them as a pure operation in `@founderos/knowledge-engine` over a caller-supplied candidate set. Apply exact-match filters and declarative context constraints by intersection, reject invalid or duplicate candidates, sort returned objects by ID, and copy source metadata into each result's provenance record.
+- **Consequences:** Query behavior is auditable, deterministic, and independently testable against the Priority 1 corpus. Callers remain responsible for supplying candidates, context constraints do not confer authorization, project matching is limited to documented object fields, and semantic relevance or ranking requires a future architecture decision.
+
 ## ADR template
 
 ```markdown

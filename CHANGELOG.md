@@ -18,3 +18,5 @@ All notable changes to FounderOS will be documented here.
 - Strict migration-manifest schemas with identity, path, hash, metadata, lifecycle, and review validation.
 - Manifest-controlled migration of all eight FounderOS Priority 1 canonical documents.
 - Path-contained migration CLI and deterministic `migration-report.json` generation.
+- Strict KnowledgeOS query and result contracts with consumer context, exact filters, and source provenance.
+- Deterministic in-memory query execution and Priority 1 corpus evaluation fixtures.
