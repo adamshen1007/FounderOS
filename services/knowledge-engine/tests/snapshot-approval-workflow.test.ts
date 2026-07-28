@@ -9,20 +9,21 @@ import {
 } from "../src/index.js";
 import {
   activeLifecycle,
+  generalKnowledgeObject,
   HASH,
   snapshot,
   snapshotEvidence,
   snapshotEvidenceObject,
   snapshotObject,
+  snapshotObjectForKnowledgeObject,
   TRANSITION_TIMES,
   validatedLifecycle,
 } from "./snapshot-lifecycle-fixtures.js";
 
 function workflowInput() {
   const activeObject = snapshotObject("alpha");
-  const proposedObject = snapshotObject("alpha", {
-    objectFingerprint: HASH("object:new"),
-  });
+  const proposedKnowledgeObject = generalKnowledgeObject("alpha", "Updated alpha content");
+  const proposedObject = snapshotObjectForKnowledgeObject(proposedKnowledgeObject);
   const activeSnapshot = snapshot("active", [activeObject]);
   const proposedSnapshot = snapshot("proposed", [proposedObject]);
   return {
@@ -31,7 +32,7 @@ function workflowInput() {
     activeSnapshotLifecycle: activeLifecycle(activeSnapshot),
     proposedSnapshot,
     proposedSnapshotEvidence: snapshotEvidence(proposedSnapshot, [
-      snapshotEvidenceObject(proposedObject, { contentFingerprint: HASH("content:new") }),
+      snapshotEvidenceObject(proposedObject, { object: proposedKnowledgeObject }),
     ]),
     proposedSnapshotLifecycle: validatedLifecycle(proposedSnapshot),
   };
@@ -133,6 +134,20 @@ describe("snapshot approval workflow", () => {
         reason: "Attempted approval with a forged baseline.",
       }),
     ).toThrow(/lifecycle record|invalid workflow/i);
+
+    const forgedContentEvidence = structuredClone(reviewing);
+    const forgedContentFingerprint = HASH("forged-content");
+    forgedContentEvidence.proposedSnapshotEvidence.objects[0]!.contentFingerprint =
+      forgedContentFingerprint;
+    forgedContentEvidence.changeSet.modifiedObjects[0]!.current.contentFingerprint =
+      forgedContentFingerprint;
+    expect(() =>
+      approveKnowledgeSnapshotApprovalWorkflow(forgedContentEvidence, {
+        actorId: "approver",
+        decidedAt: TRANSITION_TIMES[2],
+        reason: "Attempted approval with forged comparison evidence.",
+      }),
+    ).toThrow(/content fingerprint.*canonical object payload/i);
   });
 
   it("requires a matching active baseline and rejects no-op workflow initialization", () => {

@@ -5,6 +5,7 @@ import {
   KnowledgeRepositorySnapshotSchema,
 } from "./corpus.js";
 import { MigrationPathSchema } from "./migration.js";
+import { KnowledgeObjectSchema } from "./objects.js";
 import {
   IdentifierSchema,
   IsoTemporalSchema,
@@ -82,6 +83,22 @@ function snapshotObjectCollectionsEqual(
 export const KnowledgeSnapshotObjectComparisonEvidenceSchema =
   KnowledgeRepositorySnapshotObjectSchema.extend({
     contentFingerprint: Sha256DigestSchema,
+    object: KnowledgeObjectSchema,
+  }).superRefine((evidence, context) => {
+    if (evidence.object.metadata.id !== evidence.objectId) {
+      context.addIssue({
+        code: "custom",
+        message: "Canonical object payload must match the evidence object identity",
+        path: ["object", "metadata", "id"],
+      });
+    }
+    if (evidence.object.metadata.objectType !== evidence.objectType) {
+      context.addIssue({
+        code: "custom",
+        message: "Canonical object payload must match the evidence object type",
+        path: ["object", "metadata", "objectType"],
+      });
+    }
   });
 
 type SnapshotObjectComparisonEvidence = z.infer<

@@ -11,6 +11,7 @@ import {
   KnowledgeSnapshotComparisonError,
   parseWithSnapshotDomainError,
 } from "../domain/snapshot-lifecycle.js";
+import { findKnowledgeSnapshotComparisonEvidenceIntegrityIssue } from "../domain/knowledge-snapshot-comparison-evidence.js";
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -30,6 +31,17 @@ export function generateKnowledgeGovernedChangeSet(
     KnowledgeSnapshotComparisonError,
     "Cannot compare snapshots",
   );
+  for (const [label, evidence] of [
+    ["current", request.currentSnapshotEvidence],
+    ["proposed", request.proposedSnapshotEvidence],
+  ] as const) {
+    const integrityIssue = findKnowledgeSnapshotComparisonEvidenceIntegrityIssue(evidence);
+    if (integrityIssue !== null) {
+      throw new KnowledgeSnapshotComparisonError(
+        `Cannot compare snapshots: ${label} snapshot evidence failed integrity verification: ${integrityIssue}`,
+      );
+    }
+  }
   const currentById = new Map(
     request.currentSnapshotEvidence.objects.map((object) => [object.objectId, object]),
   );

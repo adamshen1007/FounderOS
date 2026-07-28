@@ -7,6 +7,8 @@ import {
   type KnowledgeRepositorySnapshot,
 } from "@founderos/knowledge-schema";
 
+import { findKnowledgeSnapshotComparisonEvidenceIntegrityIssue } from "./knowledge-snapshot-comparison-evidence.js";
+
 export class KnowledgeSnapshotLifecycleError extends Error {
   public constructor(message: string) {
     super(message);
@@ -89,12 +91,24 @@ export function parseKnowledgeSnapshotApprovalWorkflow(
   input: unknown,
   context: string,
 ): KnowledgeSnapshotApprovalWorkflow {
-  return parseWithSnapshotDomainError(
+  const workflow = parseWithSnapshotDomainError(
     KnowledgeSnapshotApprovalWorkflowSchema,
     input,
     KnowledgeSnapshotApprovalWorkflowError,
     context,
   );
+  for (const [label, evidence] of [
+    ["active", workflow.activeSnapshotEvidence],
+    ["proposed", workflow.proposedSnapshotEvidence],
+  ] as const) {
+    const integrityIssue = findKnowledgeSnapshotComparisonEvidenceIntegrityIssue(evidence);
+    if (integrityIssue !== null) {
+      throw new KnowledgeSnapshotApprovalWorkflowError(
+        `${context}: ${label} snapshot evidence failed integrity verification: ${integrityIssue}`,
+      );
+    }
+  }
+  return workflow;
 }
 
 export function deepFreeze<T>(value: T, visited = new WeakSet<object>()): T {

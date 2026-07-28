@@ -37,8 +37,36 @@ function snapshotObject(fingerprint: string, objectId = "knowledge-001") {
   };
 }
 
+function knowledgeObject(objectId = "knowledge-001") {
+  return {
+    metadata: {
+      id: objectId,
+      objectType: "knowledge" as const,
+      title: `${objectId} title`,
+      domain: "FounderOS",
+      createdAt: CREATED_AT,
+      updatedAt: CREATED_AT,
+      status: "active" as const,
+      confidence: "high" as const,
+      importance: "high" as const,
+      tags: [],
+      relationships: [],
+      source: {
+        sourceType: "official_specification" as const,
+        sourceReference: `docs/${objectId}.md`,
+        originalCreator: "FounderOS",
+      },
+    },
+    content: `${objectId} content`,
+  };
+}
+
 function comparisonObject(fingerprint: string, objectId = "knowledge-001") {
-  return { ...snapshotObject(fingerprint, objectId), contentFingerprint: fingerprint };
+  return {
+    ...snapshotObject(fingerprint, objectId),
+    contentFingerprint: fingerprint,
+    object: knowledgeObject(objectId),
+  };
 }
 
 function snapshotWithObjects(
@@ -69,6 +97,7 @@ function evidence(
   objects = value.objects.map((object) => ({
     ...object,
     contentFingerprint: object.objectFingerprint,
+    object: knowledgeObject(object.objectId),
   })),
 ) {
   return KnowledgeSnapshotComparisonEvidenceSchema.parse({
@@ -235,6 +264,16 @@ describe("KnowledgeSnapshotComparisonRequestSchema", () => {
         proposedSnapshotEvidence: evidence(proposedSnapshot),
       }).success,
     ).toBe(false);
+
+    const missingPayload = structuredClone(evidence(currentSnapshot));
+    delete (missingPayload.objects[0] as Partial<(typeof missingPayload.objects)[number]>).object;
+    expect(KnowledgeSnapshotComparisonEvidenceSchema.safeParse(missingPayload).success).toBe(false);
+
+    const mismatchedPayload = structuredClone(evidence(currentSnapshot));
+    mismatchedPayload.objects[0]!.object.metadata.id = "another-object";
+    expect(KnowledgeSnapshotComparisonEvidenceSchema.safeParse(mismatchedPayload).success).toBe(
+      false,
+    );
   });
 });
 

@@ -15,6 +15,10 @@ import {
   createKnowledgeSnapshotLifecycleRecord,
   validateKnowledgeSnapshotLifecycle,
 } from "../src/index.js";
+import {
+  createCanonicalSha256Fingerprint,
+  createKnowledgeObjectContentFingerprint,
+} from "../src/domain/canonical-fingerprint.js";
 import type { AcceptedMigrationDocumentReport } from "../src/interfaces/migration-report.js";
 
 export const HASH = (value: string): string => createHash("sha256").update(value).digest("hex");
@@ -42,13 +46,21 @@ export function snapshotObject(
   objectId: string,
   overrides: Partial<KnowledgeRepositorySnapshotObject> = {},
 ): KnowledgeRepositorySnapshotObject {
+  return snapshotObjectForKnowledgeObject(generalKnowledgeObject(objectId), overrides);
+}
+
+export function snapshotObjectForKnowledgeObject(
+  object: KnowledgeObject,
+  overrides: Partial<KnowledgeRepositorySnapshotObject> = {},
+): KnowledgeRepositorySnapshotObject {
+  const objectId = object.metadata.id;
   return {
     objectId,
-    objectType: "knowledge",
+    objectType: object.metadata.objectType,
     sourcePath: `docs/${objectId}.md`,
     sourceHash: HASH(`source:${objectId}`),
-    metadataFingerprint: HASH(`metadata:${objectId}`),
-    objectFingerprint: HASH(`object:${objectId}`),
+    metadataFingerprint: createCanonicalSha256Fingerprint(object.metadata),
+    objectFingerprint: createCanonicalSha256Fingerprint(object),
     ...overrides,
   };
 }
@@ -77,9 +89,11 @@ export function snapshotEvidenceObject(
   object: KnowledgeRepositorySnapshotObject,
   overrides: Partial<KnowledgeSnapshotObjectComparisonEvidence> = {},
 ): KnowledgeSnapshotObjectComparisonEvidence {
+  const canonicalObject = overrides.object ?? generalKnowledgeObject(object.objectId);
   return {
     ...object,
-    contentFingerprint: HASH(`content:${object.objectId}`),
+    contentFingerprint: createKnowledgeObjectContentFingerprint(canonicalObject),
+    object: canonicalObject,
     ...overrides,
   };
 }
@@ -146,6 +160,29 @@ export function metadata<T extends KnowledgeObject["metadata"]["objectType"]>(
       originalCreator: "FounderOS",
     },
   };
+}
+
+export function generalKnowledgeObject(objectId: string, content = `${objectId} content`) {
+  return {
+    metadata: metadata(objectId, "knowledge"),
+    content,
+  } satisfies KnowledgeObject;
+}
+
+export function decisionKnowledgeObject(objectId: string) {
+  return {
+    metadata: metadata(objectId, "decision"),
+    context: "Context",
+    problem: "Problem",
+    options: ["A", "B"],
+    chosenOption: "A",
+    reasoning: "Reason",
+    expectedOutcome: "Outcome",
+    risks: [],
+    relatedProjectIds: [],
+    reviewDate: "2026-08-28T00:00:00.000Z",
+    lessonsLearned: [],
+  } satisfies KnowledgeObject;
 }
 
 export function document(object: KnowledgeObject): AcceptedMigrationDocumentReport {

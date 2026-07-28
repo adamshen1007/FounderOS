@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import { generateKnowledgeGovernedChangeSet } from "../src/index.js";
+import { createKnowledgeObjectContentFingerprint } from "../src/domain/canonical-fingerprint.js";
 import {
+  decisionKnowledgeObject,
+  generalKnowledgeObject,
   HASH,
   snapshot,
   snapshotEvidence,
   snapshotEvidenceObject,
   snapshotObject,
+  snapshotObjectForKnowledgeObject,
 } from "./snapshot-lifecycle-fixtures.js";
 
 describe("governed snapshot comparison", () => {
   it("classifies complete, stable object evidence and snapshot-level changes", () => {
+    const modifiedKnowledgeObject = decisionKnowledgeObject("modified");
     const previousObjects = [
       snapshotObject("alpha"),
       snapshotObject("removed"),
@@ -19,12 +24,9 @@ describe("governed snapshot comparison", () => {
     const proposedObjects = [
       snapshotObject("added"),
       snapshotObject("alpha"),
-      snapshotObject("modified", {
-        objectType: "decision",
+      snapshotObjectForKnowledgeObject(modifiedKnowledgeObject, {
         sourcePath: "docs/moved-modified.md",
         sourceHash: HASH("source:changed"),
-        metadataFingerprint: HASH("metadata:changed"),
-        objectFingerprint: HASH("object:changed"),
       }),
     ];
     const previous = snapshot("previous", previousObjects);
@@ -35,7 +37,7 @@ describe("governed snapshot comparison", () => {
       proposed.objects.map((object) =>
         snapshotEvidenceObject(
           object,
-          object.objectId === "modified" ? { contentFingerprint: HASH("content:changed") } : {},
+          object.objectId === "modified" ? { object: modifiedKnowledgeObject } : {},
         ),
       ),
     );
@@ -60,6 +62,54 @@ describe("governed snapshot comparison", () => {
       { objectId: "modified", changeTypes: ["content", "metadata", "object_type", "provenance"] },
     ]);
     expect(Object.isFrozen(changeSet.modifiedObjects[0]?.current)).toBe(true);
+  });
+
+  it("verifies distinct-snapshot content evidence against canonical object payloads", () => {
+    const currentObject = snapshotObject("alpha");
+    const proposedKnowledgeObject = generalKnowledgeObject("alpha", "Changed canonical content");
+    const proposedObject = snapshotObjectForKnowledgeObject(proposedKnowledgeObject);
+    const current = snapshot("content-current", [currentObject]);
+    const proposed = snapshot("content-proposed", [proposedObject]);
+    const currentEvidence = snapshotEvidence(current);
+    const proposedEvidence = snapshotEvidence(proposed, [
+      snapshotEvidenceObject(proposedObject, { object: proposedKnowledgeObject }),
+    ]);
+
+    const legitimate = generateKnowledgeGovernedChangeSet({
+      currentSnapshot: current,
+      currentSnapshotEvidence: currentEvidence,
+      proposedSnapshot: proposed,
+      proposedSnapshotEvidence: proposedEvidence,
+    });
+    expect(legitimate.modifiedObjects).toMatchObject([
+      { objectId: "alpha", changeTypes: ["content"] },
+    ]);
+
+    const forgedEvidence = structuredClone(proposedEvidence);
+    forgedEvidence.objects[0]!.contentFingerprint = HASH("forged-content");
+    expect(() =>
+      generateKnowledgeGovernedChangeSet({
+        currentSnapshot: current,
+        currentSnapshotEvidence: currentEvidence,
+        proposedSnapshot: proposed,
+        proposedSnapshotEvidence: forgedEvidence,
+      }),
+    ).toThrow(/content fingerprint.*canonical object payload/i);
+
+    const forgedPayloadEvidence = structuredClone(proposedEvidence);
+    const forgedPayload = forgedPayloadEvidence.objects[0]!.object;
+    if (!("content" in forgedPayload)) throw new Error("Expected general knowledge payload");
+    forgedPayload.content = "Caller-forged canonical content";
+    forgedPayloadEvidence.objects[0]!.contentFingerprint =
+      createKnowledgeObjectContentFingerprint(forgedPayload);
+    expect(() =>
+      generateKnowledgeGovernedChangeSet({
+        currentSnapshot: current,
+        currentSnapshotEvidence: currentEvidence,
+        proposedSnapshot: proposed,
+        proposedSnapshotEvidence: forgedPayloadEvidence,
+      }),
+    ).toThrow(/object fingerprint.*canonical object payload/i);
   });
 
   it("returns a deterministic empty change set for the same content-addressed snapshot", () => {
@@ -148,44 +198,43 @@ describe("governed snapshot comparison", () => {
   });
 
   it("detects each object change class and rejects unexplained aggregate changes", () => {
-    const previousObject = snapshotObject("alpha");
+    const previousKnowledgeObject = generalKnowledgeObject("alpha");
+    const previousObject = snapshotObjectForKnowledgeObject(previousKnowledgeObject);
     const current = snapshot("current", [previousObject]);
     const currentEvidence = snapshotEvidence(current);
+    const metadataChangedKnowledgeObject = generalKnowledgeObject("alpha");
+    metadataChangedKnowledgeObject.metadata.title = "Changed title";
+    const typeChangedKnowledgeObject = decisionKnowledgeObject("alpha");
     const cases = [
       [
-        "content",
-        snapshotObject("alpha", { objectFingerprint: HASH("object:content") }),
-        { contentFingerprint: HASH("content-only") },
+        ["metadata"],
+        snapshotObjectForKnowledgeObject(metadataChangedKnowledgeObject),
+        metadataChangedKnowledgeObject,
       ],
       [
-        "metadata",
-        snapshotObject("alpha", {
-          metadataFingerprint: HASH("metadata-only"),
-          objectFingerprint: HASH("object:metadata"),
+        ["provenance"],
+        snapshotObjectForKnowledgeObject(previousKnowledgeObject, {
+          sourceHash: HASH("source-only"),
         }),
-        {},
+        previousKnowledgeObject,
       ],
-      ["provenance", snapshotObject("alpha", { sourceHash: HASH("source-only") }), {}],
       [
-        "object_type",
-        snapshotObject("alpha", {
-          objectType: "decision" as const,
-          objectFingerprint: HASH("object:type"),
-        }),
-        {},
+        ["content", "metadata", "object_type"],
+        snapshotObjectForKnowledgeObject(typeChangedKnowledgeObject),
+        typeChangedKnowledgeObject,
       ],
     ] as const;
-    for (const [changeType, proposedObject, evidenceOverrides] of cases) {
-      const proposed = snapshot(changeType, [proposedObject]);
+    for (const [changeTypes, proposedObject, canonicalObject] of cases) {
+      const proposed = snapshot(changeTypes.join("-"), [proposedObject]);
       const changeSet = generateKnowledgeGovernedChangeSet({
         currentSnapshot: current,
         currentSnapshotEvidence: currentEvidence,
         proposedSnapshot: proposed,
         proposedSnapshotEvidence: snapshotEvidence(proposed, [
-          snapshotEvidenceObject(proposedObject, evidenceOverrides),
+          snapshotEvidenceObject(proposedObject, { object: canonicalObject }),
         ]),
       });
-      expect(changeSet.modifiedObjects).toMatchObject([{ changeTypes: [changeType] }]);
+      expect(changeSet.modifiedObjects).toMatchObject([{ changeTypes }]);
     }
 
     const unexplainedObject = snapshotObject("alpha", {
@@ -199,6 +248,6 @@ describe("governed snapshot comparison", () => {
         proposedSnapshot: unexplained,
         proposedSnapshotEvidence: snapshotEvidence(unexplained),
       }),
-    ).toThrow(/cannot explain object fingerprint change/i);
+    ).toThrow(/object fingerprint.*canonical object payload/i);
   });
 });

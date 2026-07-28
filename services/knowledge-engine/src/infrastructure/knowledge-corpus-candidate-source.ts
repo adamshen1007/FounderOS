@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import {
   KnowledgeCandidateBatchSchema,
   KnowledgeCorpusSourceSchema,
@@ -17,6 +15,11 @@ import {
 } from "@founderos/knowledge-schema";
 
 import { executeKnowledgeMigration } from "../application/execute-knowledge-migration.js";
+import {
+  createCanonicalSha256Fingerprint,
+  createKnowledgeObjectContentFingerprint,
+} from "../domain/canonical-fingerprint.js";
+import { findKnowledgeSnapshotComparisonEvidenceIntegrityIssue } from "../domain/knowledge-snapshot-comparison-evidence.js";
 import type {
   AcceptedMigrationDocumentReport,
   KnowledgeMigrationReport,
@@ -25,28 +28,6 @@ import { deepFreeze } from "../domain/snapshot-lifecycle.js";
 
 function compareStrings(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
-}
-
-function canonicalize(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value) ?? "null";
-  }
-
-  if (Array.isArray(value)) {
-    return `[${value.map(canonicalize).join(",")}]`;
-  }
-
-  const entries = Object.entries(value)
-    .filter(([, entryValue]) => entryValue !== undefined)
-    .sort(([left], [right]) => compareStrings(left, right));
-
-  return `{${entries
-    .map(([key, entryValue]) => `${JSON.stringify(key)}:${canonicalize(entryValue)}`)
-    .join(",")}}`;
-}
-
-function sha256(value: unknown): string {
-  return createHash("sha256").update(canonicalize(value)).digest("hex");
 }
 
 export class KnowledgeCorpusMigrationRejectedError extends Error {
@@ -77,15 +58,15 @@ export function createKnowledgeRepositorySnapshot(
   const creation = KnowledgeRepositorySnapshotCreationSchema.parse(input.creation);
   const objects: KnowledgeRepositorySnapshotObject[] = input.documents
     .map((document) => ({
-      metadataFingerprint: sha256(document.object.metadata),
-      objectFingerprint: sha256(document.object),
+      metadataFingerprint: createCanonicalSha256Fingerprint(document.object.metadata),
+      objectFingerprint: createCanonicalSha256Fingerprint(document.object),
       objectId: document.object.metadata.id,
       objectType: document.object.metadata.objectType,
       sourceHash: document.actualSourceHash,
       sourcePath: document.sourcePath,
     }))
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
-  const contentFingerprint = sha256({
+  const contentFingerprint = createCanonicalSha256Fingerprint({
     corpusId: corpus.corpusId,
     corpusVersion: corpus.corpusVersion,
     objects,
@@ -124,19 +105,25 @@ export function createKnowledgeSnapshotComparisonEvidence(
           `Cannot create comparison evidence for missing snapshot object ${document.object.metadata.id}`,
         );
       }
-      const { metadata: _metadata, ...content } = document.object;
-      void _metadata;
-      return { ...snapshotObject, contentFingerprint: sha256(content) };
+      return {
+        ...snapshotObject,
+        contentFingerprint: createKnowledgeObjectContentFingerprint(document.object),
+        object: document.object,
+      };
     })
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
 
-  return deepFreeze(
-    KnowledgeSnapshotComparisonEvidenceSchema.parse({
-      schemaVersion: "1.0",
-      snapshotId: snapshot.snapshotId,
-      objects,
-    }),
-  );
+  const evidence = KnowledgeSnapshotComparisonEvidenceSchema.parse({
+    schemaVersion: "1.0",
+    snapshotId: snapshot.snapshotId,
+    objects,
+  });
+  const integrityIssue = findKnowledgeSnapshotComparisonEvidenceIntegrityIssue(evidence);
+  if (integrityIssue !== null) {
+    throw new Error(`Cannot create snapshot comparison evidence: ${integrityIssue}`);
+  }
+
+  return deepFreeze(evidence);
 }
 
 export interface CreateKnowledgeCorpusCandidateSourceOptions {
