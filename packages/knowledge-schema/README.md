@@ -28,6 +28,8 @@ Milestone 06 adds candidate-source and repository access contracts. A candidate 
 
 Milestone 07 adds strict corpus-source, repository-snapshot, and corpus-change contracts. Snapshots bind a corpus version and manifest reference to deterministic object, metadata, source-hash, and content fingerprints. Change sets report version, identity, source, metadata, and object changes without defining refresh execution or persistence behavior.
 
+Milestone 08 adds strict lifecycle, governed comparison, change-set, and approval-workflow contracts. `KnowledgeSnapshotLifecycleRecordSchema` validates ordered lifecycle evidence from `created` through `archived`; `KnowledgeSnapshotComparisonRequestSchema` requires distinct snapshots from one corpus; `KnowledgeGovernedChangeSetSchema` preserves deterministic, classified added, removed, and modified object evidence; and `KnowledgeSnapshotApprovalWorkflowSchema` aligns the active baseline, proposed snapshot, change set, lifecycle record, and review status. These schemas define validation contracts only: the package contains no lifecycle orchestration, review behavior, activation behavior, persistence, or automation.
+
 ## Usage
 
 ```typescript
@@ -58,6 +60,20 @@ import {
 } from "@founderos/knowledge-schema";
 
 const batch = KnowledgeCandidateBatchSchema.parse(candidateBatchInput);
+```
+
+```typescript
+import {
+  KnowledgeGovernedChangeSetSchema,
+  KnowledgeSnapshotApprovalWorkflowSchema,
+  KnowledgeSnapshotComparisonRequestSchema,
+  KnowledgeSnapshotLifecycleRecordSchema,
+} from "@founderos/knowledge-schema";
+
+const lifecycle = KnowledgeSnapshotLifecycleRecordSchema.parse(lifecycleInput);
+const comparison = KnowledgeSnapshotComparisonRequestSchema.parse(comparisonInput);
+const changeSet = KnowledgeGovernedChangeSetSchema.parse(changeSetInput);
+const workflow = KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.

@@ -92,6 +92,17 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 07 Verification Checklist v1.0](./docs/milestones/milestone-07/FounderOS_Milestone_07_Verification_Checklist_v1.0.md)
 - [Milestone 07 Codex Execution Prompt v1.0](./docs/milestones/milestone-07/FounderOS_Milestone_07_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 08 — Knowledge Snapshot Lifecycle Management Foundation
+
+- [Knowledge Snapshot Lifecycle Management Foundation Specification v1.0](./docs/milestones/milestone-08/FounderOS_Milestone_08_Knowledge_Snapshot_Lifecycle_Management_Foundation_Specification_v1.0.md)
+- [Knowledge Snapshot Lifecycle Model v1.0](./docs/milestones/milestone-08/FounderOS_Knowledge_Snapshot_Lifecycle_Model_v1.0.md)
+- [Snapshot Comparison Contract v1.0](./docs/milestones/milestone-08/FounderOS_Snapshot_Comparison_Contract_v1.0.md)
+- [Knowledge Change Set Model v1.0](./docs/milestones/milestone-08/FounderOS_Knowledge_Change_Set_Model_v1.0.md)
+- [Snapshot Approval Workflow v1.0](./docs/milestones/milestone-08/FounderOS_Snapshot_Approval_Workflow_v1.0.md)
+- [Milestone 08 Acceptance Criteria v1.0](./docs/milestones/milestone-08/FounderOS_Milestone_08_Acceptance_Criteria_v1.0.md)
+- [Milestone 08 Verification Checklist v1.0](./docs/milestones/milestone-08/FounderOS_Milestone_08_Verification_Checklist_v1.0.md)
+- [Milestone 08 Codex Execution Prompt v1.0](./docs/milestones/milestone-08/FounderOS_Milestone_08_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

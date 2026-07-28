@@ -10,6 +10,8 @@ Milestone 06 makes repository-backed querying the primary access flow. Candidate
 
 Milestone 07 connects the approved Priority 1 corpus to that repository boundary. `KnowledgeCorpusCandidateSource` reuses the manifest-controlled migration workflow, rejects partially valid corpus states, preserves object provenance, and creates an immutable repository snapshot with a content-derived identity. `initializeCorpusKnowledgeRepository` exposes the unchanged repository query capability, while `compareKnowledgeRepositorySnapshots` reports deterministic corpus changes without performing refreshes.
 
+Milestone 08 provides pure public lifecycle and approval-workflow operations for caller-supplied snapshots. `createKnowledgeSnapshotLifecycleRecord` creates immutable `created` evidence, and `transitionKnowledgeSnapshotLifecycle` advances it one validated state at a time with strictly increasing actor and time evidence. `generateKnowledgeGovernedChangeSet` deterministically compares distinct snapshots from the same corpus. `initializeKnowledgeSnapshotApprovalWorkflow` requires a matching active baseline lifecycle and a distinct proposed snapshot with a matching `validated` lifecycle. `beginKnowledgeSnapshotApprovalReview`, `approveKnowledgeSnapshotApprovalWorkflow`, and `rejectKnowledgeSnapshotApprovalWorkflow` manage human review evidence; `activateKnowledgeSnapshotApprovalWorkflow` can produce `active` lifecycle evidence only after approval.
+
 ```typescript
 import { queryKnowledgeObjects } from "@founderos/knowledge-engine";
 
@@ -40,10 +42,54 @@ const { repository, snapshot } = await initializeCorpusKnowledgeRepository({
 });
 ```
 
+```typescript
+import {
+  activateKnowledgeSnapshotApprovalWorkflow,
+  approveKnowledgeSnapshotApprovalWorkflow,
+  beginKnowledgeSnapshotApprovalReview,
+  createKnowledgeSnapshotLifecycleRecord,
+  initializeKnowledgeSnapshotApprovalWorkflow,
+  transitionKnowledgeSnapshotLifecycle,
+} from "@founderos/knowledge-engine";
+
+// `activeSnapshot` and `proposedSnapshot` are distinct, schema-valid snapshots from one corpus.
+const activeLifecycle = ["validator", "reviewer", "approver", "activator"].reduce(
+  (record, actorId, index) =>
+    transitionKnowledgeSnapshotLifecycle(record, activeSnapshot, {
+      actorId,
+      transitionedAt: `2026-07-28T00:0${index + 1}:00.000Z`,
+    }),
+  createKnowledgeSnapshotLifecycleRecord(activeSnapshot),
+);
+const proposedValidated = transitionKnowledgeSnapshotLifecycle(
+  createKnowledgeSnapshotLifecycleRecord(proposedSnapshot),
+  proposedSnapshot,
+  { actorId: "validator", transitionedAt: "2026-07-28T00:01:00.000Z" },
+);
+const workflow = initializeKnowledgeSnapshotApprovalWorkflow({
+  activeSnapshot,
+  activeSnapshotLifecycle: activeLifecycle,
+  proposedSnapshot,
+  proposedSnapshotLifecycle: proposedValidated,
+});
+const reviewing = beginKnowledgeSnapshotApprovalReview(workflow, {
+  actorId: "reviewer",
+  transitionedAt: "2026-07-28T00:02:00.000Z",
+});
+const approved = approveKnowledgeSnapshotApprovalWorkflow(reviewing, {
+  actorId: "approver",
+  transitionedAt: "2026-07-28T00:03:00.000Z",
+});
+const activated = activateKnowledgeSnapshotApprovalWorkflow(approved, {
+  actorId: "activator",
+  transitionedAt: "2026-07-28T00:04:00.000Z",
+});
+```
+
 From the repository root:
 
 ```bash
 pnpm knowledge:migrate
 ```
 
-Directory ingestion is recursive, Markdown-only, stable in path order, and does not follow symbolic links. Repository access is an immutable in-memory snapshot, not durable storage. Snapshot comparison detects changes but does not synchronize them. Querying remains deterministic exact filtering—not full-text search, semantic retrieval, ranking, or authorization. The implementation remains read-only and does not watch a vault or implement persistence, embeddings, graph storage, Hermes, agents, or MCP integrations.
+Directory ingestion is recursive, Markdown-only, stable in path order, and does not follow symbolic links. Repository access is an immutable in-memory snapshot, not durable storage. Lifecycle records, governed change sets, and approval workflows are immutable, deterministic, and human-controlled in-memory evidence; they do not persist, synchronize, automatically approve, or automatically activate a snapshot. Snapshot comparison detects changes but does not synchronize them. Querying remains deterministic exact filtering—not full-text search, semantic retrieval, ranking, or authorization. The implementation remains read-only and does not watch a vault or implement persistence, embeddings, graph storage, Hermes, agents, or MCP integrations.

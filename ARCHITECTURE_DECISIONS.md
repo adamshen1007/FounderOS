@@ -90,6 +90,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Implement an engine-owned corpus candidate source that delegates canonical reads, approval gates, path safety, source hashes, and object validation to the Milestone 04 migration workflow. Materialize its accepted objects through the existing in-memory repository and create a schema-validated, deeply immutable snapshot whose identity is derived from corpus version, manifest reference, and deterministic per-object fingerprints. Compare snapshots through a pure, sorted change-set contract.
 - **Consequences:** The Priority 1 corpus can be queried through the existing repository abstraction with traceable, reproducible knowledge-state identity. Creation metadata does not alter content identity. Change detection is observable but inert: durable storage, automatic refresh, watchers, synchronization, retrieval intelligence, and agent integration remain future decisions.
 
+## ADR-0012: Govern immutable snapshots through deterministic lifecycle evidence
+
+- **Status:** Accepted
+- **Date:** 2026-07-28
+- **Context:** Milestone 07 provides immutable, content-addressed snapshots and deterministic comparison, but controlled knowledge evolution also needs explicit lifecycle and human-review evidence without introducing durable workflow infrastructure.
+- **Decision:** Immutable snapshots evolve only through validated, deterministic lifecycle transitions and human-approved governed change sets. `@founderos/knowledge-schema` owns the shared lifecycle, comparison, change-set, and workflow contracts; `@founderos/knowledge-engine` owns pure orchestration over those contracts. Activation readiness is in-memory governance evidence, not persistence or automation.
+- **Consequences:** Lifecycle history, comparison evidence, and review status are reproducible, immutable, and independently testable. Callers must supply valid snapshots, transition evidence, an active baseline lifecycle, and a distinct validated proposed lifecycle; no state is retained between calls. Durable workflow storage, authorization, notifications, automatic synchronization or activation, background processing, and audit integrations remain deferred.
+
 ## ADR template
 
 ```markdown
