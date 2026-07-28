@@ -18,6 +18,16 @@ import {
   type KnowledgeCandidateSourceDescriptor,
   type KnowledgeRepositoryFindRequest,
 } from "./repository.js";
+import {
+  KnowledgeGovernedChangeSetSchema,
+  KnowledgeSnapshotApprovalWorkflowSchema,
+  KnowledgeSnapshotComparisonRequestSchema,
+  KnowledgeSnapshotLifecycleRecordSchema,
+  type KnowledgeGovernedChangeSet,
+  type KnowledgeSnapshotApprovalWorkflow,
+  type KnowledgeSnapshotComparisonRequest,
+  type KnowledgeSnapshotLifecycleRecord,
+} from "./snapshot-lifecycle.js";
 
 export function parseKnowledgeMetadata(input: unknown): KnowledgeMetadata {
   return KnowledgeMetadataSchema.parse(input);
@@ -101,4 +111,42 @@ export function parseKnowledgeCorpusChangeSet(input: unknown): KnowledgeCorpusCh
 
 export function safeParseKnowledgeCorpusChangeSet(input: unknown) {
   return KnowledgeCorpusChangeSetSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotLifecycleRecord(
+  input: unknown,
+): KnowledgeSnapshotLifecycleRecord {
+  return KnowledgeSnapshotLifecycleRecordSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotLifecycleRecord(input: unknown) {
+  return KnowledgeSnapshotLifecycleRecordSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotComparisonRequest(
+  input: unknown,
+): KnowledgeSnapshotComparisonRequest {
+  return KnowledgeSnapshotComparisonRequestSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotComparisonRequest(input: unknown) {
+  return KnowledgeSnapshotComparisonRequestSchema.safeParse(input);
+}
+
+export function parseKnowledgeGovernedChangeSet(input: unknown): KnowledgeGovernedChangeSet {
+  return KnowledgeGovernedChangeSetSchema.parse(input);
+}
+
+export function safeParseKnowledgeGovernedChangeSet(input: unknown) {
+  return KnowledgeGovernedChangeSetSchema.safeParse(input);
+}
+
+export function parseKnowledgeSnapshotApprovalWorkflow(
+  input: unknown,
+): KnowledgeSnapshotApprovalWorkflow {
+  return KnowledgeSnapshotApprovalWorkflowSchema.parse(input);
+}
+
+export function safeParseKnowledgeSnapshotApprovalWorkflow(input: unknown) {
+  return KnowledgeSnapshotApprovalWorkflowSchema.safeParse(input);
 }

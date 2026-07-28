@@ -64,6 +64,7 @@ export const KnowledgeRepositorySnapshotObjectSchema = z
     objectType: KnowledgeObjectTypeSchema,
     sourcePath: MigrationSourcePathSchema,
     sourceHash: Sha256DigestSchema,
+    contentFingerprint: Sha256DigestSchema,
     metadataFingerprint: Sha256DigestSchema,
     objectFingerprint: Sha256DigestSchema,
   })
