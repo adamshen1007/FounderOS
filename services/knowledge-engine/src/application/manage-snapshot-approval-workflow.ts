@@ -1,5 +1,6 @@
 import {
   KnowledgeSnapshotApprovalWorkflowSchema,
+  KnowledgeSnapshotLifecycleRecordSchema,
   type KnowledgeSnapshotApprovalWorkflow,
   type KnowledgeSnapshotLifecycleRecord,
   type KnowledgeRepositorySnapshot,
@@ -9,7 +10,6 @@ import {
   deepFreeze,
   KnowledgeSnapshotApprovalWorkflowError,
   parseKnowledgeSnapshotApprovalWorkflow,
-  parseKnowledgeSnapshotLifecycleRecord,
   parseWithSnapshotDomainError,
   type SnapshotLifecycleTransitionEvidence,
 } from "../domain/snapshot-lifecycle.js";
@@ -18,6 +18,7 @@ import { transitionKnowledgeSnapshotLifecycle } from "./manage-knowledge-snapsho
 
 export interface InitializeKnowledgeSnapshotApprovalWorkflowInput {
   activeSnapshot: KnowledgeRepositorySnapshot;
+  activeSnapshotLifecycle: KnowledgeSnapshotLifecycleRecord;
   proposedSnapshot: KnowledgeRepositorySnapshot;
   proposedSnapshotLifecycle: KnowledgeSnapshotLifecycleRecord;
 }
@@ -25,8 +26,26 @@ export interface InitializeKnowledgeSnapshotApprovalWorkflowInput {
 export function initializeKnowledgeSnapshotApprovalWorkflow(
   input: InitializeKnowledgeSnapshotApprovalWorkflowInput,
 ): KnowledgeSnapshotApprovalWorkflow {
-  const proposedSnapshotLifecycle = parseKnowledgeSnapshotLifecycleRecord(
+  const activeSnapshotLifecycle = parseWithSnapshotDomainError(
+    KnowledgeSnapshotLifecycleRecordSchema,
+    input.activeSnapshotLifecycle,
+    KnowledgeSnapshotApprovalWorkflowError,
+    "Cannot initialize workflow with invalid active lifecycle",
+  );
+  if (activeSnapshotLifecycle.status !== "active") {
+    throw new KnowledgeSnapshotApprovalWorkflowError(
+      "A snapshot approval workflow requires an active baseline snapshot lifecycle",
+    );
+  }
+  if (activeSnapshotLifecycle.snapshotId !== input.activeSnapshot.snapshotId) {
+    throw new KnowledgeSnapshotApprovalWorkflowError(
+      "The active snapshot lifecycle must identify the active baseline snapshot",
+    );
+  }
+  const proposedSnapshotLifecycle = parseWithSnapshotDomainError(
+    KnowledgeSnapshotLifecycleRecordSchema,
     input.proposedSnapshotLifecycle,
+    KnowledgeSnapshotApprovalWorkflowError,
     "Cannot initialize workflow with invalid proposed lifecycle",
   );
   if (proposedSnapshotLifecycle.status !== "validated") {
