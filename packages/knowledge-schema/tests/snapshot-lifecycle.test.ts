@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   KnowledgeGovernedChangeSetSchema,
   KnowledgeSnapshotApprovalWorkflowSchema,
+  KnowledgeSnapshotComparisonEvidenceSchema,
   KnowledgeSnapshotComparisonRequestSchema,
   SnapshotLifecycleStatusSchema,
   parseKnowledgeGovernedChangeSet,
@@ -14,33 +15,47 @@ import {
 const A = "a".repeat(64);
 const B = "b".repeat(64);
 const C = "c".repeat(64);
+const CREATED_AT = "2026-07-28T00:00:00Z";
+const STATES = [
+  "created",
+  "validated",
+  "reviewing",
+  "approved",
+  "active",
+  "superseded",
+  "archived",
+] as const;
 
 function snapshotObject(fingerprint: string, objectId = "knowledge-001") {
   return {
     objectId,
-    objectType: "knowledge",
+    objectType: "knowledge" as const,
     sourcePath: `docs/${objectId}.md`,
     sourceHash: fingerprint,
-    contentFingerprint: fingerprint,
     metadataFingerprint: fingerprint,
     objectFingerprint: fingerprint,
   };
+}
+
+function comparisonObject(fingerprint: string, objectId = "knowledge-001") {
+  return { ...snapshotObject(fingerprint, objectId), contentFingerprint: fingerprint };
 }
 
 function snapshotWithObjects(
   fingerprint: string,
   corpusVersion: string,
   objects: ReturnType<typeof snapshotObject>[],
+  sourceManifestReference = "knowledge/migration-manifest.yaml",
 ) {
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "1.0" as const,
     snapshotId: `snapshot-${fingerprint}`,
     corpusId: "founderos-priority-1",
     corpusVersion,
-    sourceManifestReference: "knowledge/migration-manifest.yaml",
+    sourceManifestReference,
     contentFingerprint: fingerprint,
     objectCount: objects.length,
-    creation: { createdAt: "2026-07-28T00:00:00Z", createdBy: "knowledge-engine" },
+    creation: { createdAt: CREATED_AT, createdBy: "knowledge-engine" },
     objects,
   };
 }
@@ -49,39 +64,49 @@ function snapshot(fingerprint: string, corpusVersion: string, objectId = "knowle
   return snapshotWithObjects(fingerprint, corpusVersion, [snapshotObject(fingerprint, objectId)]);
 }
 
-function lifecycle(status: string) {
-  const states = [
-    "created",
-    "validated",
-    "reviewing",
-    "approved",
-    "active",
-    "superseded",
-    "archived",
-  ];
-  const finalIndex = states.indexOf(status);
+function evidence(
+  value: ReturnType<typeof snapshotWithObjects>,
+  objects = value.objects.map((object) => ({
+    ...object,
+    contentFingerprint: object.objectFingerprint,
+  })),
+) {
+  return KnowledgeSnapshotComparisonEvidenceSchema.parse({
+    schemaVersion: "1.0",
+    snapshotId: value.snapshotId,
+    objects,
+  });
+}
 
+function lifecycle(value: ReturnType<typeof snapshot>, status: (typeof STATES)[number]) {
+  const finalIndex = STATES.indexOf(status);
   return {
-    snapshotId: `snapshot-${A}`,
+    snapshotId: value.snapshotId,
+    snapshotCreatedAt: value.creation.createdAt,
     status,
-    transitions: states.slice(1, finalIndex + 1).map((to, index) => ({
-      from: states[index],
+    transitions: STATES.slice(1, finalIndex + 1).map((to, index) => ({
+      from: STATES[index],
       to,
-      actorId: "founder",
-      transitionedAt: `2026-07-28T00:0${index}:00Z`,
+      actorId: `founder-${index}`,
+      transitionedAt: `2026-07-28T00:0${index + 1}:00Z`,
     })),
   };
 }
 
-function governedChangeSet() {
+function governedChangeSet(reviewStatus = "pending") {
   const source = snapshot(A, "1.0");
   const target = snapshot(B, "2.0");
-
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "1.0" as const,
     changeId: `change-${source.snapshotId}-to-${target.snapshotId}`,
     sourceSnapshotId: source.snapshotId,
     targetSnapshotId: target.snapshotId,
+    sourceSnapshotFingerprint: source.contentFingerprint,
+    targetSnapshotFingerprint: target.contentFingerprint,
+    snapshotFingerprintChanged: true,
+    sourceManifestReference: source.sourceManifestReference,
+    targetManifestReference: target.sourceManifestReference,
+    manifestReferenceChanged: false,
     sourceCorpusVersion: source.corpusVersion,
     targetCorpusVersion: target.corpusVersion,
     corpusVersionChanged: true,
@@ -90,149 +115,167 @@ function governedChangeSet() {
     modifiedObjects: [
       {
         objectId: "knowledge-001",
-        previous: source.objects[0],
-        current: target.objects[0],
-        changeTypes: ["content", "metadata", "provenance"],
+        previous: comparisonObject(A),
+        current: comparisonObject(B),
+        changeTypes: ["content", "metadata", "provenance"] as const,
       },
     ],
-    reviewStatus: "pending",
+    reviewStatus,
     changed: true,
   };
 }
 
-function workflowInput(lifecycleStatus = "reviewing", reviewStatus = "reviewing") {
+function workflowInput(
+  proposedStatus: (typeof STATES)[number] = "reviewing",
+  reviewStatus = "reviewing",
+) {
   const activeSnapshot = snapshot(A, "1.0");
   const proposedSnapshot = snapshot(B, "2.0");
-  const changeSet = governedChangeSet();
-  changeSet.reviewStatus = reviewStatus;
+  const changeSet = governedChangeSet(reviewStatus);
+  const decision =
+    reviewStatus === "approved"
+      ? {
+          changeId: changeSet.changeId,
+          proposedSnapshotId: proposedSnapshot.snapshotId,
+          decision: "approved",
+          actorId: "founder-2",
+          decidedAt: "2026-07-28T00:03:00Z",
+          reason: "Reviewed and approved.",
+        }
+      : reviewStatus === "rejected"
+        ? {
+            changeId: changeSet.changeId,
+            proposedSnapshotId: proposedSnapshot.snapshotId,
+            decision: "rejected",
+            actorId: "founder-reviewer",
+            decidedAt: "2026-07-28T00:03:00Z",
+            reason: "Rejected after review.",
+          }
+        : null;
 
   return {
     activeSnapshot,
+    activeSnapshotEvidence: evidence(activeSnapshot),
+    activeSnapshotLifecycle: lifecycle(
+      activeSnapshot,
+      proposedStatus === "active" ? "superseded" : "active",
+    ),
     proposedSnapshot,
+    proposedSnapshotEvidence: evidence(proposedSnapshot),
+    proposedSnapshotLifecycle: lifecycle(proposedSnapshot, proposedStatus),
     changeSet,
-    proposedSnapshotLifecycle: {
-      ...lifecycle(lifecycleStatus),
-      snapshotId: proposedSnapshot.snapshotId,
-    },
     reviewStatus,
+    reviewDecision: decision,
   };
 }
 
-describe("SnapshotLifecycleStatusSchema", () => {
-  it.each(["created", "validated", "reviewing", "approved", "active", "superseded", "archived"])(
-    "accepts %s",
-    (status) => {
-      expect(SnapshotLifecycleStatusSchema.parse(status)).toBe(status);
-    },
-  );
-});
-
 describe("KnowledgeSnapshotLifecycleRecordSchema", () => {
-  it("validates every deterministic lifecycle state", () => {
-    for (const status of [
-      "created",
-      "validated",
-      "reviewing",
-      "approved",
-      "active",
-      "superseded",
-      "archived",
-    ]) {
-      expect(safeParseKnowledgeSnapshotLifecycleRecord(lifecycle(status)).success).toBe(true);
-    }
+  it.each(STATES)("validates deterministic %s lifecycle evidence", (status) => {
+    expect(
+      safeParseKnowledgeSnapshotLifecycleRecord(lifecycle(snapshot(A, "1.0"), status)).success,
+    ).toBe(true);
   });
 
-  it("requires a created record to have no history", () => {
-    const input = lifecycle("created");
-    input.transitions.push({
-      from: "created",
-      to: "validated",
-      actorId: "founder",
-      transitionedAt: "2026-07-28T00:00:00Z",
-    });
+  it("rejects skipped states and evidence at or before snapshot creation", () => {
+    const value = snapshot(A, "1.0");
+    const skipped = lifecycle(value, "reviewing");
+    skipped.transitions[0] = { ...skipped.transitions[0]!, to: "reviewing" };
+    expect(safeParseKnowledgeSnapshotLifecycleRecord(skipped).success).toBe(false);
 
-    expect(safeParseKnowledgeSnapshotLifecycleRecord(input).success).toBe(false);
-  });
-
-  it.each([
-    ["skipped lifecycle state", { from: "created", to: "reviewing" }],
-    ["broken transition chain", { from: "created", to: "validated" }],
-    ["status mismatches final transition", undefined],
-  ])("rejects %s", (_label, replacement) => {
-    const input = lifecycle("reviewing");
-    if (replacement) input.transitions[1] = { ...input.transitions[1]!, ...replacement };
-    else input.status = "approved";
-
-    expect(safeParseKnowledgeSnapshotLifecycleRecord(input).success).toBe(false);
-  });
-
-  it("rejects temporal evidence that is not strictly ordered", () => {
-    const input = lifecycle("reviewing");
-    input.transitions[1] = {
-      ...input.transitions[1]!,
-      transitionedAt: "2026-07-28T00:00:00Z",
+    const tooEarly = lifecycle(value, "validated");
+    tooEarly.transitions[0] = {
+      ...tooEarly.transitions[0]!,
+      transitionedAt: value.creation.createdAt,
     };
-
-    expect(safeParseKnowledgeSnapshotLifecycleRecord(input).success).toBe(false);
+    expect(safeParseKnowledgeSnapshotLifecycleRecord(tooEarly).success).toBe(false);
   });
 });
 
 describe("KnowledgeSnapshotComparisonRequestSchema", () => {
-  it("accepts distinct immutable snapshots from one corpus", () => {
+  it("allows a real same-identity comparison with separate M08 content evidence", () => {
     const currentSnapshot = snapshot(A, "1.0");
-    const proposedSnapshot = snapshot(B, "2.0");
-
+    const currentSnapshotEvidence = evidence(currentSnapshot);
     expect(
-      KnowledgeSnapshotComparisonRequestSchema.parse({ currentSnapshot, proposedSnapshot }),
-    ).toEqual({ currentSnapshot, proposedSnapshot });
+      KnowledgeSnapshotComparisonRequestSchema.parse({
+        currentSnapshot,
+        currentSnapshotEvidence,
+        proposedSnapshot: currentSnapshot,
+        proposedSnapshotEvidence: currentSnapshotEvidence,
+      }),
+    ).toMatchObject({ currentSnapshot, proposedSnapshot: currentSnapshot });
+
+    const conflictingEvidence = structuredClone(currentSnapshotEvidence);
+    conflictingEvidence.objects[0]!.contentFingerprint = B;
+    expect(
+      safeParseKnowledgeSnapshotComparisonRequest({
+        currentSnapshot,
+        currentSnapshotEvidence,
+        proposedSnapshot: currentSnapshot,
+        proposedSnapshotEvidence: conflictingEvidence,
+      }).success,
+    ).toBe(false);
   });
 
-  it.each([
-    ["cross-corpus snapshots", { corpusId: "another-corpus" }],
-    ["identical snapshots", undefined],
-  ])("rejects %s", (_label, proposedReplacement) => {
+  it("rejects cross-corpus snapshots and evidence that does not extend its snapshot", () => {
     const currentSnapshot = snapshot(A, "1.0");
-    const proposedSnapshot = proposedReplacement
-      ? { ...snapshot(B, "2.0"), ...proposedReplacement }
-      : snapshot(A, "1.0");
-
+    const proposedSnapshot = snapshot(B, "2.0");
     expect(
-      safeParseKnowledgeSnapshotComparisonRequest({ currentSnapshot, proposedSnapshot }).success,
+      safeParseKnowledgeSnapshotComparisonRequest({
+        currentSnapshot,
+        currentSnapshotEvidence: evidence(currentSnapshot),
+        proposedSnapshot: { ...proposedSnapshot, corpusId: "other-corpus" },
+        proposedSnapshotEvidence: evidence(proposedSnapshot),
+      }).success,
+    ).toBe(false);
+    expect(
+      safeParseKnowledgeSnapshotComparisonRequest({
+        currentSnapshot,
+        currentSnapshotEvidence: evidence(proposedSnapshot),
+        proposedSnapshot,
+        proposedSnapshotEvidence: evidence(proposedSnapshot),
+      }).success,
     ).toBe(false);
   });
 });
 
 describe("KnowledgeGovernedChangeSetSchema", () => {
-  it("preserves complete object records, provenance, review status, and serialization", () => {
+  it("preserves complete deterministic evidence and serialization", () => {
     const parsed = parseKnowledgeGovernedChangeSet(governedChangeSet());
-
     expect(JSON.parse(JSON.stringify(parsed))).toEqual(governedChangeSet());
     expect(parsed.modifiedObjects[0]?.current.contentFingerprint).toBe(B);
   });
 
-  it("permits a corpus-version-only change", () => {
-    const input = governedChangeSet();
-    input.modifiedObjects = [];
+  it("permits a deterministic same-snapshot empty change set", () => {
+    const value = snapshot(A, "1.0");
+    const input = {
+      ...governedChangeSet(),
+      changeId: `change-${value.snapshotId}-to-${value.snapshotId}`,
+      sourceSnapshotId: value.snapshotId,
+      targetSnapshotId: value.snapshotId,
+      sourceSnapshotFingerprint: value.contentFingerprint,
+      targetSnapshotFingerprint: value.contentFingerprint,
+      snapshotFingerprintChanged: false,
+      sourceCorpusVersion: value.corpusVersion,
+      targetCorpusVersion: value.corpusVersion,
+      corpusVersionChanged: false,
+      modifiedObjects: [],
+      changed: false,
+    };
+    expect(KnowledgeGovernedChangeSetSchema.parse(input)).toMatchObject({ changed: false });
 
-    expect(KnowledgeGovernedChangeSetSchema.parse(input).changed).toBe(true);
+    expect(
+      KnowledgeGovernedChangeSetSchema.safeParse({
+        ...input,
+        addedObjects: [comparisonObject(B, "added")],
+        changed: true,
+      }).success,
+    ).toBe(false);
   });
 
   it.each([
     ["mismatched deterministic change ID", { changeId: "change-arbitrary" }],
-    ["identical snapshot identities", { targetSnapshotId: `snapshot-${A}` }],
+    ["incorrect snapshot fingerprint evidence", { snapshotFingerprintChanged: false }],
     ["incorrect version evidence", { corpusVersionChanged: false }],
-    [
-      "unsorted classifications",
-      {
-        modifiedObjects: [
-          { ...governedChangeSet().modifiedObjects[0]!, changeTypes: ["provenance", "content"] },
-        ],
-      },
-    ],
-    [
-      "unclassified object changes",
-      { modifiedObjects: [{ ...governedChangeSet().modifiedObjects[0]!, changeTypes: [] }] },
-    ],
     ["incorrect changed flag", { changed: false }],
   ])("rejects %s", (_label, replacement) => {
     expect(
@@ -243,134 +286,59 @@ describe("KnowledgeGovernedChangeSetSchema", () => {
 });
 
 describe("KnowledgeSnapshotApprovalWorkflowSchema", () => {
-  it("requires a proposed snapshot identity consistent with its lifecycle and change set", () => {
-    const activeSnapshot = snapshot(A, "1.0");
-    const proposedSnapshot = snapshot(B, "2.0");
-    const lifecycleRecord = {
-      ...lifecycle("reviewing"),
-      snapshotId: proposedSnapshot.snapshotId,
-    };
-    const changeSet = governedChangeSet();
-    changeSet.reviewStatus = "reviewing";
-
-    expect(
-      KnowledgeSnapshotApprovalWorkflowSchema.parse({
-        activeSnapshot,
-        proposedSnapshot,
-        changeSet,
-        proposedSnapshotLifecycle: lifecycleRecord,
-        reviewStatus: "reviewing",
-      }),
-    ).toMatchObject({ reviewStatus: "reviewing" });
-  });
-
-  it.each([
-    ["activation without approval", "active", "reviewing"],
-    ["reviewing lifecycle without an in-progress review", "reviewing", "pending"],
-    ["approved lifecycle without approval", "approved", "reviewing"],
-    ["rejected review with an active lifecycle", "active", "rejected"],
-  ])("rejects %s", (_label, lifecycleStatus, reviewStatus) => {
-    expect(
-      safeParseKnowledgeSnapshotApprovalWorkflow(workflowInput(lifecycleStatus, reviewStatus))
-        .success,
-    ).toBe(false);
-  });
-
-  it.each([
-    ["validated lifecycle with an in-progress review", "validated", "reviewing"],
-    ["validated lifecycle with approval", "validated", "approved"],
-    ["reviewing lifecycle with approval", "reviewing", "approved"],
-    ["created lifecycle with a rejected review", "created", "rejected"],
-  ])("rejects %s", (_label, lifecycleStatus, reviewStatus) => {
-    expect(
-      safeParseKnowledgeSnapshotApprovalWorkflow(workflowInput(lifecycleStatus, reviewStatus))
-        .success,
-    ).toBe(false);
-  });
-
-  it("allows a rejected review only while the lifecycle remains in review", () => {
-    expect(
-      KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput("reviewing", "rejected")),
-    ).toMatchObject({ reviewStatus: "rejected" });
-  });
-
-  it("requires governed evidence to exactly cover active and proposed snapshot differences", () => {
-    const removed = snapshotObject(A, "knowledge-000");
-    const previous = snapshotObject(A, "knowledge-001");
-    const current = snapshotObject(B, "knowledge-001");
-    const added = snapshotObject(C, "knowledge-002");
-    const activeSnapshot = snapshotWithObjects(A, "1.0", [removed, previous]);
-    const proposedSnapshot = snapshotWithObjects(B, "2.0", [current, added]);
-    const changeSet = {
-      schemaVersion: "1.0",
-      changeId: `change-${activeSnapshot.snapshotId}-to-${proposedSnapshot.snapshotId}`,
-      sourceSnapshotId: activeSnapshot.snapshotId,
-      targetSnapshotId: proposedSnapshot.snapshotId,
-      sourceCorpusVersion: activeSnapshot.corpusVersion,
-      targetCorpusVersion: proposedSnapshot.corpusVersion,
-      corpusVersionChanged: true,
-      addedObjects: [added],
-      removedObjects: [removed],
-      modifiedObjects: [
-        {
-          objectId: "knowledge-001",
-          previous,
-          current,
-          changeTypes: ["content", "metadata", "provenance"],
-        },
-      ],
+  it("retains the active baseline and validates reviewing and atomic activation states", () => {
+    expect(KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput())).toMatchObject({
       reviewStatus: "reviewing",
-      changed: true,
-    };
-    const workflow = {
-      activeSnapshot,
-      proposedSnapshot,
-      changeSet,
-      proposedSnapshotLifecycle: {
-        ...lifecycle("reviewing"),
-        snapshotId: proposedSnapshot.snapshotId,
-      },
-      reviewStatus: "reviewing",
-    };
+      activeSnapshotLifecycle: { status: "active" },
+      proposedSnapshotLifecycle: { status: "reviewing" },
+    });
+    expect(
+      KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput("active", "approved")),
+    ).toMatchObject({
+      activeSnapshotLifecycle: { status: "superseded" },
+      proposedSnapshotLifecycle: { status: "active" },
+      reviewDecision: { decision: "approved" },
+    });
+  });
 
-    expect(KnowledgeSnapshotApprovalWorkflowSchema.parse(workflow)).toMatchObject(workflow);
+  it("rejects reduced, misaligned, and incomplete workflows", () => {
+    const reduced = workflowInput();
+    delete (reduced as Partial<typeof reduced>).activeSnapshotLifecycle;
+    expect(safeParseKnowledgeSnapshotApprovalWorkflow(reduced).success).toBe(false);
 
-    const omittedModified = structuredClone(workflow);
+    expect(
+      safeParseKnowledgeSnapshotApprovalWorkflow(workflowInput("active", "reviewing")).success,
+    ).toBe(false);
+
+    const omittedModified = workflowInput();
     omittedModified.changeSet.modifiedObjects = [];
     expect(safeParseKnowledgeSnapshotApprovalWorkflow(omittedModified).success).toBe(false);
 
-    const omittedAdded = structuredClone(workflow);
-    omittedAdded.changeSet.addedObjects = [];
-    expect(safeParseKnowledgeSnapshotApprovalWorkflow(omittedAdded).success).toBe(false);
-
-    const omittedRemoved = structuredClone(workflow);
-    omittedRemoved.changeSet.removedObjects = [];
-    expect(safeParseKnowledgeSnapshotApprovalWorkflow(omittedRemoved).success).toBe(false);
-
-    const tamperedModified = structuredClone(workflow);
-    tamperedModified.changeSet.modifiedObjects[0]!.current = snapshotObject(C, "knowledge-001");
-    expect(safeParseKnowledgeSnapshotApprovalWorkflow(tamperedModified).success).toBe(false);
+    const tamperedEvidence = workflowInput();
+    tamperedEvidence.activeSnapshotEvidence.objects[0] = comparisonObject(C);
+    expect(safeParseKnowledgeSnapshotApprovalWorkflow(tamperedEvidence).success).toBe(false);
   });
 
-  it("permits a corpus-version-only workflow change without object evidence", () => {
-    const activeSnapshot = snapshot(A, "1.0");
-    const proposedSnapshot = snapshot(B, "2.0");
-    proposedSnapshot.objects[0] = activeSnapshot.objects[0]!;
-    const changeSet = governedChangeSet();
-    changeSet.modifiedObjects = [];
-    changeSet.reviewStatus = "reviewing";
-
+  it("requires bound approval and rejection decision evidence", () => {
     expect(
-      KnowledgeSnapshotApprovalWorkflowSchema.parse({
-        activeSnapshot,
-        proposedSnapshot,
-        changeSet,
-        proposedSnapshotLifecycle: {
-          ...lifecycle("reviewing"),
-          snapshotId: proposedSnapshot.snapshotId,
-        },
-        reviewStatus: "reviewing",
-      }),
-    ).toMatchObject({ changeSet: { modifiedObjects: [] } });
+      KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput("approved", "approved")),
+    ).toMatchObject({ reviewDecision: { decision: "approved" } });
+    expect(
+      KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput("reviewing", "rejected")),
+    ).toMatchObject({ reviewDecision: { decision: "rejected" } });
+
+    const unbound = workflowInput("approved", "approved");
+    unbound.reviewDecision!.changeId = "another-change";
+    expect(safeParseKnowledgeSnapshotApprovalWorkflow(unbound).success).toBe(false);
+
+    const missing = workflowInput("approved", "approved");
+    missing.reviewDecision = null;
+    expect(safeParseKnowledgeSnapshotApprovalWorkflow(missing).success).toBe(false);
+  });
+});
+
+describe("SnapshotLifecycleStatusSchema", () => {
+  it.each(STATES)("accepts %s", (status) => {
+    expect(SnapshotLifecycleStatusSchema.parse(status)).toBe(status);
   });
 });

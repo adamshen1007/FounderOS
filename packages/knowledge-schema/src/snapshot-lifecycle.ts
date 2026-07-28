@@ -4,7 +4,13 @@ import {
   KnowledgeRepositorySnapshotObjectSchema,
   KnowledgeRepositorySnapshotSchema,
 } from "./corpus.js";
-import { IdentifierSchema, IsoTemporalSchema, NonEmptyStringSchema } from "./primitives.js";
+import { MigrationPathSchema } from "./migration.js";
+import {
+  IdentifierSchema,
+  IsoTemporalSchema,
+  NonEmptyStringSchema,
+  Sha256DigestSchema,
+} from "./primitives.js";
 
 const SNAPSHOT_LIFECYCLE_STATES = [
   "created",
@@ -24,16 +30,6 @@ export const SnapshotObjectChangeTypeSchema = z.enum([
   "object_type",
   "provenance",
 ]);
-
-const ALLOWED_LIFECYCLE_STATUSES_BY_REVIEW_STATUS: Record<
-  z.infer<typeof SnapshotReviewStatusSchema>,
-  readonly z.infer<typeof SnapshotLifecycleStatusSchema>[]
-> = {
-  pending: ["created", "validated"],
-  reviewing: ["reviewing"],
-  approved: ["approved", "active"],
-  rejected: ["reviewing"],
-};
 
 function isSortedUnique(values: readonly string[]): boolean {
   return (
@@ -56,9 +52,111 @@ function requireSortedUnique(
   }
 }
 
+type SnapshotObject = z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>;
+type Snapshot = z.infer<typeof KnowledgeRepositorySnapshotSchema>;
+
+function snapshotObjectsEqual(left: SnapshotObject, right: SnapshotObject): boolean {
+  return (
+    left.objectId === right.objectId &&
+    left.objectType === right.objectType &&
+    left.sourcePath === right.sourcePath &&
+    left.sourceHash === right.sourceHash &&
+    left.metadataFingerprint === right.metadataFingerprint &&
+    left.objectFingerprint === right.objectFingerprint
+  );
+}
+
+function snapshotObjectCollectionsEqual(
+  left: readonly SnapshotObject[],
+  right: readonly SnapshotObject[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((object, index) => {
+      const comparison = right[index];
+      return comparison !== undefined && snapshotObjectsEqual(object, comparison);
+    })
+  );
+}
+
+export const KnowledgeSnapshotObjectComparisonEvidenceSchema =
+  KnowledgeRepositorySnapshotObjectSchema.extend({
+    contentFingerprint: Sha256DigestSchema,
+  });
+
+type SnapshotObjectComparisonEvidence = z.infer<
+  typeof KnowledgeSnapshotObjectComparisonEvidenceSchema
+>;
+
+function comparisonObjectsEqual(
+  left: SnapshotObjectComparisonEvidence,
+  right: SnapshotObjectComparisonEvidence,
+): boolean {
+  return snapshotObjectsEqual(left, right) && left.contentFingerprint === right.contentFingerprint;
+}
+
+function comparisonObjectCollectionsEqual(
+  left: readonly SnapshotObjectComparisonEvidence[],
+  right: readonly SnapshotObjectComparisonEvidence[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((object, index) => {
+      const comparison = right[index];
+      return comparison !== undefined && comparisonObjectsEqual(object, comparison);
+    })
+  );
+}
+
+export const KnowledgeSnapshotComparisonEvidenceSchema = z
+  .object({
+    schemaVersion: z.literal("1.0"),
+    snapshotId: IdentifierSchema,
+    objects: z.array(KnowledgeSnapshotObjectComparisonEvidenceSchema),
+  })
+  .strict()
+  .superRefine((evidence, context) => {
+    requireSortedUnique(
+      evidence.objects.map((object) => object.objectId),
+      context,
+      "objects",
+    );
+  });
+
+type SnapshotComparisonEvidence = z.infer<typeof KnowledgeSnapshotComparisonEvidenceSchema>;
+
+function requireEvidenceMatchesSnapshot(
+  snapshot: Snapshot,
+  evidence: SnapshotComparisonEvidence,
+  context: z.RefinementCtx,
+  path: "currentSnapshotEvidence" | "proposedSnapshotEvidence" | "activeSnapshotEvidence",
+): void {
+  if (evidence.snapshotId !== snapshot.snapshotId) {
+    context.addIssue({
+      code: "custom",
+      message: "Comparison evidence must identify its snapshot",
+      path: [path, "snapshotId"],
+    });
+  }
+
+  if (
+    evidence.objects.length !== snapshot.objects.length ||
+    evidence.objects.some((object, index) => {
+      const snapshotObject = snapshot.objects[index];
+      return snapshotObject === undefined || !snapshotObjectsEqual(object, snapshotObject);
+    })
+  ) {
+    context.addIssue({
+      code: "custom",
+      message: "Comparison evidence must exactly extend every snapshot object descriptor",
+      path: [path, "objects"],
+    });
+  }
+}
+
 function snapshotObjectChangeTypes(
-  previous: z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>,
-  current: z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>,
+  previous: SnapshotObjectComparisonEvidence,
+  current: SnapshotObjectComparisonEvidence,
 ): string[] {
   const changeTypes: string[] = [];
 
@@ -70,34 +168,6 @@ function snapshotObjectChangeTypes(
   if (previous.objectType !== current.objectType) changeTypes.push("object_type");
 
   return changeTypes.sort();
-}
-
-function snapshotObjectsEqual(
-  left: z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>,
-  right: z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>,
-): boolean {
-  return (
-    left.objectId === right.objectId &&
-    left.objectType === right.objectType &&
-    left.sourcePath === right.sourcePath &&
-    left.sourceHash === right.sourceHash &&
-    left.contentFingerprint === right.contentFingerprint &&
-    left.metadataFingerprint === right.metadataFingerprint &&
-    left.objectFingerprint === right.objectFingerprint
-  );
-}
-
-function snapshotObjectCollectionsEqual(
-  left: readonly z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>[],
-  right: readonly z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>[],
-): boolean {
-  return (
-    left.length === right.length &&
-    left.every((object, index) => {
-      const comparison = right[index];
-      return comparison !== undefined && snapshotObjectsEqual(object, comparison);
-    })
-  );
 }
 
 export const KnowledgeSnapshotLifecycleTransitionSchema = z
@@ -112,6 +182,7 @@ export const KnowledgeSnapshotLifecycleTransitionSchema = z
 export const KnowledgeSnapshotLifecycleRecordSchema = z
   .object({
     snapshotId: IdentifierSchema,
+    snapshotCreatedAt: IsoTemporalSchema,
     status: SnapshotLifecycleStatusSchema,
     transitions: z.array(KnowledgeSnapshotLifecycleTransitionSchema),
   })
@@ -138,14 +209,16 @@ export const KnowledgeSnapshotLifecycleRecordSchema = z
           path: ["transitions", index],
         });
       }
-      const previousTransition = record.transitions[index - 1];
-      if (
-        previousTransition &&
-        Date.parse(previousTransition.transitionedAt) >= Date.parse(transition.transitionedAt)
-      ) {
+
+      const previousTemporalEvidence =
+        record.transitions[index - 1]?.transitionedAt ?? record.snapshotCreatedAt;
+      if (Date.parse(previousTemporalEvidence) >= Date.parse(transition.transitionedAt)) {
         context.addIssue({
           code: "custom",
-          message: "Transition history must be ordered by increasing temporal evidence",
+          message:
+            index === 0
+              ? "Lifecycle evidence must occur after snapshot creation"
+              : "Transition history must be ordered by increasing temporal evidence",
           path: ["transitions", index, "transitionedAt"],
         });
       }
@@ -164,7 +237,9 @@ export const KnowledgeSnapshotLifecycleRecordSchema = z
 export const KnowledgeSnapshotComparisonRequestSchema = z
   .object({
     currentSnapshot: KnowledgeRepositorySnapshotSchema,
+    currentSnapshotEvidence: KnowledgeSnapshotComparisonEvidenceSchema,
     proposedSnapshot: KnowledgeRepositorySnapshotSchema,
+    proposedSnapshotEvidence: KnowledgeSnapshotComparisonEvidenceSchema,
   })
   .strict()
   .superRefine((request, context) => {
@@ -175,20 +250,55 @@ export const KnowledgeSnapshotComparisonRequestSchema = z
         path: ["proposedSnapshot", "corpusId"],
       });
     }
+    requireEvidenceMatchesSnapshot(
+      request.currentSnapshot,
+      request.currentSnapshotEvidence,
+      context,
+      "currentSnapshotEvidence",
+    );
+    requireEvidenceMatchesSnapshot(
+      request.proposedSnapshot,
+      request.proposedSnapshotEvidence,
+      context,
+      "proposedSnapshotEvidence",
+    );
+
     if (request.currentSnapshot.snapshotId === request.proposedSnapshot.snapshotId) {
-      context.addIssue({
-        code: "custom",
-        message: "Snapshot comparison requires distinct snapshot identities",
-        path: ["proposedSnapshot", "snapshotId"],
-      });
+      const snapshotsRepresentSameIdentity =
+        request.currentSnapshot.corpusVersion === request.proposedSnapshot.corpusVersion &&
+        request.currentSnapshot.sourceManifestReference ===
+          request.proposedSnapshot.sourceManifestReference &&
+        snapshotObjectCollectionsEqual(
+          request.currentSnapshot.objects,
+          request.proposedSnapshot.objects,
+        );
+      if (!snapshotsRepresentSameIdentity) {
+        context.addIssue({
+          code: "custom",
+          message: "The same snapshot identity must have identical content-bearing fields",
+          path: ["proposedSnapshot"],
+        });
+      }
+      if (
+        !comparisonObjectCollectionsEqual(
+          request.currentSnapshotEvidence.objects,
+          request.proposedSnapshotEvidence.objects,
+        )
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "The same snapshot identity must have identical comparison evidence",
+          path: ["proposedSnapshotEvidence"],
+        });
+      }
     }
   });
 
 export const KnowledgeModifiedSnapshotObjectSchema = z
   .object({
     objectId: IdentifierSchema,
-    previous: KnowledgeRepositorySnapshotObjectSchema,
-    current: KnowledgeRepositorySnapshotObjectSchema,
+    previous: KnowledgeSnapshotObjectComparisonEvidenceSchema,
+    current: KnowledgeSnapshotObjectComparisonEvidenceSchema,
     changeTypes: z.array(SnapshotObjectChangeTypeSchema).min(1),
   })
   .strict()
@@ -229,21 +339,34 @@ export const KnowledgeGovernedChangeSetSchema = z
     changeId: IdentifierSchema,
     sourceSnapshotId: IdentifierSchema,
     targetSnapshotId: IdentifierSchema,
+    sourceSnapshotFingerprint: Sha256DigestSchema,
+    targetSnapshotFingerprint: Sha256DigestSchema,
+    snapshotFingerprintChanged: z.boolean(),
+    sourceManifestReference: MigrationPathSchema,
+    targetManifestReference: MigrationPathSchema,
+    manifestReferenceChanged: z.boolean(),
     sourceCorpusVersion: NonEmptyStringSchema,
     targetCorpusVersion: NonEmptyStringSchema,
     corpusVersionChanged: z.boolean(),
-    addedObjects: z.array(KnowledgeRepositorySnapshotObjectSchema),
-    removedObjects: z.array(KnowledgeRepositorySnapshotObjectSchema),
+    addedObjects: z.array(KnowledgeSnapshotObjectComparisonEvidenceSchema),
+    removedObjects: z.array(KnowledgeSnapshotObjectComparisonEvidenceSchema),
     modifiedObjects: z.array(KnowledgeModifiedSnapshotObjectSchema),
     reviewStatus: SnapshotReviewStatusSchema,
     changed: z.boolean(),
   })
   .strict()
   .superRefine((changeSet, context) => {
-    if (changeSet.sourceSnapshotId === changeSet.targetSnapshotId) {
+    if (changeSet.sourceSnapshotId !== `snapshot-${changeSet.sourceSnapshotFingerprint}`) {
       context.addIssue({
         code: "custom",
-        message: "Governed change sets require distinct source and target snapshot identities",
+        message: "Source snapshot identity must match its fingerprint evidence",
+        path: ["sourceSnapshotId"],
+      });
+    }
+    if (changeSet.targetSnapshotId !== `snapshot-${changeSet.targetSnapshotFingerprint}`) {
+      context.addIssue({
+        code: "custom",
+        message: "Target snapshot identity must match its fingerprint evidence",
         path: ["targetSnapshotId"],
       });
     }
@@ -255,6 +378,26 @@ export const KnowledgeGovernedChangeSetSchema = z
         message:
           "changeId must be deterministically derived from source and target snapshot identities",
         path: ["changeId"],
+      });
+    }
+    if (
+      changeSet.snapshotFingerprintChanged !==
+      (changeSet.sourceSnapshotFingerprint !== changeSet.targetSnapshotFingerprint)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "snapshotFingerprintChanged must match the compared snapshot fingerprints",
+        path: ["snapshotFingerprintChanged"],
+      });
+    }
+    if (
+      changeSet.manifestReferenceChanged !==
+      (changeSet.sourceManifestReference !== changeSet.targetManifestReference)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "manifestReferenceChanged must match the compared manifest references",
+        path: ["manifestReferenceChanged"],
       });
     }
     if (
@@ -298,26 +441,72 @@ export const KnowledgeGovernedChangeSetSchema = z
     }
 
     const detected =
+      changeSet.snapshotFingerprintChanged ||
+      changeSet.manifestReferenceChanged ||
       changeSet.corpusVersionChanged ||
       changeSet.addedObjects.length > 0 ||
       changeSet.removedObjects.length > 0 ||
       changeSet.modifiedObjects.length > 0;
+    if (changeSet.sourceSnapshotId === changeSet.targetSnapshotId && detected) {
+      context.addIssue({
+        code: "custom",
+        message: "The same snapshot identity must produce an empty governed change set",
+        path: ["targetSnapshotId"],
+      });
+    }
     if (changeSet.changed !== detected) {
       context.addIssue({
         code: "custom",
-        message: "changed must reflect version, added, removed, or modified object changes",
+        message: "changed must reflect every represented snapshot or object change",
         path: ["changed"],
       });
     }
   });
 
+export const KnowledgeSnapshotReviewDecisionSchema = z
+  .object({
+    changeId: IdentifierSchema,
+    proposedSnapshotId: IdentifierSchema,
+    decision: z.enum(["approved", "rejected"]),
+    actorId: IdentifierSchema,
+    decidedAt: IsoTemporalSchema,
+    reason: NonEmptyStringSchema,
+  })
+  .strict();
+
+function requireLifecycleMatchesSnapshot(
+  snapshot: Snapshot,
+  lifecycle: z.infer<typeof KnowledgeSnapshotLifecycleRecordSchema>,
+  context: z.RefinementCtx,
+  path: "activeSnapshotLifecycle" | "proposedSnapshotLifecycle",
+): void {
+  if (lifecycle.snapshotId !== snapshot.snapshotId) {
+    context.addIssue({
+      code: "custom",
+      message: "Lifecycle record must identify its snapshot",
+      path: [path, "snapshotId"],
+    });
+  }
+  if (lifecycle.snapshotCreatedAt !== snapshot.creation.createdAt) {
+    context.addIssue({
+      code: "custom",
+      message: "Lifecycle record must preserve the snapshot creation time",
+      path: [path, "snapshotCreatedAt"],
+    });
+  }
+}
+
 export const KnowledgeSnapshotApprovalWorkflowSchema = z
   .object({
     activeSnapshot: KnowledgeRepositorySnapshotSchema,
+    activeSnapshotEvidence: KnowledgeSnapshotComparisonEvidenceSchema,
+    activeSnapshotLifecycle: KnowledgeSnapshotLifecycleRecordSchema,
     proposedSnapshot: KnowledgeRepositorySnapshotSchema,
-    changeSet: KnowledgeGovernedChangeSetSchema,
+    proposedSnapshotEvidence: KnowledgeSnapshotComparisonEvidenceSchema,
     proposedSnapshotLifecycle: KnowledgeSnapshotLifecycleRecordSchema,
+    changeSet: KnowledgeGovernedChangeSetSchema,
     reviewStatus: SnapshotReviewStatusSchema,
+    reviewDecision: KnowledgeSnapshotReviewDecisionSchema.nullable(),
   })
   .strict()
   .superRefine((workflow, context) => {
@@ -328,40 +517,60 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
         path: ["proposedSnapshot", "corpusId"],
       });
     }
-    if (workflow.activeSnapshot.snapshotId !== workflow.changeSet.sourceSnapshotId) {
+    if (
+      workflow.activeSnapshot.snapshotId === workflow.proposedSnapshot.snapshotId ||
+      !workflow.changeSet.changed
+    ) {
       context.addIssue({
         code: "custom",
-        message: "The active snapshot must match the change set source snapshot",
-        path: ["changeSet", "sourceSnapshotId"],
+        message: "Approval workflows require a proposed snapshot with governed changes",
+        path: ["proposedSnapshot", "snapshotId"],
       });
     }
-    if (workflow.proposedSnapshot.snapshotId !== workflow.changeSet.targetSnapshotId) {
-      context.addIssue({
-        code: "custom",
-        message: "The proposed snapshot must match the change set target snapshot",
-        path: ["changeSet", "targetSnapshotId"],
-      });
-    }
-    if (workflow.activeSnapshot.corpusVersion !== workflow.changeSet.sourceCorpusVersion) {
-      context.addIssue({
-        code: "custom",
-        message: "The active snapshot corpus version must match the change set source version",
-        path: ["changeSet", "sourceCorpusVersion"],
-      });
-    }
-    if (workflow.proposedSnapshot.corpusVersion !== workflow.changeSet.targetCorpusVersion) {
-      context.addIssue({
-        code: "custom",
-        message: "The proposed snapshot corpus version must match the change set target version",
-        path: ["changeSet", "targetCorpusVersion"],
-      });
-    }
-    if (workflow.proposedSnapshot.snapshotId !== workflow.proposedSnapshotLifecycle.snapshotId) {
-      context.addIssue({
-        code: "custom",
-        message: "The proposed snapshot lifecycle record must identify the proposed snapshot",
-        path: ["proposedSnapshotLifecycle", "snapshotId"],
-      });
+
+    requireEvidenceMatchesSnapshot(
+      workflow.activeSnapshot,
+      workflow.activeSnapshotEvidence,
+      context,
+      "activeSnapshotEvidence",
+    );
+    requireEvidenceMatchesSnapshot(
+      workflow.proposedSnapshot,
+      workflow.proposedSnapshotEvidence,
+      context,
+      "proposedSnapshotEvidence",
+    );
+    requireLifecycleMatchesSnapshot(
+      workflow.activeSnapshot,
+      workflow.activeSnapshotLifecycle,
+      context,
+      "activeSnapshotLifecycle",
+    );
+    requireLifecycleMatchesSnapshot(
+      workflow.proposedSnapshot,
+      workflow.proposedSnapshotLifecycle,
+      context,
+      "proposedSnapshotLifecycle",
+    );
+
+    const expectedChangeSetIdentity = {
+      sourceSnapshotId: workflow.activeSnapshot.snapshotId,
+      targetSnapshotId: workflow.proposedSnapshot.snapshotId,
+      sourceSnapshotFingerprint: workflow.activeSnapshot.contentFingerprint,
+      targetSnapshotFingerprint: workflow.proposedSnapshot.contentFingerprint,
+      sourceManifestReference: workflow.activeSnapshot.sourceManifestReference,
+      targetManifestReference: workflow.proposedSnapshot.sourceManifestReference,
+      sourceCorpusVersion: workflow.activeSnapshot.corpusVersion,
+      targetCorpusVersion: workflow.proposedSnapshot.corpusVersion,
+    } as const;
+    for (const [field, expected] of Object.entries(expectedChangeSetIdentity)) {
+      if (workflow.changeSet[field as keyof typeof expectedChangeSetIdentity] !== expected) {
+        context.addIssue({
+          code: "custom",
+          message: `${field} must match its workflow snapshot`,
+          path: ["changeSet", field],
+        });
+      }
     }
     if (workflow.reviewStatus !== workflow.changeSet.reviewStatus) {
       context.addIssue({
@@ -371,34 +580,22 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
       });
     }
 
-    if (
-      !ALLOWED_LIFECYCLE_STATUSES_BY_REVIEW_STATUS[workflow.reviewStatus].includes(
-        workflow.proposedSnapshotLifecycle.status,
-      )
-    ) {
-      context.addIssue({
-        code: "custom",
-        message: "Review status must align with its allowed proposed snapshot lifecycle states",
-        path: ["proposedSnapshotLifecycle", "status"],
-      });
-    }
-
     const activeObjectsById = new Map(
-      workflow.activeSnapshot.objects.map((object) => [object.objectId, object]),
+      workflow.activeSnapshotEvidence.objects.map((object) => [object.objectId, object]),
     );
     const proposedObjectsById = new Map(
-      workflow.proposedSnapshot.objects.map((object) => [object.objectId, object]),
+      workflow.proposedSnapshotEvidence.objects.map((object) => [object.objectId, object]),
     );
-    const expectedAddedObjects = workflow.proposedSnapshot.objects.filter(
+    const expectedAddedObjects = workflow.proposedSnapshotEvidence.objects.filter(
       (object) => !activeObjectsById.has(object.objectId),
     );
-    const expectedRemovedObjects = workflow.activeSnapshot.objects.filter(
+    const expectedRemovedObjects = workflow.activeSnapshotEvidence.objects.filter(
       (object) => !proposedObjectsById.has(object.objectId),
     );
-    const expectedModifiedObjects = workflow.activeSnapshot.objects
+    const expectedModifiedObjects = workflow.activeSnapshotEvidence.objects
       .filter((previous) => {
         const current = proposedObjectsById.get(previous.objectId);
-        return current !== undefined && !snapshotObjectsEqual(previous, current);
+        return current !== undefined && !comparisonObjectsEqual(previous, current);
       })
       .map((previous) => ({
         objectId: previous.objectId,
@@ -406,7 +603,7 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
         current: proposedObjectsById.get(previous.objectId)!,
       }));
 
-    if (!snapshotObjectCollectionsEqual(workflow.changeSet.addedObjects, expectedAddedObjects)) {
+    if (!comparisonObjectCollectionsEqual(workflow.changeSet.addedObjects, expectedAddedObjects)) {
       context.addIssue({
         code: "custom",
         message: "Added object evidence must exactly match proposed-only snapshot records",
@@ -414,7 +611,7 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
       });
     }
     if (
-      !snapshotObjectCollectionsEqual(workflow.changeSet.removedObjects, expectedRemovedObjects)
+      !comparisonObjectCollectionsEqual(workflow.changeSet.removedObjects, expectedRemovedObjects)
     ) {
       context.addIssue({
         code: "custom",
@@ -429,8 +626,8 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
         return (
           expected === undefined ||
           modified.objectId !== expected.objectId ||
-          !snapshotObjectsEqual(modified.previous, expected.previous) ||
-          !snapshotObjectsEqual(modified.current, expected.current)
+          !comparisonObjectsEqual(modified.previous, expected.previous) ||
+          !comparisonObjectsEqual(modified.current, expected.current)
         );
       })
     ) {
@@ -441,11 +638,106 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
         path: ["changeSet", "modifiedObjects"],
       });
     }
+
+    const activeStatus = workflow.activeSnapshotLifecycle.status;
+    const proposedStatus = workflow.proposedSnapshotLifecycle.status;
+    const validStatusPair =
+      (workflow.reviewStatus === "pending" &&
+        activeStatus === "active" &&
+        proposedStatus === "validated") ||
+      (workflow.reviewStatus === "reviewing" &&
+        activeStatus === "active" &&
+        proposedStatus === "reviewing") ||
+      (workflow.reviewStatus === "approved" &&
+        ((activeStatus === "active" && proposedStatus === "approved") ||
+          (activeStatus === "superseded" && proposedStatus === "active"))) ||
+      (workflow.reviewStatus === "rejected" &&
+        activeStatus === "active" &&
+        proposedStatus === "reviewing");
+    if (!validStatusPair) {
+      context.addIssue({
+        code: "custom",
+        message: "Review status must align with both snapshot lifecycle states",
+        path: ["reviewStatus"],
+      });
+    }
+
+    const expectedDecision =
+      workflow.reviewStatus === "approved"
+        ? "approved"
+        : workflow.reviewStatus === "rejected"
+          ? "rejected"
+          : null;
+    if (expectedDecision === null && workflow.reviewDecision !== null) {
+      context.addIssue({
+        code: "custom",
+        message: "Pending and reviewing workflows must not contain a review decision",
+        path: ["reviewDecision"],
+      });
+    }
+    if (expectedDecision !== null) {
+      const decision = workflow.reviewDecision;
+      if (decision === null || decision.decision !== expectedDecision) {
+        context.addIssue({
+          code: "custom",
+          message: `${expectedDecision} workflows require matching immutable decision evidence`,
+          path: ["reviewDecision"],
+        });
+      } else {
+        if (
+          decision.changeId !== workflow.changeSet.changeId ||
+          decision.proposedSnapshotId !== workflow.proposedSnapshot.snapshotId
+        ) {
+          context.addIssue({
+            code: "custom",
+            message: "Review decision must bind the governed change and proposed snapshot",
+            path: ["reviewDecision"],
+          });
+        }
+
+        const reviewTransition = workflow.proposedSnapshotLifecycle.transitions.find(
+          (transition) => transition.to === "reviewing",
+        );
+        if (
+          expectedDecision === "rejected" &&
+          reviewTransition !== undefined &&
+          Date.parse(reviewTransition.transitionedAt) >= Date.parse(decision.decidedAt)
+        ) {
+          context.addIssue({
+            code: "custom",
+            message: "Rejection evidence must occur after review begins",
+            path: ["reviewDecision", "decidedAt"],
+          });
+        }
+        if (expectedDecision === "approved") {
+          const approvalTransition = workflow.proposedSnapshotLifecycle.transitions.find(
+            (transition) => transition.to === "approved",
+          );
+          if (
+            approvalTransition === undefined ||
+            approvalTransition.actorId !== decision.actorId ||
+            approvalTransition.transitionedAt !== decision.decidedAt
+          ) {
+            context.addIssue({
+              code: "custom",
+              message: "Approval lifecycle evidence must match the approval decision",
+              path: ["reviewDecision"],
+            });
+          }
+        }
+      }
+    }
   });
 
 export type SnapshotLifecycleStatus = z.infer<typeof SnapshotLifecycleStatusSchema>;
 export type SnapshotReviewStatus = z.infer<typeof SnapshotReviewStatusSchema>;
 export type SnapshotObjectChangeType = z.infer<typeof SnapshotObjectChangeTypeSchema>;
+export type KnowledgeSnapshotObjectComparisonEvidence = z.infer<
+  typeof KnowledgeSnapshotObjectComparisonEvidenceSchema
+>;
+export type KnowledgeSnapshotComparisonEvidence = z.infer<
+  typeof KnowledgeSnapshotComparisonEvidenceSchema
+>;
 export type KnowledgeSnapshotLifecycleTransition = z.infer<
   typeof KnowledgeSnapshotLifecycleTransitionSchema
 >;
@@ -457,6 +749,7 @@ export type KnowledgeSnapshotComparisonRequest = z.infer<
 >;
 export type KnowledgeModifiedSnapshotObject = z.infer<typeof KnowledgeModifiedSnapshotObjectSchema>;
 export type KnowledgeGovernedChangeSet = z.infer<typeof KnowledgeGovernedChangeSetSchema>;
+export type KnowledgeSnapshotReviewDecision = z.infer<typeof KnowledgeSnapshotReviewDecisionSchema>;
 export type KnowledgeSnapshotApprovalWorkflow = z.infer<
   typeof KnowledgeSnapshotApprovalWorkflowSchema
 >;

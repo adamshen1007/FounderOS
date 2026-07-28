@@ -1,14 +1,19 @@
 import { createHash } from "node:crypto";
 
-import type {
-  KnowledgeObject,
-  KnowledgeRepositorySnapshot,
-  KnowledgeRepositorySnapshotObject,
+import {
+  KnowledgeSnapshotComparisonEvidenceSchema,
+  KnowledgeSnapshotLifecycleRecordSchema,
+  type KnowledgeObject,
+  type KnowledgeRepositorySnapshot,
+  type KnowledgeRepositorySnapshotObject,
+  type KnowledgeSnapshotComparisonEvidence,
+  type KnowledgeSnapshotObjectComparisonEvidence,
+  type SnapshotLifecycleStatus,
 } from "@founderos/knowledge-schema";
 
 import {
   createKnowledgeSnapshotLifecycleRecord,
-  transitionKnowledgeSnapshotLifecycle,
+  validateKnowledgeSnapshotLifecycle,
 } from "../src/index.js";
 import type { AcceptedMigrationDocumentReport } from "../src/interfaces/migration-report.js";
 
@@ -23,6 +28,16 @@ export const TRANSITION_TIMES = [
   "2026-07-28T00:06:00.000Z",
 ] as const;
 
+const LIFECYCLE_STATES = [
+  "created",
+  "validated",
+  "reviewing",
+  "approved",
+  "active",
+  "superseded",
+  "archived",
+] as const;
+
 export function snapshotObject(
   objectId: string,
   overrides: Partial<KnowledgeRepositorySnapshotObject> = {},
@@ -32,7 +47,6 @@ export function snapshotObject(
     objectType: "knowledge",
     sourcePath: `docs/${objectId}.md`,
     sourceHash: HASH(`source:${objectId}`),
-    contentFingerprint: HASH(`content:${objectId}`),
     metadataFingerprint: HASH(`metadata:${objectId}`),
     objectFingerprint: HASH(`object:${objectId}`),
     ...overrides,
@@ -43,6 +57,7 @@ export function snapshot(
   snapshotIdSuffix: string,
   objects: readonly KnowledgeRepositorySnapshotObject[],
   corpusVersion = "v1",
+  sourceManifestReference = "knowledge/migration-manifest.yaml",
 ): KnowledgeRepositorySnapshot {
   const contentFingerprint = HASH(`snapshot:${snapshotIdSuffix}`);
   return {
@@ -50,7 +65,7 @@ export function snapshot(
     snapshotId: `snapshot-${contentFingerprint}`,
     corpusId: "founderos-priority-1",
     corpusVersion,
-    sourceManifestReference: "knowledge/migration-manifest.yaml",
+    sourceManifestReference,
     contentFingerprint,
     objectCount: objects.length,
     creation: { createdAt: CREATED_AT, createdBy: "founderos-engine" },
@@ -58,8 +73,47 @@ export function snapshot(
   };
 }
 
+export function snapshotEvidenceObject(
+  object: KnowledgeRepositorySnapshotObject,
+  overrides: Partial<KnowledgeSnapshotObjectComparisonEvidence> = {},
+): KnowledgeSnapshotObjectComparisonEvidence {
+  return {
+    ...object,
+    contentFingerprint: HASH(`content:${object.objectId}`),
+    ...overrides,
+  };
+}
+
+export function snapshotEvidence(
+  value: KnowledgeRepositorySnapshot,
+  objects: readonly KnowledgeSnapshotObjectComparisonEvidence[] = value.objects.map((object) =>
+    snapshotEvidenceObject(object),
+  ),
+): KnowledgeSnapshotComparisonEvidence {
+  return KnowledgeSnapshotComparisonEvidenceSchema.parse({
+    schemaVersion: "1.0",
+    snapshotId: value.snapshotId,
+    objects: [...objects].sort((left, right) => left.objectId.localeCompare(right.objectId)),
+  });
+}
+
+export function lifecycle(value: KnowledgeRepositorySnapshot, status: SnapshotLifecycleStatus) {
+  const finalIndex = LIFECYCLE_STATES.indexOf(status);
+  return KnowledgeSnapshotLifecycleRecordSchema.parse({
+    snapshotId: value.snapshotId,
+    snapshotCreatedAt: value.creation.createdAt,
+    status,
+    transitions: LIFECYCLE_STATES.slice(1, finalIndex + 1).map((to, index) => ({
+      from: LIFECYCLE_STATES[index],
+      to,
+      actorId: `historical-actor-${index + 1}`,
+      transitionedAt: TRANSITION_TIMES[index],
+    })),
+  });
+}
+
 export function validatedLifecycle(proposed: KnowledgeRepositorySnapshot) {
-  return transitionKnowledgeSnapshotLifecycle(
+  return validateKnowledgeSnapshotLifecycle(
     createKnowledgeSnapshotLifecycleRecord(proposed),
     proposed,
     { actorId: "validator", transitionedAt: TRANSITION_TIMES[0] },
@@ -67,14 +121,7 @@ export function validatedLifecycle(proposed: KnowledgeRepositorySnapshot) {
 }
 
 export function activeLifecycle(active: KnowledgeRepositorySnapshot) {
-  return TRANSITION_TIMES.slice(0, 4).reduce(
-    (record, transitionedAt, index) =>
-      transitionKnowledgeSnapshotLifecycle(record, active, {
-        actorId: `active-actor-${index + 1}`,
-        transitionedAt,
-      }),
-    createKnowledgeSnapshotLifecycleRecord(active),
-  );
+  return lifecycle(active, "active");
 }
 
 export function metadata<T extends KnowledgeObject["metadata"]["objectType"]>(

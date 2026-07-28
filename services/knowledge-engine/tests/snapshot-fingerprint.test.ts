@@ -1,9 +1,46 @@
 import { describe, expect, it } from "vitest";
 
-import { createKnowledgeRepositorySnapshot } from "../src/index.js";
+import {
+  createKnowledgeRepositorySnapshot,
+  createKnowledgeSnapshotComparisonEvidence,
+} from "../src/index.js";
 import { corpus, CREATED_AT, document, metadata } from "./snapshot-lifecycle-fixtures.js";
 
 describe("knowledge repository snapshot content fingerprints", () => {
+  it("preserves the Milestone 07 snapshot v1 descriptor and identity", () => {
+    const documents = [
+      document({ metadata: metadata("knowledge", "knowledge"), content: "Knowledge" }),
+    ];
+    const result = createKnowledgeRepositorySnapshot({
+      corpus,
+      creation: { createdAt: CREATED_AT, createdBy: "founderos-engine" },
+      documents,
+    });
+
+    expect(result).toMatchObject({
+      snapshotId: "snapshot-dc58b54c2716fa60f63f5199012ecde3e870cf2f29d9ea2c987cf92e77b68b3b",
+      contentFingerprint: "dc58b54c2716fa60f63f5199012ecde3e870cf2f29d9ea2c987cf92e77b68b3b",
+      objects: [
+        {
+          objectId: "knowledge",
+          objectType: "knowledge",
+          sourcePath: "docs/knowledge.md",
+          sourceHash: "646dd4852129089b7924274a6af02cc6adc3b2bc0178e0e835a67bb608368e4e",
+          metadataFingerprint: "889c1d0858e3bcce719040b56951f799b455b471883c81dacc2f2ddb1cf80e01",
+          objectFingerprint: "bc82e6fc5d83beadc00b0d64a17d270f656373b10f6576bd74b744d0dde7e90f",
+        },
+      ],
+    });
+    expect(Object.keys(result.objects[0]!)).toEqual([
+      "objectId",
+      "objectType",
+      "sourcePath",
+      "sourceHash",
+      "metadataFingerprint",
+      "objectFingerprint",
+    ]);
+  });
+
   it("keeps metadata separate from non-metadata decision payloads", () => {
     const documents = [
       document({
@@ -37,13 +74,26 @@ describe("knowledge repository snapshot content fingerprints", () => {
       creation,
       documents: payloadChanged,
     });
+    const baselineEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: baseline,
+      documents,
+    });
+    const metadataEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: metadataSnapshot,
+      documents: metadataChanged,
+    });
+    const payloadEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: payloadSnapshot,
+      documents: payloadChanged,
+    });
 
-    expect(metadataSnapshot.objects[0]!.contentFingerprint).toBe(
-      baseline.objects[0]!.contentFingerprint,
+    expect(metadataEvidence.objects[0]!.contentFingerprint).toBe(
+      baselineEvidence.objects[0]!.contentFingerprint,
     );
-    expect(payloadSnapshot.objects[0]!.contentFingerprint).not.toBe(
-      baseline.objects[0]!.contentFingerprint,
+    expect(payloadEvidence.objects[0]!.contentFingerprint).not.toBe(
+      baselineEvidence.objects[0]!.contentFingerprint,
     );
+    expect("contentFingerprint" in baseline.objects[0]!).toBe(false);
     expect(Object.isFrozen(baseline.objects[0])).toBe(true);
   });
 
@@ -150,10 +200,23 @@ describe("knowledge repository snapshot content fingerprints", () => {
       creation,
       documents: changed,
     });
+    const baselineEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: baseline,
+      documents,
+    });
+    const repeatedEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: repeated,
+      documents,
+    });
+    const changedEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: changedSnapshot,
+      documents: changed,
+    });
 
     expect(repeated.snapshotId).toBe(baseline.snapshotId);
-    for (const baselineObject of baseline.objects) {
-      const changedObject = changedSnapshot.objects.find(
+    expect(repeatedEvidence).toEqual(baselineEvidence);
+    for (const baselineObject of baselineEvidence.objects) {
+      const changedObject = changedEvidence.objects.find(
         (object) => object.objectId === baselineObject.objectId,
       );
       expect(changedObject?.contentFingerprint).not.toBe(baselineObject.contentFingerprint);

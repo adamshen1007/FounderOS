@@ -2,6 +2,7 @@ import {
   KnowledgeSnapshotLifecycleTransitionSchema,
   type KnowledgeSnapshotLifecycleRecord,
   type KnowledgeRepositorySnapshot,
+  type SnapshotLifecycleStatus,
 } from "@founderos/knowledge-schema";
 
 import {
@@ -34,15 +35,22 @@ export function createKnowledgeSnapshotLifecycleRecord(
   );
   return deepFreeze(
     parseKnowledgeSnapshotLifecycleRecord(
-      { snapshotId: snapshot.snapshotId, status: "created", transitions: [] },
+      {
+        snapshotId: snapshot.snapshotId,
+        snapshotCreatedAt: snapshot.creation.createdAt,
+        status: "created",
+        transitions: [],
+      },
       "Cannot create lifecycle record",
     ),
   );
 }
 
-export function transitionKnowledgeSnapshotLifecycle(
+/** Internal orchestration primitive. Public callers use state-specific operations. */
+export function advanceKnowledgeSnapshotLifecycle(
   recordInput: KnowledgeSnapshotLifecycleRecord,
   snapshotInput: KnowledgeRepositorySnapshot,
+  targetStatus: SnapshotLifecycleStatus,
   evidence: SnapshotLifecycleTransitionEvidence,
 ): KnowledgeSnapshotLifecycleRecord {
   const record = parseKnowledgeSnapshotLifecycleRecord(
@@ -53,9 +61,12 @@ export function transitionKnowledgeSnapshotLifecycle(
     snapshotInput,
     "Cannot transition lifecycle for invalid snapshot",
   );
-  if (record.snapshotId !== snapshot.snapshotId) {
+  if (
+    record.snapshotId !== snapshot.snapshotId ||
+    record.snapshotCreatedAt !== snapshot.creation.createdAt
+  ) {
     throw new KnowledgeSnapshotLifecycleError(
-      "Cannot transition lifecycle record with a different snapshot identity",
+      "Cannot transition lifecycle record with different snapshot identity or creation evidence",
     );
   }
 
@@ -66,20 +77,25 @@ export function transitionKnowledgeSnapshotLifecycle(
       "Cannot transition an archived snapshot lifecycle record",
     );
   }
+  if (targetStatus !== nextStatus) {
+    throw new KnowledgeSnapshotLifecycleError(
+      `Cannot transition snapshot lifecycle from ${record.status} to ${targetStatus}`,
+    );
+  }
 
   const transition = parseWithSnapshotDomainError(
     KnowledgeSnapshotLifecycleTransitionSchema,
-    { from: record.status, to: nextStatus, ...evidence },
+    { from: record.status, to: targetStatus, ...evidence },
     KnowledgeSnapshotLifecycleError,
     "Invalid lifecycle transition evidence",
   );
-  const previousTransition = record.transitions.at(-1);
-  if (
-    previousTransition !== undefined &&
-    Date.parse(previousTransition.transitionedAt) >= Date.parse(transition.transitionedAt)
-  ) {
+  const previousTemporalEvidence =
+    record.transitions.at(-1)?.transitionedAt ?? snapshot.creation.createdAt;
+  if (Date.parse(previousTemporalEvidence) >= Date.parse(transition.transitionedAt)) {
     throw new KnowledgeSnapshotLifecycleError(
-      "Lifecycle transition evidence timestamps must be strictly increasing",
+      record.transitions.length === 0
+        ? "Lifecycle transition evidence must occur after snapshot creation"
+        : "Lifecycle transition evidence timestamps must be strictly increasing",
     );
   }
 
@@ -87,10 +103,37 @@ export function transitionKnowledgeSnapshotLifecycle(
     parseKnowledgeSnapshotLifecycleRecord(
       {
         snapshotId: record.snapshotId,
-        status: nextStatus,
+        snapshotCreatedAt: record.snapshotCreatedAt,
+        status: targetStatus,
         transitions: [...record.transitions, transition],
       },
       "Cannot create transitioned lifecycle record",
     ),
   );
+}
+
+export function validateKnowledgeSnapshotLifecycle(
+  recordInput: KnowledgeSnapshotLifecycleRecord,
+  snapshotInput: KnowledgeRepositorySnapshot,
+  evidence: SnapshotLifecycleTransitionEvidence,
+): KnowledgeSnapshotLifecycleRecord {
+  if (recordInput.status !== "created") {
+    throw new KnowledgeSnapshotLifecycleError(
+      "Snapshot validation can begin only from created lifecycle status",
+    );
+  }
+  return advanceKnowledgeSnapshotLifecycle(recordInput, snapshotInput, "validated", evidence);
+}
+
+export function archiveKnowledgeSnapshotLifecycle(
+  recordInput: KnowledgeSnapshotLifecycleRecord,
+  snapshotInput: KnowledgeRepositorySnapshot,
+  evidence: SnapshotLifecycleTransitionEvidence,
+): KnowledgeSnapshotLifecycleRecord {
+  if (recordInput.status !== "superseded") {
+    throw new KnowledgeSnapshotLifecycleError(
+      "Snapshot archival can occur only from superseded lifecycle status",
+    );
+  }
+  return advanceKnowledgeSnapshotLifecycle(recordInput, snapshotInput, "archived", evidence);
 }

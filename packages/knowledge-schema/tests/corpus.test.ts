@@ -46,7 +46,6 @@ function snapshot() {
         objectType: "knowledge",
         sourcePath: "docs/a.md",
         sourceHash: A,
-        contentFingerprint: A,
         metadataFingerprint: A,
         objectFingerprint: A,
       },
@@ -55,7 +54,6 @@ function snapshot() {
         objectType: "principle",
         sourcePath: "docs/b.md",
         sourceHash: B,
-        contentFingerprint: B,
         metadataFingerprint: B,
         objectFingerprint: B,
       },
@@ -110,13 +108,9 @@ describe("Milestone 07 corpus contracts", () => {
       safeParseKnowledgeRepositorySnapshot({ ...snapshot(), snapshotId: "snapshot-arbitrary" })
         .success,
     ).toBe(false);
-    const missingContentFingerprint = snapshot();
-    delete (
-      missingContentFingerprint.objects[0] as Partial<
-        (typeof missingContentFingerprint.objects)[number]
-      >
-    ).contentFingerprint;
-    expect(safeParseKnowledgeRepositorySnapshot(missingContentFingerprint).success).toBe(false);
+    const milestone08FieldLeakedIntoV1 = snapshot();
+    (milestone08FieldLeakedIntoV1.objects[0] as Record<string, unknown>).contentFingerprint = A;
+    expect(safeParseKnowledgeRepositorySnapshot(milestone08FieldLeakedIntoV1).success).toBe(false);
   });
 
   it("rejects duplicate IDs, duplicate paths, and unsorted snapshot records", () => {

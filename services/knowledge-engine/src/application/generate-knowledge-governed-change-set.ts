@@ -3,6 +3,7 @@ import {
   KnowledgeSnapshotComparisonRequestSchema,
   type KnowledgeGovernedChangeSet,
   type KnowledgeRepositorySnapshot,
+  type KnowledgeSnapshotComparisonEvidence,
 } from "@founderos/knowledge-schema";
 
 import {
@@ -20,7 +21,9 @@ export function generateKnowledgeGovernedChangeSet(
 ): KnowledgeGovernedChangeSet {
   const request = parseWithSnapshotDomainError<{
     currentSnapshot: KnowledgeRepositorySnapshot;
+    currentSnapshotEvidence: KnowledgeSnapshotComparisonEvidence;
     proposedSnapshot: KnowledgeRepositorySnapshot;
+    proposedSnapshotEvidence: KnowledgeSnapshotComparisonEvidence;
   }>(
     KnowledgeSnapshotComparisonRequestSchema,
     requestInput,
@@ -28,18 +31,18 @@ export function generateKnowledgeGovernedChangeSet(
     "Cannot compare snapshots",
   );
   const currentById = new Map(
-    request.currentSnapshot.objects.map((object) => [object.objectId, object]),
+    request.currentSnapshotEvidence.objects.map((object) => [object.objectId, object]),
   );
   const proposedById = new Map(
-    request.proposedSnapshot.objects.map((object) => [object.objectId, object]),
+    request.proposedSnapshotEvidence.objects.map((object) => [object.objectId, object]),
   );
-  const addedObjects = request.proposedSnapshot.objects
+  const addedObjects = request.proposedSnapshotEvidence.objects
     .filter((object) => !currentById.has(object.objectId))
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
-  const removedObjects = request.currentSnapshot.objects
+  const removedObjects = request.currentSnapshotEvidence.objects
     .filter((object) => !proposedById.has(object.objectId))
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
-  const modifiedObjects = request.currentSnapshot.objects
+  const modifiedObjects = request.currentSnapshotEvidence.objects
     .flatMap((previous) => {
       const current = proposedById.get(previous.objectId);
       if (current === undefined) return [];
@@ -53,6 +56,11 @@ export function generateKnowledgeGovernedChangeSet(
           ? ["provenance" as const]
           : []),
       ].sort(compareStrings);
+      if (changeTypes.length === 0 && previous.objectFingerprint !== current.objectFingerprint) {
+        throw new KnowledgeSnapshotComparisonError(
+          `Cannot explain object fingerprint change for ${previous.objectId} from comparison evidence`,
+        );
+      }
       return changeTypes.length === 0
         ? []
         : [{ objectId: previous.objectId, previous, current, changeTypes }];
@@ -60,6 +68,11 @@ export function generateKnowledgeGovernedChangeSet(
     .sort((left, right) => compareStrings(left.objectId, right.objectId));
   const corpusVersionChanged =
     request.currentSnapshot.corpusVersion !== request.proposedSnapshot.corpusVersion;
+  const snapshotFingerprintChanged =
+    request.currentSnapshot.contentFingerprint !== request.proposedSnapshot.contentFingerprint;
+  const manifestReferenceChanged =
+    request.currentSnapshot.sourceManifestReference !==
+    request.proposedSnapshot.sourceManifestReference;
 
   return deepFreeze(
     parseWithSnapshotDomainError(
@@ -69,6 +82,12 @@ export function generateKnowledgeGovernedChangeSet(
         changeId: `change-${request.currentSnapshot.snapshotId}-to-${request.proposedSnapshot.snapshotId}`,
         sourceSnapshotId: request.currentSnapshot.snapshotId,
         targetSnapshotId: request.proposedSnapshot.snapshotId,
+        sourceSnapshotFingerprint: request.currentSnapshot.contentFingerprint,
+        targetSnapshotFingerprint: request.proposedSnapshot.contentFingerprint,
+        snapshotFingerprintChanged,
+        sourceManifestReference: request.currentSnapshot.sourceManifestReference,
+        targetManifestReference: request.proposedSnapshot.sourceManifestReference,
+        manifestReferenceChanged,
         sourceCorpusVersion: request.currentSnapshot.corpusVersion,
         targetCorpusVersion: request.proposedSnapshot.corpusVersion,
         corpusVersionChanged,
@@ -77,6 +96,8 @@ export function generateKnowledgeGovernedChangeSet(
         modifiedObjects,
         reviewStatus: "pending",
         changed:
+          snapshotFingerprintChanged ||
+          manifestReferenceChanged ||
           corpusVersionChanged ||
           addedObjects.length > 0 ||
           removedObjects.length > 0 ||

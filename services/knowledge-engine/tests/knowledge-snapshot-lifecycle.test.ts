@@ -1,117 +1,93 @@
 import { describe, expect, it } from "vitest";
 
+import * as knowledgeEngine from "../src/index.js";
 import {
+  archiveKnowledgeSnapshotLifecycle,
   createKnowledgeSnapshotLifecycleRecord,
-  transitionKnowledgeSnapshotLifecycle,
+  validateKnowledgeSnapshotLifecycle,
 } from "../src/index.js";
-import { snapshot, snapshotObject, TRANSITION_TIMES } from "./snapshot-lifecycle-fixtures.js";
+import {
+  lifecycle,
+  snapshot,
+  snapshotObject,
+  TRANSITION_TIMES,
+} from "./snapshot-lifecycle-fixtures.js";
 
 describe("snapshot lifecycle", () => {
-  it("creates and transitions immutable records only in lifecycle order", () => {
+  it("exposes validation and archival without a public raw governance bypass", () => {
     const proposed = snapshot("proposed", [snapshotObject("alpha")]);
     const created = createKnowledgeSnapshotLifecycleRecord(proposed);
-    const records = TRANSITION_TIMES.reduce(
-      (history, transitionedAt, index) => [
-        ...history,
-        transitionKnowledgeSnapshotLifecycle(history.at(-1)!, proposed, {
-          actorId: `actor-${index + 1}`,
-          transitionedAt,
-        }),
-      ],
-      [created],
-    );
-    const archived = records.at(-1)!;
+    const validated = validateKnowledgeSnapshotLifecycle(created, proposed, {
+      actorId: "validator",
+      transitionedAt: TRANSITION_TIMES[0],
+    });
+    const superseded = lifecycle(proposed, "superseded");
+    const archived = archiveKnowledgeSnapshotLifecycle(superseded, proposed, {
+      actorId: "archivist",
+      transitionedAt: TRANSITION_TIMES[5],
+    });
 
-    expect(created).toMatchObject({ status: "created", transitions: [] });
-    expect(archived.transitions.map((transition) => [transition.from, transition.to])).toEqual([
-      ["created", "validated"],
-      ["validated", "reviewing"],
-      ["reviewing", "approved"],
-      ["approved", "active"],
-      ["active", "superseded"],
-      ["superseded", "archived"],
-    ]);
-    expect(Object.isFrozen(archived.transitions)).toBe(true);
+    expect(created).toMatchObject({
+      snapshotCreatedAt: proposed.creation.createdAt,
+      status: "created",
+      transitions: [],
+    });
+    expect(validated).toMatchObject({ status: "validated" });
+    expect(archived).toMatchObject({ status: "archived" });
+    expect(Object.isFrozen(validated.transitions)).toBe(true);
+    expect("transitionKnowledgeSnapshotLifecycle" in knowledgeEngine).toBe(false);
+    expect("advanceKnowledgeSnapshotLifecycle" in knowledgeEngine).toBe(false);
+  });
+
+  it("rejects identity mismatch, repeated validation, and pre-creation evidence", () => {
+    const proposed = snapshot("proposed", [snapshotObject("alpha")]);
+    const created = createKnowledgeSnapshotLifecycleRecord(proposed);
+    const validated = validateKnowledgeSnapshotLifecycle(created, proposed, {
+      actorId: "validator",
+      transitionedAt: TRANSITION_TIMES[0],
+    });
+
     expect(() =>
-      transitionKnowledgeSnapshotLifecycle(records[1]!, proposed, {
-        actorId: "reviewer",
-        transitionedAt: TRANSITION_TIMES[0],
-      }),
-    ).toThrow(/increasing/i);
-    expect(() =>
-      transitionKnowledgeSnapshotLifecycle(created, snapshot("other", [snapshotObject("alpha")]), {
+      validateKnowledgeSnapshotLifecycle(created, snapshot("other", [snapshotObject("alpha")]), {
         actorId: "validator",
         transitionedAt: TRANSITION_TIMES[0],
       }),
-    ).toThrow(/identity/i);
+    ).toThrow(/identity|creation/i);
     expect(() =>
-      transitionKnowledgeSnapshotLifecycle(archived, proposed, {
-        actorId: "archivist",
-        transitionedAt: "2026-07-28T00:07:00.000Z",
+      validateKnowledgeSnapshotLifecycle(validated, proposed, {
+        actorId: "validator",
+        transitionedAt: TRANSITION_TIMES[1],
       }),
-    ).toThrow(/archived/i);
+    ).toThrow(/created/i);
+    expect(() =>
+      validateKnowledgeSnapshotLifecycle(created, proposed, {
+        actorId: "validator",
+        transitionedAt: proposed.creation.createdAt,
+      }),
+    ).toThrow(/after snapshot creation/i);
   });
 
-  it("rejects tampered skip, reversal, and repeat histories at the operation boundary", () => {
+  it("rejects tampered lifecycle history at every public operation boundary", () => {
     const proposed = snapshot("proposed", [snapshotObject("alpha")]);
-    const malformedRecords = [
-      {
-        snapshotId: proposed.snapshotId,
-        status: "reviewing",
-        transitions: [
-          {
-            from: "created",
-            to: "reviewing",
-            actorId: "tamperer",
-            transitionedAt: TRANSITION_TIMES[0],
-          },
-        ],
-      },
-      {
-        snapshotId: proposed.snapshotId,
-        status: "created",
-        transitions: [
-          {
-            from: "created",
-            to: "validated",
-            actorId: "tamperer",
-            transitionedAt: TRANSITION_TIMES[0],
-          },
-          {
-            from: "validated",
-            to: "created",
-            actorId: "tamperer",
-            transitionedAt: TRANSITION_TIMES[1],
-          },
-        ],
-      },
-      {
-        snapshotId: proposed.snapshotId,
-        status: "validated",
-        transitions: [
-          {
-            from: "created",
-            to: "validated",
-            actorId: "tamperer",
-            transitionedAt: TRANSITION_TIMES[0],
-          },
-          {
-            from: "validated",
-            to: "validated",
-            actorId: "tamperer",
-            transitionedAt: TRANSITION_TIMES[1],
-          },
-        ],
-      },
-    ];
+    const malformed = {
+      snapshotId: proposed.snapshotId,
+      snapshotCreatedAt: proposed.creation.createdAt,
+      status: "superseded",
+      transitions: [
+        {
+          from: "created",
+          to: "superseded",
+          actorId: "tamperer",
+          transitionedAt: TRANSITION_TIMES[0],
+        },
+      ],
+    };
 
-    for (const malformed of malformedRecords) {
-      expect(() =>
-        transitionKnowledgeSnapshotLifecycle(malformed as never, proposed, {
-          actorId: "validator",
-          transitionedAt: "2026-07-28T00:07:00.000Z",
-        }),
-      ).toThrow(/transition|history/i);
-    }
+    expect(() =>
+      archiveKnowledgeSnapshotLifecycle(malformed as never, proposed, {
+        actorId: "archivist",
+        transitionedAt: TRANSITION_TIMES[5],
+      }),
+    ).toThrow(/transition history|lifecycle/i);
   });
 });

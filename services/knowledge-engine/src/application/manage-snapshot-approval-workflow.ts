@@ -1,9 +1,13 @@
 import {
   KnowledgeSnapshotApprovalWorkflowSchema,
   KnowledgeSnapshotLifecycleRecordSchema,
-  type KnowledgeSnapshotApprovalWorkflow,
-  type KnowledgeSnapshotLifecycleRecord,
+  KnowledgeSnapshotReviewDecisionSchema,
   type KnowledgeRepositorySnapshot,
+  type KnowledgeSnapshotApprovalWorkflow,
+  type KnowledgeSnapshotComparisonEvidence,
+  type KnowledgeSnapshotLifecycleRecord,
+  type KnowledgeSnapshotReviewDecision,
+  type SnapshotReviewStatus,
 } from "@founderos/knowledge-schema";
 
 import {
@@ -14,13 +18,21 @@ import {
   type SnapshotLifecycleTransitionEvidence,
 } from "../domain/snapshot-lifecycle.js";
 import { generateKnowledgeGovernedChangeSet } from "./generate-knowledge-governed-change-set.js";
-import { transitionKnowledgeSnapshotLifecycle } from "./manage-knowledge-snapshot-lifecycle.js";
+import { advanceKnowledgeSnapshotLifecycle } from "./manage-knowledge-snapshot-lifecycle.js";
 
 export interface InitializeKnowledgeSnapshotApprovalWorkflowInput {
   activeSnapshot: KnowledgeRepositorySnapshot;
+  activeSnapshotEvidence: KnowledgeSnapshotComparisonEvidence;
   activeSnapshotLifecycle: KnowledgeSnapshotLifecycleRecord;
   proposedSnapshot: KnowledgeRepositorySnapshot;
+  proposedSnapshotEvidence: KnowledgeSnapshotComparisonEvidence;
   proposedSnapshotLifecycle: KnowledgeSnapshotLifecycleRecord;
+}
+
+export interface SnapshotReviewDecisionInput {
+  actorId: string;
+  decidedAt: string;
+  reason: string;
 }
 
 export function initializeKnowledgeSnapshotApprovalWorkflow(
@@ -37,11 +49,6 @@ export function initializeKnowledgeSnapshotApprovalWorkflow(
       "A snapshot approval workflow requires an active baseline snapshot lifecycle",
     );
   }
-  if (activeSnapshotLifecycle.snapshotId !== input.activeSnapshot.snapshotId) {
-    throw new KnowledgeSnapshotApprovalWorkflowError(
-      "The active snapshot lifecycle must identify the active baseline snapshot",
-    );
-  }
   const proposedSnapshotLifecycle = parseWithSnapshotDomainError(
     KnowledgeSnapshotLifecycleRecordSchema,
     input.proposedSnapshotLifecycle,
@@ -55,18 +62,29 @@ export function initializeKnowledgeSnapshotApprovalWorkflow(
   }
   const changeSet = generateKnowledgeGovernedChangeSet({
     currentSnapshot: input.activeSnapshot,
+    currentSnapshotEvidence: input.activeSnapshotEvidence,
     proposedSnapshot: input.proposedSnapshot,
+    proposedSnapshotEvidence: input.proposedSnapshotEvidence,
   });
+  if (!changeSet.changed) {
+    throw new KnowledgeSnapshotApprovalWorkflowError(
+      "A snapshot approval workflow requires a proposed snapshot with governed changes",
+    );
+  }
 
   return deepFreeze(
     parseWithSnapshotDomainError(
       KnowledgeSnapshotApprovalWorkflowSchema,
       {
         activeSnapshot: input.activeSnapshot,
+        activeSnapshotEvidence: input.activeSnapshotEvidence,
+        activeSnapshotLifecycle,
         proposedSnapshot: input.proposedSnapshot,
-        changeSet,
+        proposedSnapshotEvidence: input.proposedSnapshotEvidence,
         proposedSnapshotLifecycle,
+        changeSet,
         reviewStatus: "pending",
+        reviewDecision: null,
       },
       KnowledgeSnapshotApprovalWorkflowError,
       "Cannot initialize snapshot approval workflow",
@@ -76,8 +94,10 @@ export function initializeKnowledgeSnapshotApprovalWorkflow(
 
 function updateWorkflow(
   workflow: KnowledgeSnapshotApprovalWorkflow,
-  lifecycle: KnowledgeSnapshotLifecycleRecord,
-  reviewStatus: "pending" | "reviewing" | "approved" | "rejected",
+  activeSnapshotLifecycle: KnowledgeSnapshotLifecycleRecord,
+  proposedSnapshotLifecycle: KnowledgeSnapshotLifecycleRecord,
+  reviewStatus: SnapshotReviewStatus,
+  reviewDecision: KnowledgeSnapshotReviewDecision | null,
   context: string,
 ): KnowledgeSnapshotApprovalWorkflow {
   return deepFreeze(
@@ -85,13 +105,35 @@ function updateWorkflow(
       KnowledgeSnapshotApprovalWorkflowSchema,
       {
         ...workflow,
+        activeSnapshotLifecycle,
+        proposedSnapshotLifecycle,
         changeSet: { ...workflow.changeSet, reviewStatus },
-        proposedSnapshotLifecycle: lifecycle,
         reviewStatus,
+        reviewDecision,
       },
       KnowledgeSnapshotApprovalWorkflowError,
       context,
     ),
+  );
+}
+
+function parseReviewDecision(
+  workflow: KnowledgeSnapshotApprovalWorkflow,
+  decision: "approved" | "rejected",
+  input: SnapshotReviewDecisionInput,
+): KnowledgeSnapshotReviewDecision {
+  return parseWithSnapshotDomainError(
+    KnowledgeSnapshotReviewDecisionSchema,
+    {
+      changeId: workflow.changeSet.changeId,
+      proposedSnapshotId: workflow.proposedSnapshot.snapshotId,
+      decision,
+      actorId: input.actorId,
+      decidedAt: input.decidedAt,
+      reason: input.reason,
+    },
+    KnowledgeSnapshotApprovalWorkflowError,
+    `Invalid ${decision} review decision evidence`,
   );
 }
 
@@ -105,27 +147,31 @@ export function beginKnowledgeSnapshotApprovalReview(
   );
   if (
     workflow.reviewStatus !== "pending" ||
+    workflow.activeSnapshotLifecycle.status !== "active" ||
     workflow.proposedSnapshotLifecycle.status !== "validated"
   ) {
     throw new KnowledgeSnapshotApprovalWorkflowError(
-      "Snapshot approval review can begin only from a validated workflow with pending review",
+      "Snapshot approval review can begin only from a validated workflow with active baseline and pending review",
     );
   }
   return updateWorkflow(
     workflow,
-    transitionKnowledgeSnapshotLifecycle(
+    workflow.activeSnapshotLifecycle,
+    advanceKnowledgeSnapshotLifecycle(
       workflow.proposedSnapshotLifecycle,
       workflow.proposedSnapshot,
+      "reviewing",
       evidence,
     ),
     "reviewing",
+    null,
     "Cannot begin snapshot approval review",
   );
 }
 
 export function approveKnowledgeSnapshotApprovalWorkflow(
   workflowInput: KnowledgeSnapshotApprovalWorkflow,
-  evidence: SnapshotLifecycleTransitionEvidence,
+  decisionInput: SnapshotReviewDecisionInput,
 ): KnowledgeSnapshotApprovalWorkflow {
   const workflow = parseKnowledgeSnapshotApprovalWorkflow(
     workflowInput,
@@ -133,26 +179,32 @@ export function approveKnowledgeSnapshotApprovalWorkflow(
   );
   if (
     workflow.reviewStatus !== "reviewing" ||
+    workflow.activeSnapshotLifecycle.status !== "active" ||
     workflow.proposedSnapshotLifecycle.status !== "reviewing"
   ) {
     throw new KnowledgeSnapshotApprovalWorkflowError(
-      "Snapshot approval workflow can be approved only while reviewing",
+      "Snapshot approval workflow can be approved only while reviewing an active baseline",
     );
   }
+  const reviewDecision = parseReviewDecision(workflow, "approved", decisionInput);
   return updateWorkflow(
     workflow,
-    transitionKnowledgeSnapshotLifecycle(
+    workflow.activeSnapshotLifecycle,
+    advanceKnowledgeSnapshotLifecycle(
       workflow.proposedSnapshotLifecycle,
       workflow.proposedSnapshot,
-      evidence,
+      "approved",
+      { actorId: reviewDecision.actorId, transitionedAt: reviewDecision.decidedAt },
     ),
     "approved",
+    reviewDecision,
     "Cannot approve snapshot approval workflow",
   );
 }
 
 export function rejectKnowledgeSnapshotApprovalWorkflow(
   workflowInput: KnowledgeSnapshotApprovalWorkflow,
+  decisionInput: SnapshotReviewDecisionInput,
 ): KnowledgeSnapshotApprovalWorkflow {
   const workflow = parseKnowledgeSnapshotApprovalWorkflow(
     workflowInput,
@@ -160,16 +212,20 @@ export function rejectKnowledgeSnapshotApprovalWorkflow(
   );
   if (
     workflow.reviewStatus !== "reviewing" ||
+    workflow.activeSnapshotLifecycle.status !== "active" ||
     workflow.proposedSnapshotLifecycle.status !== "reviewing"
   ) {
     throw new KnowledgeSnapshotApprovalWorkflowError(
-      "Snapshot approval workflow can be rejected only while reviewing",
+      "Snapshot approval workflow can be rejected only while reviewing an active baseline",
     );
   }
+  const reviewDecision = parseReviewDecision(workflow, "rejected", decisionInput);
   return updateWorkflow(
     workflow,
+    workflow.activeSnapshotLifecycle,
     workflow.proposedSnapshotLifecycle,
     "rejected",
+    reviewDecision,
     "Cannot reject snapshot approval workflow",
   );
 }
@@ -184,20 +240,34 @@ export function activateKnowledgeSnapshotApprovalWorkflow(
   );
   if (
     workflow.reviewStatus !== "approved" ||
+    workflow.reviewDecision?.decision !== "approved" ||
+    workflow.activeSnapshotLifecycle.status !== "active" ||
     workflow.proposedSnapshotLifecycle.status !== "approved"
   ) {
     throw new KnowledgeSnapshotApprovalWorkflowError(
-      "Snapshot approval workflow can activate only after an approved review",
+      "Snapshot approval workflow can activate only after an approved review with an active baseline",
     );
   }
+
+  const supersededActiveLifecycle = advanceKnowledgeSnapshotLifecycle(
+    workflow.activeSnapshotLifecycle,
+    workflow.activeSnapshot,
+    "superseded",
+    evidence,
+  );
+  const activeProposedLifecycle = advanceKnowledgeSnapshotLifecycle(
+    workflow.proposedSnapshotLifecycle,
+    workflow.proposedSnapshot,
+    "active",
+    evidence,
+  );
+
   return updateWorkflow(
     workflow,
-    transitionKnowledgeSnapshotLifecycle(
-      workflow.proposedSnapshotLifecycle,
-      workflow.proposedSnapshot,
-      evidence,
-    ),
+    supersededActiveLifecycle,
+    activeProposedLifecycle,
     "approved",
+    workflow.reviewDecision,
     "Cannot activate snapshot approval workflow",
   );
 }
