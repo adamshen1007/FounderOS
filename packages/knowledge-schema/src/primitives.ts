@@ -2,6 +2,9 @@ import { z } from "zod";
 
 export const NonEmptyStringSchema = z.string().trim().min(1);
 export const IdentifierSchema = NonEmptyStringSchema;
+export const Sha256DigestSchema = z
+  .string()
+  .regex(/^[a-f0-9]{64}$/u, "Expected a lowercase SHA-256 digest");
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 const ISO_DATE_TIME_PATTERN =

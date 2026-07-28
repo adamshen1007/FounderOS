@@ -82,6 +82,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Define versioned candidate-source batches and asynchronous repository interfaces in `@founderos/knowledge-schema`. Implement a validated in-memory candidate source and immutable repository snapshot in `@founderos/knowledge-engine`. Candidate sources provide objects and source provenance; repositories revalidate, reject duplicate identities, sort observable results, and supply candidates to the existing query filter through a repository-backed application service.
 - **Consequences:** Query execution no longer needs to know how candidates were obtained, and future providers can implement the same asynchronous contract. The in-memory repository is rebuilt from its sources, carries no durability or update semantics, and deliberately performs no ranking, semantic selection, or authorization.
 
+## ADR-0011: Materialize approved corpus access as immutable content-addressed snapshots
+
+- **Status:** Accepted
+- **Date:** 2026-07-28
+- **Context:** Milestone 06 proves repository-backed querying with manually supplied candidates, but future context assembly needs to identify exactly which approved corpus state supplied a result without coupling queries to files or introducing persistence.
+- **Decision:** Implement an engine-owned corpus candidate source that delegates canonical reads, approval gates, path safety, source hashes, and object validation to the Milestone 04 migration workflow. Materialize its accepted objects through the existing in-memory repository and create a schema-validated, deeply immutable snapshot whose identity is derived from corpus version, manifest reference, and deterministic per-object fingerprints. Compare snapshots through a pure, sorted change-set contract.
+- **Consequences:** The Priority 1 corpus can be queried through the existing repository abstraction with traceable, reproducible knowledge-state identity. Creation metadata does not alter content identity. Change detection is observable but inert: durable storage, automatic refresh, watchers, synchronization, retrieval intelligence, and agent integration remain future decisions.
+
 ## ADR template
 
 ```markdown

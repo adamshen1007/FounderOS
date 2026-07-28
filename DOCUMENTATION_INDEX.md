@@ -82,6 +82,16 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 06 Verification Checklist v1.0](./docs/milestones/milestone-06/FounderOS_Milestone_06_Verification_Checklist_v1.0.md)
 - [Milestone 06 Codex Execution Prompt v1.0](./docs/milestones/milestone-06/FounderOS_Milestone_06_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 07 — Knowledge Corpus Repository Adapter
+
+- [Knowledge Corpus Repository Adapter Specification v1.0](./docs/milestones/milestone-07/FounderOS_Milestone_07_Knowledge_Corpus_Repository_Adapter_Specification_v1.0.md)
+- [Knowledge Corpus Candidate Source Contract v1.0](./docs/milestones/milestone-07/FounderOS_Knowledge_Corpus_Candidate_Source_Contract_v1.0.md)
+- [Knowledge Repository Snapshot Specification v1.0](./docs/milestones/milestone-07/FounderOS_Knowledge_Repository_Snapshot_Specification_v1.0.md)
+- [Knowledge Corpus Refresh and Change Detection Specification v1.0](./docs/milestones/milestone-07/FounderOS_Knowledge_Corpus_Refresh_and_Change_Detection_Specification_v1.0.md)
+- [Milestone 07 Acceptance Criteria v1.0](./docs/milestones/milestone-07/FounderOS_Milestone_07_Acceptance_Criteria_v1.0.md)
+- [Milestone 07 Verification Checklist v1.0](./docs/milestones/milestone-07/FounderOS_Milestone_07_Verification_Checklist_v1.0.md)
+- [Milestone 07 Codex Execution Prompt v1.0](./docs/milestones/milestone-07/FounderOS_Milestone_07_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

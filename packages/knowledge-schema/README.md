@@ -26,6 +26,8 @@ Milestone 05 adds strict, versioned query and result contracts. Queries carry id
 
 Milestone 06 adds candidate-source and repository access contracts. A candidate batch binds a validated source descriptor and its provenance to schema-valid Knowledge Objects. The repository interface supports deterministic candidate listing, identity lookup, multi-identity finding, and source inspection. Provider execution and storage behavior remain outside this package.
 
+Milestone 07 adds strict corpus-source, repository-snapshot, and corpus-change contracts. Snapshots bind a corpus version and manifest reference to deterministic object, metadata, source-hash, and content fingerprints. Change sets report version, identity, source, metadata, and object changes without defining refresh execution or persistence behavior.
+
 ## Usage
 
 ```typescript
