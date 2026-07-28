@@ -74,6 +74,14 @@ This ledger records repository-level decisions. Feature-level decisions should m
 - **Decision:** Define strict query and result contracts in `@founderos/knowledge-schema` and execute them as a pure operation in `@founderos/knowledge-engine` over a caller-supplied candidate set. Apply exact-match filters and declarative context constraints by intersection, reject invalid or duplicate candidates, sort returned objects by ID, and copy source metadata into each result's provenance record.
 - **Consequences:** Query behavior is auditable, deterministic, and independently testable against the Priority 1 corpus. Callers remain responsible for supplying candidates, context constraints do not confer authorization, project matching is limited to documented object fields, and semantic relevance or ranking requires a future architecture decision.
 
+## ADR-0010: Separate candidate provision from deterministic knowledge access
+
+- **Status:** Accepted
+- **Date:** 2026-07-28
+- **Context:** Milestone 05 requires callers to assemble candidate arrays directly. Future filesystems, databases, and external providers need a stable access boundary, but Milestone 06 excludes durable persistence, external integrations, and retrieval intelligence.
+- **Decision:** Define versioned candidate-source batches and asynchronous repository interfaces in `@founderos/knowledge-schema`. Implement a validated in-memory candidate source and immutable repository snapshot in `@founderos/knowledge-engine`. Candidate sources provide objects and source provenance; repositories revalidate, reject duplicate identities, sort observable results, and supply candidates to the existing query filter through a repository-backed application service.
+- **Consequences:** Query execution no longer needs to know how candidates were obtained, and future providers can implement the same asynchronous contract. The in-memory repository is rebuilt from its sources, carries no durability or update semantics, and deliberately performs no ranking, semantic selection, or authorization.
+
 ## ADR template
 
 ```markdown
