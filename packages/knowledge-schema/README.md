@@ -22,6 +22,8 @@ The package intentionally contains no persistence, Markdown parsing, retrieval, 
 
 Milestone 04 adds strict migration-manifest contracts for object identity, object type, canonical and logical destination paths, SHA-256 evidence, metadata, migration status, and human-review status. These contracts validate migration intent only; filesystem execution remains in `@founderos/knowledge-engine`.
 
+Milestone 05 adds strict, versioned query and result contracts. Queries carry identity, consumer context, optional context constraints, and exact-match filters for object type, project, lifecycle status, tags, source, domain, and category. Results carry validated objects, matching source provenance, candidate and match counts, and the sorted set of applied constraints. The schema package defines these boundaries but does not execute queries.
+
 ## Usage
 
 ```typescript
@@ -35,6 +37,13 @@ const knowledgeObject = parseKnowledgeObject(input);
 import { KnowledgeMigrationManifestSchema } from "@founderos/knowledge-schema";
 
 const manifest = KnowledgeMigrationManifestSchema.parse(input);
+```
+
+```typescript
+import { KnowledgeQuerySchema, KnowledgeQueryResultSchema } from "@founderos/knowledge-schema";
+
+const query = KnowledgeQuerySchema.parse(queryInput);
+const result = KnowledgeQueryResultSchema.parse(resultInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.

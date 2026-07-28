@@ -2,7 +2,7 @@
 
 FounderOS is an AI-native operating system for founder decision-making, organizational memory, and governed AI-assisted execution. This repository is a documentation-first TypeScript monorepo.
 
-Milestone 00 establishes engineering boundaries and quality controls. It does **not** implement Hermes, KnowledgeOS, an agent runtime, MCP connectors, or a user interface.
+The repository currently provides the governed KnowledgeOS schema, ingestion, migration, and deterministic query foundations. It does **not** implement persistence, semantic retrieval, Hermes, an agent runtime, MCP connectors, or a user interface.
 
 ## Architecture at a glance
 
@@ -20,20 +20,20 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 
 ## Implemented foundations
 
-- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, relationships, and the seven official knowledge object categories.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only file and directory ingestion, manifest-controlled Priority 1 corpus migration, deterministic reports, path containment, conflict detection, and source evidence.
+- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, relationships, the seven official knowledge object categories, queries, and query results.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, and deterministic in-memory filtering with preserved source provenance.
 - [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
 - [`knowledge/migration-manifest.yaml`](./knowledge/migration-manifest.yaml) binds the eight canonical FounderOS Priority 1 documents to reviewed object identities, logical destinations, metadata, and source hashes.
 
-Vault watching, persistence, retrieval, embeddings, graph storage, agent behavior, connectors, and interfaces remain unimplemented.
+Vault watching, persistence, semantic retrieval, embeddings, ranking, graph storage, agent behavior, connectors, and interfaces remain unimplemented.
 
 ## Repository layout
 
 | Path              | Responsibility                                     |
 | ----------------- | -------------------------------------------------- |
 | `apps/`           | Future user-facing applications                    |
-| `services/`       | Future core backend service boundaries             |
-| `packages/`       | Future shared contracts, types, and libraries      |
+| `services/`       | Core backend service boundaries                    |
+| `packages/`       | Shared contracts, types, and libraries             |
 | `integrations/`   | Future external-system adapters                    |
 | `infrastructure/` | Deployment, data, monitoring, and security assets  |
 | `docs/`           | Governance and architecture source documentation   |
