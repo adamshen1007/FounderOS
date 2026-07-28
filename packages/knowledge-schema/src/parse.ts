@@ -1,3 +1,11 @@
+import {
+  KnowledgeCorpusChangeSetSchema,
+  KnowledgeCorpusSourceSchema,
+  KnowledgeRepositorySnapshotSchema,
+  type KnowledgeCorpusChangeSet,
+  type KnowledgeCorpusSource,
+  type KnowledgeRepositorySnapshot,
+} from "./corpus.js";
 import { KnowledgeMetadataSchema, type KnowledgeMetadata } from "./metadata.js";
 import { KnowledgeObjectSchema, type KnowledgeObject } from "./objects.js";
 import { KnowledgeQuerySchema, type KnowledgeQuery } from "./query.js";
@@ -69,4 +77,28 @@ export function parseKnowledgeRepositoryFindRequest(
 
 export function safeParseKnowledgeRepositoryFindRequest(input: unknown) {
   return KnowledgeRepositoryFindRequestSchema.safeParse(input);
+}
+
+export function parseKnowledgeCorpusSource(input: unknown): KnowledgeCorpusSource {
+  return KnowledgeCorpusSourceSchema.parse(input);
+}
+
+export function safeParseKnowledgeCorpusSource(input: unknown) {
+  return KnowledgeCorpusSourceSchema.safeParse(input);
+}
+
+export function parseKnowledgeRepositorySnapshot(input: unknown): KnowledgeRepositorySnapshot {
+  return KnowledgeRepositorySnapshotSchema.parse(input);
+}
+
+export function safeParseKnowledgeRepositorySnapshot(input: unknown) {
+  return KnowledgeRepositorySnapshotSchema.safeParse(input);
+}
+
+export function parseKnowledgeCorpusChangeSet(input: unknown): KnowledgeCorpusChangeSet {
+  return KnowledgeCorpusChangeSetSchema.parse(input);
+}
+
+export function safeParseKnowledgeCorpusChangeSet(input: unknown) {
+  return KnowledgeCorpusChangeSetSchema.safeParse(input);
 }

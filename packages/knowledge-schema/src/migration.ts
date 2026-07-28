@@ -8,9 +8,12 @@ import {
   KnowledgeStatusSchema,
 } from "./enums.js";
 import { RelationshipReferenceSchema } from "./metadata.js";
-import { IdentifierSchema, IsoTemporalSchema, NonEmptyStringSchema } from "./primitives.js";
-
-const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+import {
+  IdentifierSchema,
+  IsoTemporalSchema,
+  NonEmptyStringSchema,
+  Sha256DigestSchema,
+} from "./primitives.js";
 
 function isSafeRelativePath(value: string): boolean {
   if (value.startsWith("/") || value.includes("\\") || value.includes("\0")) {
@@ -66,7 +69,7 @@ export const KnowledgeMigrationManifestEntrySchema = z
     objectType: KnowledgeObjectTypeSchema,
     sourcePath: MigrationSourcePathSchema,
     destinationPath: MigrationDestinationPathSchema,
-    sourceHash: z.string().regex(SHA256_PATTERN, "Expected a lowercase SHA-256 digest"),
+    sourceHash: Sha256DigestSchema,
     migrationStatus: MigrationStatusSchema,
     reviewStatus: ReviewStatusSchema,
     metadata: MigrationMetadataSchema,
