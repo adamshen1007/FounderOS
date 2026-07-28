@@ -2,7 +2,7 @@
   "name": "@founderos/knowledge-schema",
   "version": "0.1.0",
   "private": true,
-  "description": "KnowledgeOS object, migration, and query contracts",
+  "description": "KnowledgeOS object, migration, query, and repository contracts",
   "type": "module",
   "files": [
     "dist"

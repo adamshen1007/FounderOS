@@ -4,3 +4,10 @@ export class DuplicateKnowledgeObjectIdError extends Error {
     this.name = "DuplicateKnowledgeObjectIdError";
   }
 }
+
+export class DuplicateKnowledgeCandidateSourceIdError extends Error {
+  public constructor(id: string) {
+    super(`Duplicate knowledge candidate source ID: ${id}`);
+    this.name = "DuplicateKnowledgeCandidateSourceIdError";
+  }
+}

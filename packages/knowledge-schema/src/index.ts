@@ -6,3 +6,4 @@ export * from "./parse.js";
 export * from "./primitives.js";
 export * from "./query.js";
 export * from "./query-result.js";
+export * from "./repository.js";

@@ -72,6 +72,16 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 05 Acceptance Criteria v1.0](./docs/milestones/milestone-05/FounderOS_Milestone_05_Acceptance_Criteria_v1.0.md)
 - [Milestone 05 Codex Execution Prompt v1.0](./docs/milestones/milestone-05/FounderOS_Milestone_05_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 06 — Knowledge Repository and Candidate Source Foundation
+
+- [Knowledge Repository and Candidate Source Foundation Specification v1.0](./docs/milestones/milestone-06/FounderOS_Milestone_06_Knowledge_Repository_and_Candidate_Source_Foundation_Specification_v1.0.md)
+- [Knowledge Repository Contract v1.0](./docs/milestones/milestone-06/FounderOS_Knowledge_Repository_Contract_v1.0.md)
+- [Candidate Source Contract v1.0](./docs/milestones/milestone-06/FounderOS_Candidate_Source_Contract_v1.0.md)
+- [Knowledge Repository Architecture v1.0](./docs/milestones/milestone-06/FounderOS_Knowledge_Repository_Architecture_v1.0.md)
+- [Milestone 06 Acceptance Criteria v1.0](./docs/milestones/milestone-06/FounderOS_Milestone_06_Acceptance_Criteria_v1.0.md)
+- [Milestone 06 Verification Checklist v1.0](./docs/milestones/milestone-06/FounderOS_Milestone_06_Verification_Checklist_v1.0.md)
+- [Milestone 06 Codex Execution Prompt v1.0](./docs/milestones/milestone-06/FounderOS_Milestone_06_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

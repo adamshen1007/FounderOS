@@ -20,3 +20,5 @@ All notable changes to FounderOS will be documented here.
 - Path-contained migration CLI and deterministic `migration-report.json` generation.
 - Strict KnowledgeOS query and result contracts with consumer context, exact filters, and source provenance.
 - Deterministic in-memory query execution and Priority 1 corpus evaluation fixtures.
+- Versioned candidate-source and Knowledge Repository contracts.
+- Validated in-memory candidate provider, deterministic repository access, and repository-backed query execution.

@@ -2,7 +2,7 @@
   "name": "@founderos/knowledge-engine",
   "version": "0.1.0",
   "private": true,
-  "description": "KnowledgeOS ingestion, migration, and query foundation",
+  "description": "KnowledgeOS ingestion, migration, repository, and query foundation",
   "type": "module",
   "files": [
     "dist"

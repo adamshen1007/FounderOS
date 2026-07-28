@@ -24,6 +24,8 @@ Milestone 04 adds strict migration-manifest contracts for object identity, objec
 
 Milestone 05 adds strict, versioned query and result contracts. Queries carry identity, consumer context, optional context constraints, and exact-match filters for object type, project, lifecycle status, tags, source, domain, and category. Results carry validated objects, matching source provenance, candidate and match counts, and the sorted set of applied constraints. The schema package defines these boundaries but does not execute queries.
 
+Milestone 06 adds candidate-source and repository access contracts. A candidate batch binds a validated source descriptor and its provenance to schema-valid Knowledge Objects. The repository interface supports deterministic candidate listing, identity lookup, multi-identity finding, and source inspection. Provider execution and storage behavior remain outside this package.
+
 ## Usage
 
 ```typescript
@@ -44,6 +46,16 @@ import { KnowledgeQuerySchema, KnowledgeQueryResultSchema } from "@founderos/kno
 
 const query = KnowledgeQuerySchema.parse(queryInput);
 const result = KnowledgeQueryResultSchema.parse(resultInput);
+```
+
+```typescript
+import {
+  KnowledgeCandidateBatchSchema,
+  type KnowledgeCandidateSource,
+  type KnowledgeRepository,
+} from "@founderos/knowledge-schema";
+
+const batch = KnowledgeCandidateBatchSchema.parse(candidateBatchInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.
