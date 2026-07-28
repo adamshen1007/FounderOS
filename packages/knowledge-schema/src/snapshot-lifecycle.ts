@@ -25,6 +25,16 @@ export const SnapshotObjectChangeTypeSchema = z.enum([
   "provenance",
 ]);
 
+const ALLOWED_LIFECYCLE_STATUSES_BY_REVIEW_STATUS: Record<
+  z.infer<typeof SnapshotReviewStatusSchema>,
+  readonly z.infer<typeof SnapshotLifecycleStatusSchema>[]
+> = {
+  pending: ["created", "validated"],
+  reviewing: ["reviewing"],
+  approved: ["approved", "active"],
+  rejected: ["reviewing"],
+};
+
 function isSortedUnique(values: readonly string[]): boolean {
   return (
     new Set(values).size === values.length &&
@@ -60,6 +70,34 @@ function snapshotObjectChangeTypes(
   if (previous.objectType !== current.objectType) changeTypes.push("object_type");
 
   return changeTypes.sort();
+}
+
+function snapshotObjectsEqual(
+  left: z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>,
+  right: z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>,
+): boolean {
+  return (
+    left.objectId === right.objectId &&
+    left.objectType === right.objectType &&
+    left.sourcePath === right.sourcePath &&
+    left.sourceHash === right.sourceHash &&
+    left.contentFingerprint === right.contentFingerprint &&
+    left.metadataFingerprint === right.metadataFingerprint &&
+    left.objectFingerprint === right.objectFingerprint
+  );
+}
+
+function snapshotObjectCollectionsEqual(
+  left: readonly z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>[],
+  right: readonly z.infer<typeof KnowledgeRepositorySnapshotObjectSchema>[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((object, index) => {
+      const comparison = right[index];
+      return comparison !== undefined && snapshotObjectsEqual(object, comparison);
+    })
+  );
 }
 
 export const KnowledgeSnapshotLifecycleTransitionSchema = z
@@ -333,32 +371,74 @@ export const KnowledgeSnapshotApprovalWorkflowSchema = z
       });
     }
 
-    const lifecycleStatus = workflow.proposedSnapshotLifecycle.status;
-    if (lifecycleStatus === "reviewing" && workflow.reviewStatus !== "reviewing") {
-      context.addIssue({
-        code: "custom",
-        message: "A reviewing lifecycle requires an in-progress review",
-        path: ["reviewStatus"],
-      });
-    }
     if (
-      (lifecycleStatus === "approved" || lifecycleStatus === "active") &&
-      workflow.reviewStatus !== "approved"
+      !ALLOWED_LIFECYCLE_STATUSES_BY_REVIEW_STATUS[workflow.reviewStatus].includes(
+        workflow.proposedSnapshotLifecycle.status,
+      )
     ) {
       context.addIssue({
         code: "custom",
-        message: "Approved or active lifecycle states require an approved review",
-        path: ["reviewStatus"],
-      });
-    }
-    if (
-      workflow.reviewStatus === "rejected" &&
-      (lifecycleStatus === "approved" || lifecycleStatus === "active")
-    ) {
-      context.addIssue({
-        code: "custom",
-        message: "A rejected review cannot have an approved or active lifecycle",
+        message: "Review status must align with its allowed proposed snapshot lifecycle states",
         path: ["proposedSnapshotLifecycle", "status"],
+      });
+    }
+
+    const activeObjectsById = new Map(
+      workflow.activeSnapshot.objects.map((object) => [object.objectId, object]),
+    );
+    const proposedObjectsById = new Map(
+      workflow.proposedSnapshot.objects.map((object) => [object.objectId, object]),
+    );
+    const expectedAddedObjects = workflow.proposedSnapshot.objects.filter(
+      (object) => !activeObjectsById.has(object.objectId),
+    );
+    const expectedRemovedObjects = workflow.activeSnapshot.objects.filter(
+      (object) => !proposedObjectsById.has(object.objectId),
+    );
+    const expectedModifiedObjects = workflow.activeSnapshot.objects
+      .filter((previous) => {
+        const current = proposedObjectsById.get(previous.objectId);
+        return current !== undefined && !snapshotObjectsEqual(previous, current);
+      })
+      .map((previous) => ({
+        objectId: previous.objectId,
+        previous,
+        current: proposedObjectsById.get(previous.objectId)!,
+      }));
+
+    if (!snapshotObjectCollectionsEqual(workflow.changeSet.addedObjects, expectedAddedObjects)) {
+      context.addIssue({
+        code: "custom",
+        message: "Added object evidence must exactly match proposed-only snapshot records",
+        path: ["changeSet", "addedObjects"],
+      });
+    }
+    if (
+      !snapshotObjectCollectionsEqual(workflow.changeSet.removedObjects, expectedRemovedObjects)
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Removed object evidence must exactly match active-only snapshot records",
+        path: ["changeSet", "removedObjects"],
+      });
+    }
+    if (
+      workflow.changeSet.modifiedObjects.length !== expectedModifiedObjects.length ||
+      workflow.changeSet.modifiedObjects.some((modified, index) => {
+        const expected = expectedModifiedObjects[index];
+        return (
+          expected === undefined ||
+          modified.objectId !== expected.objectId ||
+          !snapshotObjectsEqual(modified.previous, expected.previous) ||
+          !snapshotObjectsEqual(modified.current, expected.current)
+        );
+      })
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "Modified object evidence must exactly match changed active and proposed snapshot records",
+        path: ["changeSet", "modifiedObjects"],
       });
     }
   });
