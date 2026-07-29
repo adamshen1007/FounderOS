@@ -138,6 +138,12 @@ export interface GovernedDurableSnapshotRegistry extends DurableSnapshotRegistry
   verifyIntegrity(): Promise<RegistryIntegrityResult>;
 }
 
+/** Delivery-specific extension for evidence derived at a committed historical prefix. */
+export interface GovernedHistoricalSnapshotRegistry extends GovernedDurableSnapshotRegistry {
+  recoverAtSequence(sequence: number): Promise<RegistryRecoveryResult>;
+  verifyIntegrityAtSequence(sequence: number): Promise<RegistryIntegrityResult>;
+}
+
 export class GovernedDurableRegistryPreconditionError extends DurableRegistryConflictError {}
 
 type TransactionFaultHooks = (transactionId: string) => LocalFileRegistryFaultHooks | undefined;
@@ -542,7 +548,7 @@ function activationCommittedResult(
   );
 }
 
-class PortGovernedDurableSnapshotRegistry implements GovernedDurableSnapshotRegistry {
+class PortGovernedDurableSnapshotRegistry implements GovernedHistoricalSnapshotRegistry {
   readonly #storage: GovernedDurableSnapshotRegistryStoragePort;
   readonly #beforeWriterAcquisition: BeforeWriterAcquisition | undefined;
 
@@ -1365,8 +1371,16 @@ class PortGovernedDurableSnapshotRegistry implements GovernedDurableSnapshotRegi
     return this.#storage.verifyIntegrity();
   }
 
+  public async verifyIntegrityAtSequence(sequence: number): Promise<RegistryIntegrityResult> {
+    return this.#storage.verifyIntegrityAtSequence(sequence);
+  }
+
   public async recover(): Promise<RegistryRecoveryResult> {
     return this.#storage.recover();
+  }
+
+  public async recoverAtSequence(sequence: number): Promise<RegistryRecoveryResult> {
+    return this.#storage.recoverAtSequence(sequence);
   }
 
   public async inspectDerivedIndex(): Promise<DerivedRegistryIndexResult> {
@@ -1381,7 +1395,7 @@ class PortGovernedDurableSnapshotRegistry implements GovernedDurableSnapshotRegi
 async function openRegistry(
   options: LocalFileRegistryOptions,
   transactionFaultHooks?: TransactionFaultHooks,
-): Promise<GovernedDurableSnapshotRegistry> {
+): Promise<GovernedHistoricalSnapshotRegistry> {
   const storage = await LocalFileRegistryStorage.open(options);
   return new PortGovernedDurableSnapshotRegistry(
     transactionFaultHooks === undefined
@@ -1402,7 +1416,9 @@ function adaptLocalStorageFaultHooks(
     readVerifiedState: () => storage.readVerifiedState(),
     rebuildDerivedIndex: () => storage.rebuildDerivedIndex(),
     recover: () => storage.recover(),
+    recoverAtSequence: (sequence) => storage.recoverAtSequence(sequence),
     verifyIntegrity: () => storage.verifyIntegrity(),
+    verifyIntegrityAtSequence: (sequence) => storage.verifyIntegrityAtSequence(sequence),
     withExclusiveWriter: (operation) =>
       storage.withExclusiveWriter((writer) =>
         operation({
@@ -1417,13 +1433,13 @@ function adaptLocalStorageFaultHooks(
 /** Direct-module test seam. Deliberately omitted from the package-root export surface. */
 export function createGovernedDurableSnapshotRegistryForTesting(
   storage: GovernedDurableSnapshotRegistryStoragePort,
-): GovernedDurableSnapshotRegistry {
+): GovernedHistoricalSnapshotRegistry {
   return new PortGovernedDurableSnapshotRegistry(storage);
 }
 
 export async function openGovernedDurableSnapshotRegistry(
   options: LocalFileRegistryOptions,
-): Promise<GovernedDurableSnapshotRegistry> {
+): Promise<GovernedHistoricalSnapshotRegistry> {
   return openRegistry(options);
 }
 
@@ -1431,6 +1447,6 @@ export async function openGovernedDurableSnapshotRegistry(
 export async function openGovernedDurableSnapshotRegistryForTesting(
   options: LocalFileRegistryOptions,
   transactionFaultHooks: TransactionFaultHooks,
-): Promise<GovernedDurableSnapshotRegistry> {
+): Promise<GovernedHistoricalSnapshotRegistry> {
   return openRegistry(options, transactionFaultHooks);
 }

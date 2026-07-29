@@ -2,6 +2,7 @@ export * from "./canonical-json.js";
 export * from "./context.js";
 export * from "./corpus.js";
 export * from "./durable-registry.js";
+export * from "./delivery.js";
 export * from "./enums.js";
 export * from "./metadata.js";
 export * from "./migration.js";

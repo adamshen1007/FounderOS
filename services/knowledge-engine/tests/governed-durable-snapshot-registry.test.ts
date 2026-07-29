@@ -96,8 +96,22 @@ class InMemoryGovernedRegistryStorage implements GovernedDurableSnapshotRegistry
     return verifyCommittedRegistryIntegrity(structuredClone(this.envelopes));
   }
 
+  public async verifyIntegrityAtSequence(sequence: number) {
+    const boundary = this.envelopes.findIndex((envelope) => envelope.lastSequence === sequence);
+    if (sequence === 0) return verifyCommittedRegistryIntegrity([]);
+    if (boundary === -1) return verifyCommittedRegistryIntegrity([{}]);
+    return verifyCommittedRegistryIntegrity(structuredClone(this.envelopes.slice(0, boundary + 1)));
+  }
+
   public async recover() {
     return recoverCommittedRegistry(structuredClone(this.envelopes));
+  }
+
+  public async recoverAtSequence(sequence: number) {
+    const boundary = this.envelopes.findIndex((envelope) => envelope.lastSequence === sequence);
+    if (sequence === 0) return recoverCommittedRegistry([]);
+    if (boundary === -1) return recoverCommittedRegistry([{}]);
+    return recoverCommittedRegistry(structuredClone(this.envelopes.slice(0, boundary + 1)));
   }
 
   public async inspectDerivedIndex(): Promise<DerivedRegistryIndexResult> {
@@ -382,8 +396,19 @@ describe("governed durable lifecycle and decision APIs", () => {
     });
     await expect(registry.getLifecycleHistory(candidate.snapshotId)).resolves.toHaveLength(4);
     await expect(registry.getReviewDecisionHistory(candidate.snapshotId)).resolves.toHaveLength(1);
-    await expect(registry.getActivationHistory()).resolves.toHaveLength(1);
+    const activationHistory = await registry.getActivationHistory();
+    expect(activationHistory).toHaveLength(1);
     await expect(registry.verifyIntegrity()).resolves.toMatchObject({ status: "valid" });
+    const registration = await registry.getSnapshot(candidate.snapshotId);
+    if (registration === null) throw new Error("Expected registered candidate");
+    await expect(registry.verifyIntegrityAtSequence(registration.sequence)).resolves.toMatchObject({
+      status: "valid",
+      verifiedThroughSequence: registration.sequence,
+      lastRecordFingerprint: registration.recordFingerprint,
+    });
+    await expect(
+      registry.verifyIntegrityAtSequence(activationHistory[0]!.sequence - 1),
+    ).resolves.toMatchObject({ status: "invalid" });
     await expect(registry.recover()).resolves.toMatchObject({
       status: "recovered",
       activeSnapshotId: candidate.snapshotId,
@@ -643,10 +668,12 @@ describe("governed durable lifecycle and decision APIs", () => {
         "rebuildDerivedIndex",
         "recordGovernedChangeSet",
         "recover",
+        "recoverAtSequence",
         "registerSnapshot",
         "rejectSnapshot",
         "validateSnapshot",
         "verifyIntegrity",
+        "verifyIntegrityAtSequence",
       ].sort(),
     );
     let writerSessionExposed = false;

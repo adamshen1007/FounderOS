@@ -667,6 +667,43 @@ describe("local file durable snapshot registration", () => {
 });
 
 describe("local file registry commit and recovery", () => {
+  it("verifies trusted historical prefixes only at committed transaction boundaries", async () => {
+    const root = await createTestRoot();
+    await openRegistry(root);
+    const storage = await LocalFileRegistryStorage.open(root);
+    const chain = createAdapterChainBuilder();
+    appendAdapterBootstrapHistory(
+      chain,
+      createAdapterSnapshot("historical-prefix"),
+      "historical-prefix",
+    );
+    for (const envelope of chain.envelopes) await storage.appendCommittedEnvelope(envelope);
+
+    const first = chain.envelopes[0]!;
+    await expect(storage.verifyIntegrityAtSequence(first.lastSequence)).resolves.toMatchObject({
+      status: "valid",
+      verifiedThroughSequence: first.lastSequence,
+      lastRecordFingerprint: first.lastRecordFingerprint,
+    });
+    await expect(storage.recoverAtSequence(first.lastSequence)).resolves.toMatchObject({
+      status: "recovered",
+      activeSnapshotId: null,
+      lastCommittedAuditSequence: first.lastSequence,
+      lastRecordFingerprint: first.lastRecordFingerprint,
+    });
+    const multiRecord = chain.envelopes.find((envelope) => envelope.records.length > 1)!;
+    await expect(
+      storage.verifyIntegrityAtSequence(multiRecord.firstSequence),
+    ).resolves.toMatchObject({
+      status: "invalid",
+      issues: [{ code: "integrity_sequence_not_committed_boundary" }],
+    });
+    await expect(storage.recoverAtSequence(multiRecord.firstSequence)).resolves.toMatchObject({
+      status: "failed",
+      errors: [{ code: "integrity_sequence_not_committed_boundary" }],
+    });
+  });
+
   it("serializes an exclusive writer session and invalidates it before lock release", async () => {
     const root = await createTestRoot();
     await openRegistry(root);

@@ -1604,6 +1604,28 @@ export class LocalFileRegistryStorage implements GovernedDurableSnapshotRegistry
     }
   }
 
+  public async verifyIntegrityAtSequence(sequence: number): Promise<RegistryIntegrityResult> {
+    try {
+      if (!Number.isSafeInteger(sequence) || sequence < 0)
+        throw new DurableRegistryIntegrityError(
+          "invalid_integrity_sequence",
+          "Historical integrity sequence must be a non-negative safe integer",
+        );
+      const state = await this.readVerifiedState();
+      const boundary = state.envelopes.findIndex((envelope) => envelope.lastSequence === sequence);
+      if (sequence !== 0 && boundary === -1)
+        throw new DurableRegistryIntegrityError(
+          "integrity_sequence_not_committed_boundary",
+          "Historical integrity sequence is not a committed transaction boundary",
+        );
+      return verifyCommittedRegistryIntegrity(
+        sequence === 0 ? [] : state.envelopes.slice(0, boundary + 1),
+      );
+    } catch (error) {
+      return invalidIntegrityResult(asIntegrityError(error));
+    }
+  }
+
   public async recover(): Promise<RegistryRecoveryResult> {
     try {
       const state = await this.readVerifiedState();
@@ -1612,6 +1634,26 @@ export class LocalFileRegistryStorage implements GovernedDurableSnapshotRegistry
         derivedIndexStatus: derivedIndex.status === "rebuilt" ? "current" : derivedIndex.status,
         derivedIndexIssues: derivedIndex.issues,
       });
+    } catch (error) {
+      return failedRecoveryResult(asIntegrityError(error));
+    }
+  }
+
+  public async recoverAtSequence(sequence: number): Promise<RegistryRecoveryResult> {
+    try {
+      if (!Number.isSafeInteger(sequence) || sequence < 0)
+        throw new DurableRegistryIntegrityError(
+          "invalid_integrity_sequence",
+          "Historical recovery sequence must be a non-negative safe integer",
+        );
+      const state = await this.readVerifiedState();
+      const boundary = state.envelopes.findIndex((envelope) => envelope.lastSequence === sequence);
+      if (sequence !== 0 && boundary === -1)
+        throw new DurableRegistryIntegrityError(
+          "integrity_sequence_not_committed_boundary",
+          "Historical recovery sequence is not a committed transaction boundary",
+        );
+      return recoverCommittedRegistry(sequence === 0 ? [] : state.envelopes.slice(0, boundary + 1));
     } catch (error) {
       return failedRecoveryResult(asIntegrityError(error));
     }

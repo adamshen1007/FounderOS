@@ -321,6 +321,20 @@ function validateBindings(
       ),
     ]);
   }
+  if (
+    recovery.committedTransactionCount !== integrity.verifiedTransactionCount ||
+    recovery.committedRecordCount !== integrity.verifiedRecordCount ||
+    recovery.lastCommittedAuditSequence !== integrity.verifiedThroughSequence ||
+    recovery.lastRecordFingerprint !== integrity.lastRecordFingerprint
+  ) {
+    return insufficient(requestId, [
+      issue(
+        "registry_integrity_invalid",
+        "registry.recoveryCoordinates",
+        "Recovery and integrity evidence do not describe the same committed prefix",
+      ),
+    ]);
+  }
   if (recovery.activeSnapshotId === null) {
     return insufficient(requestId, [
       issue(
@@ -760,6 +774,11 @@ export interface VerifyKnowledgeContextPackageInput {
   readonly package: unknown;
   readonly candidateInputs: readonly unknown[];
   readonly bindings: VerifiedKnowledgeContextInputs;
+  /** Trusted integrity and replay-derived active state for the exact historical registry prefix. */
+  readonly historicalRegistryState?: {
+    readonly integrity: RegistryIntegrityResult;
+    readonly recovery: RegistryRecoveryResult;
+  };
 }
 
 export function verifyKnowledgeContextPackage(
@@ -781,8 +800,30 @@ export function verifyKnowledgeContextPackage(
     });
   }
   const contextPackage = parsed.data;
-  const bindings = captureVerifiedBindings(input.bindings);
-  if (bindings === null) {
+  const currentBindings = captureVerifiedBindings(input.bindings);
+  const currentStateValid =
+    currentBindings !== null &&
+    currentBindings.integrity.status === "valid" &&
+    currentBindings.recovery.status === "recovered" &&
+    currentBindings.integrity.integrityFingerprint ===
+      currentBindings.recovery.integrityFingerprint &&
+    currentBindings.integrity.verifiedTransactionCount ===
+      currentBindings.recovery.committedTransactionCount &&
+    currentBindings.integrity.verifiedRecordCount ===
+      currentBindings.recovery.committedRecordCount &&
+    currentBindings.integrity.verifiedThroughSequence ===
+      currentBindings.recovery.lastCommittedAuditSequence &&
+    currentBindings.integrity.lastRecordFingerprint ===
+      currentBindings.recovery.lastRecordFingerprint;
+  const bindings =
+    !currentStateValid || input.historicalRegistryState === undefined
+      ? currentBindings
+      : captureVerifiedBindings({
+          ...currentBindings,
+          integrity: input.historicalRegistryState.integrity,
+          recovery: input.historicalRegistryState.recovery,
+        });
+  if (!currentStateValid || bindings === null) {
     return KnowledgeContextVerificationResultSchema.parse({
       schemaVersion: "1.0",
       status: "invalid",
