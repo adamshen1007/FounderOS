@@ -4,6 +4,18 @@ export * from "./application/execute-knowledge-migration.js";
 export * from "./application/compare-knowledge-repository-snapshots.js";
 export * from "./application/generate-knowledge-governed-change-set.js";
 export {
+  GovernedDurableRegistryPreconditionError,
+  openGovernedDurableSnapshotRegistry,
+  type ApproveGovernedSnapshotInput,
+  type BeginGovernedSnapshotReviewInput,
+  type DurableRegistryActorEvidence,
+  type GovernedDurableSnapshotRegistry,
+  type GovernedLifecycleTransitionInput,
+  type RecordGovernedChangeSetInput,
+  type RegisterGovernedSnapshotInput,
+  type RejectGovernedSnapshotInput,
+} from "./application/manage-governed-durable-snapshot-registry.js";
+export {
   archiveKnowledgeSnapshotLifecycle,
   createKnowledgeSnapshotLifecycleRecord,
   validateKnowledgeSnapshotLifecycle,
@@ -27,6 +39,7 @@ export * from "./infrastructure/load-migration-manifest.js";
 export * from "./infrastructure/knowledge-corpus-candidate-source.js";
 export * from "./infrastructure/in-memory-candidate-source.js";
 export * from "./infrastructure/in-memory-knowledge-repository.js";
+export * from "./infrastructure/local-file-durable-snapshot-registry.js";
 export * from "./infrastructure/parse-markdown.js";
 export * from "./infrastructure/safe-path.js";
 export * from "./interfaces/ingestion-report.js";

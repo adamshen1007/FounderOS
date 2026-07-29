@@ -30,6 +30,8 @@ Milestone 07 adds strict corpus-source, repository-snapshot, and corpus-change c
 
 Milestone 08 adds strict lifecycle, governed comparison, change-set, review-decision, and approval-workflow contracts without changing the Milestone 07 snapshot object or its content-derived identity. `KnowledgeSnapshotComparisonEvidenceSchema` carries the canonical validated Knowledge Object payload alongside the additional per-object content fingerprint needed for governed comparison, allowing the engine to verify every metadata, object, and content digest against the snapshot descriptor. `KnowledgeSnapshotLifecycleRecordSchema` validates ordered lifecycle evidence from `created` through `archived`, including the invariant that transitions occur after snapshot creation. `KnowledgeSnapshotComparisonRequestSchema` accepts snapshots from one corpus, including same-identity comparisons that yield an empty change set. `KnowledgeGovernedChangeSetSchema` preserves deterministic snapshot-, manifest-, version-, and object-level evidence. `KnowledgeSnapshotApprovalWorkflowSchema` binds the active baseline and proposed snapshot, their lifecycle records, the governed change set, review status, and immutable approval or rejection evidence. These schemas define validation contracts only: the package contains no lifecycle orchestration, review behavior, activation behavior, persistence, or automation.
 
+Milestone 09 adds strict, versioned, storage-independent contracts for durable snapshot registrations, canonical manifest evidence, state-specific lifecycle transitions, exact approval and rejection decision envelopes, bootstrap and Milestone 08 governed change-set evidence, activation audit records, ordered audit chains, committed transaction envelopes, optimistic activation requests and results, fail-closed recovery and integrity summaries, and rebuildable derived-index state. `DurableKnowledgeMigrationManifestSchema` preserves valid Milestone 04 entry fields while restricting durable evidence recursively to finite canonical JSON and allowing empty snapshot evidence without changing the general Milestone 04 manifest contract. A registration's approved `ready` or `migrated` manifest entries must match its sorted snapshot descriptors one-to-one by object ID, object type, source path, and source hash. The engine commits the canonical evidence digest without changing the Milestone 07 snapshot-v1 contract or identity. Every authoritative record carries explicit sequence and predecessor evidence plus actor, reason, transaction, stable record identity, and fingerprint fields. Recovery success and failure contracts report lifecycle-transition, decision, and activation counts, while recovery and integrity contracts report derived-index health separately from authoritative validity. Approval, activation, and supersession edges are restricted to their exact atomic envelope shapes. The `DurableSnapshotRegistry` interface exposes safe activation and read/recovery/index operations only; raw prebuilt registration, lifecycle, decision, change-set, and activation-record append capabilities are deliberately absent. The separate bootstrap change-set contract models the first activation without weakening the Milestone 08 comparison contract. These are validation and storage-independent interface contracts only: canonical hashing, replay, locking, filesystem layout, recovery behavior, and persistence remain engine-owned.
+
 ## Usage
 
 ```typescript
@@ -78,6 +80,21 @@ const comparison = KnowledgeSnapshotComparisonRequestSchema.parse(comparisonInpu
 const changeSet = KnowledgeGovernedChangeSetSchema.parse(changeSetInput);
 const decision = KnowledgeSnapshotReviewDecisionSchema.parse(decisionInput);
 const workflow = KnowledgeSnapshotApprovalWorkflowSchema.parse(workflowInput);
+```
+
+```typescript
+import {
+  CommittedRegistryTransactionEnvelopeSchema,
+  SnapshotActivationRequestSchema,
+  parseRegistryIntegrityResult,
+  parseRegistryRecoveryResult,
+  type DurableSnapshotRegistry,
+} from "@founderos/knowledge-schema";
+
+const envelope = CommittedRegistryTransactionEnvelopeSchema.parse(envelopeInput);
+const activation = SnapshotActivationRequestSchema.parse(activationInput);
+const integrity = parseRegistryIntegrityResult(integrityInput);
+const recovery = parseRegistryRecoveryResult(recoveryInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.
