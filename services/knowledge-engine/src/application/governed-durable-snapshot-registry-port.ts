@@ -25,7 +25,9 @@ export interface GovernedDurableSnapshotRegistryStoragePort {
   readVerifiedState(): Promise<GovernedDurableSnapshotRegistryVerifiedState>;
   rebuildDerivedIndex(): Promise<DerivedRegistryIndexResult>;
   recover(): Promise<RegistryRecoveryResult>;
+  recoverAtSequence(sequence: number): Promise<RegistryRecoveryResult>;
   verifyIntegrity(): Promise<RegistryIntegrityResult>;
+  verifyIntegrityAtSequence(sequence: number): Promise<RegistryIntegrityResult>;
   withExclusiveWriter<T>(
     operation: (writer: GovernedDurableSnapshotRegistryWriterPort) => Promise<T>,
   ): Promise<T>;

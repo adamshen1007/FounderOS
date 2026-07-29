@@ -2,6 +2,11 @@ export * from "./application/ingest-markdown.js";
 export * from "./application/assemble-governed-knowledge-context.js";
 export * from "./application/ingest-markdown-directory.js";
 export * from "./application/execute-knowledge-migration.js";
+export {
+  BoundedContextDeliveryIdempotencyStore,
+  deliverGovernedKnowledgeContext,
+  type DeliverGovernedKnowledgeContextInput,
+} from "./application/deliver-governed-knowledge-context.js";
 export * from "./application/compare-knowledge-repository-snapshots.js";
 export * from "./application/generate-knowledge-governed-change-set.js";
 export {
@@ -11,6 +16,7 @@ export {
   type BeginGovernedSnapshotReviewInput,
   type DurableRegistryActorEvidence,
   type GovernedDurableSnapshotRegistry,
+  type GovernedHistoricalSnapshotRegistry,
   type GovernedLifecycleTransitionInput,
   type RecordGovernedChangeSetInput,
   type RegisterGovernedSnapshotInput,
@@ -41,6 +47,38 @@ export {
   type VerifiedKnowledgeContextInputs,
   type VerifyKnowledgeContextPackageInput,
 } from "./domain/knowledge-context.js";
+export {
+  createContextConsumerDescriptor,
+  createContextConsumptionEvidence,
+  createContextDeliveryPolicyDecisionEvidence,
+  createContextDeliveryReplayEvidence,
+  createGovernedContextDeliveryRequest,
+  evaluateContextDeliveryFreshness,
+  matchContextConsumerCapabilities,
+  serializeGovernedContextDeliveryResult,
+  verifyContextConsumerCompatibilityResult,
+  verifyContextConsumerDescriptor,
+  verifyContextConsumptionEvidence,
+  verifyContextDeliveryFreshnessEvidence,
+  verifyContextDeliveryPolicyDecisionEvidence,
+  verifyContextDeliveryReceipt,
+  verifyContextDeliveryReplayEvidence,
+  verifyGovernedContextDeliveryEnvelope,
+  verifyGovernedContextDeliveryRequest,
+  type ContextConsumerDescriptorInput,
+  type ContextConsumptionEvidenceInput,
+  type ContextDeliveryPolicyDecisionEvidenceInput,
+  type ContextDeliveryReplayEvidenceInput,
+  type EvaluateContextDeliveryFreshnessInput,
+  type GovernedContextDeliveryRequestInput,
+  type VerifyContextConsumerCompatibilityResultInput,
+  type VerifyContextConsumptionEvidenceInput,
+  type VerifyContextDeliveryFreshnessEvidenceInput,
+  type VerifyContextDeliveryPolicyDecisionEvidenceInput,
+  type VerifyContextDeliveryReceiptInput,
+  type VerifyContextDeliveryReplayEvidenceInput,
+  type VerifyGovernedContextDeliveryEnvelopeInput,
+} from "./domain/context-delivery.js";
 export * from "./domain/safe-path.js";
 export * from "./infrastructure/load-migration-manifest.js";
 export * from "./infrastructure/knowledge-corpus-candidate-source.js";

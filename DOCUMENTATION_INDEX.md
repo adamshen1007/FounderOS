@@ -134,6 +134,23 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 10 Verification Checklist v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Verification_Checklist_v1.0.md)
 - [Milestone 10 Codex Execution Prompt v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 11 — Governed Context Consumer Boundary Foundation
+
+- [Milestone 11 Package README v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Package_README_v1.0.md)
+- [Governed Context Consumer Boundary Foundation Specification v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Governed_Context_Consumer_Boundary_Foundation_Specification_v1.0.md)
+- [Context Consumer Identity and Capability Contract v1.0](./docs/milestones/milestone-11/FounderOS_Context_Consumer_Identity_and_Capability_Contract_v1.0.md)
+- [Governed Context Delivery Request Contract v1.0](./docs/milestones/milestone-11/FounderOS_Governed_Context_Delivery_Request_Contract_v1.0.md)
+- [Context Consumer Policy and Authorization Input Boundary Specification v1.0](./docs/milestones/milestone-11/FounderOS_Context_Consumer_Policy_and_Authorization_Input_Boundary_Specification_v1.0.md)
+- [Context Delivery Freshness, Expiration, Replay, and Idempotency Specification v1.0](./docs/milestones/milestone-11/FounderOS_Context_Delivery_Freshness_Expiration_Replay_and_Idempotency_Specification_v1.0.md)
+- [Governed Context Delivery Envelope Contract v1.0](./docs/milestones/milestone-11/FounderOS_Governed_Context_Delivery_Envelope_Contract_v1.0.md)
+- [No-Context-Bypass and Package Integrity Enforcement Policy v1.0](./docs/milestones/milestone-11/FounderOS_No_Context_Bypass_and_Package_Integrity_Enforcement_Policy_v1.0.md)
+- [Provider-Neutral Reasoning Consumer Boundary v1.0](./docs/milestones/milestone-11/FounderOS_Provider_Neutral_Reasoning_Consumer_Boundary_v1.0.md)
+- [Context Delivery Receipt and Consumption Evidence Contract v1.0](./docs/milestones/milestone-11/FounderOS_Context_Delivery_Receipt_and_Consumption_Evidence_Contract_v1.0.md)
+- [Governed Context Consumer Evaluation Framework v1.0](./docs/milestones/milestone-11/FounderOS_Governed_Context_Consumer_Evaluation_Framework_v1.0.md)
+- [Milestone 11 Acceptance Criteria v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Acceptance_Criteria_v1.0.md)
+- [Milestone 11 Verification Checklist v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Verification_Checklist_v1.0.md)
+- [Milestone 11 Codex Execution Prompt v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

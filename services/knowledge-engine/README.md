@@ -91,6 +91,32 @@ The authoritative budget measures object count and Unicode code points in the ca
 
 `verifyKnowledgeContextPackage` is a pure verifier supplied with the package, trusted active registry/snapshot bindings, and repository candidates. It recomputes request, query, query-result, included-content, object, provenance, budget, ordering, evidence, and final context fingerprints and reproduces the assembly result. The optional caller evidence timestamp is preserved but excluded from context identity, so identical governed inputs produce byte-identical packages. Context packages are audit artifacts, not prompts; no LLM, tokenizer, agent, authorization, or semantic-ranking behavior is present.
 
+## Milestone 11 governed Context Consumer delivery
+
+`deliverGovernedKnowledgeContext` is the only exported delivery operation. It accepts one strict Delivery Request, one Context Package, caller-supplied policy-decision evidence, the delivery-specific `GovernedHistoricalSnapshotRegistry`, a Knowledge Repository and matching repository snapshot, an explicit canonical evaluation timestamp, and a caller-owned `BoundedContextDeliveryIdempotencyStore`. It captures every top-level input field through own data-property descriptors before reading values, obtains candidates only from the repository, and independently verifies the complete Milestone 10 package, registered snapshot, activation evidence, and repository binding before evaluating Consumer capabilities, the allowed policy outcome, freshness, historical replay, and idempotency. Policy evidence must bind the exact canonical Delivery Request. A historical package additionally requires `verifyIntegrityAtSequence` and `recoverAtSequence` to derive matching valid integrity and active-state evidence for its exact committed registry prefix; the verifier never fabricates historical recovery state. These prefix operations extend, rather than alter, the Milestone 09 base registry contract. The operation never accepts raw candidate arrays, Query Results, corpus paths, prompts, provider configuration, credentials, or hidden context.
+
+Successful delivery returns a deeply immutable envelope containing the exact Context Package plus deterministic compatibility, policy, freshness, replay-policy, and active-snapshot evidence, followed by a bound acknowledgment and initial-delivery receipt. Preflight rejection returns deterministic governed attempt evidence without pretending an envelope reached a Consumer. Same-key identical replay returns the exact original result for permitted modes and records separate Replay Evidence that binds the current policy and freshness evaluations to the original envelope and receipt; conflicting reuse and single-delivery replay fail. Policy and freshness are revalidated before replay lookup. Artifact verifiers require their authoritative request, candidate, registry, current-state, envelope, acknowledgment, or receipt inputs and reproduce the claimed artifact instead of trusting a self-consistent fingerprint. The initial store has explicit finite FIFO retention and no public mutation surface; it proves replaceable local behavior, not durable or distributed idempotency.
+
+```typescript
+import {
+  BoundedContextDeliveryIdempotencyStore,
+  deliverGovernedKnowledgeContext,
+} from "@founderos/knowledge-engine";
+
+const delivery = await deliverGovernedKnowledgeContext({
+  request: deliveryRequest,
+  contextPackage,
+  policyDecisionEvidence,
+  registry,
+  repository,
+  repositorySnapshot,
+  idempotencyStore: new BoundedContextDeliveryIdempotencyStore(1_000),
+  evaluatedAt: "2026-07-29T12:00:00.000Z",
+});
+```
+
+Milestone 11 does not authenticate callers, define authorization rules, invoke a model, execute reasoning, run an agent, persist delivery state, or add provider, Hermes, MCP, integration, or UI behavior.
+
 ```typescript
 import {
   assembleGovernedKnowledgeContext,

@@ -34,6 +34,8 @@ Milestone 09 adds strict, versioned, storage-independent contracts for durable s
 
 Milestone 10 adds strict, versioned, model-independent contracts for governed context requests, explicit object and Unicode-code-point budgets, included/excluded/omitted/truncated evidence, active-registry and repository-snapshot bindings, deterministic context packages, insufficient-context outcomes, and independent verification results. Requests embed the existing query contract and bind consumer identity, required and preferred knowledge, scope, policy, and explicit empty/truncation behavior. Packages preserve the exact request, query identity and result fingerprint, logical provenance, budget arithmetic, stable evidence counts, and content-derived identity without embedding an unbudgeted copy of the full query result. These contracts contain no registry access, selection execution, tokenizer, prompt, LLM, authorization, agent, or storage behavior.
 
+Milestone 11 adds strict Consumer identity and capability, governed delivery request, policy input and caller-supplied decision evidence, freshness, replay, compatibility, immutable delivery envelope, acknowledgment, initial-delivery receipt, rejected-attempt evidence, replay-attempt evidence, consumption-placeholder, and artifact-verification contracts. Policy decisions bind the exact canonical Delivery Request identity rather than only its authorization projection. Successful result validation binds the acknowledgment and receipt back to the envelope. The provider-neutral Consumer interface accepts only a governed envelope. Contracts contain no prompts, chat roles, models, credentials, policy engine, provider adapter, repository access, reasoning execution, or agent behavior.
+
 ## Usage
 
 ```typescript
@@ -107,6 +109,18 @@ import {
 
 const request = KnowledgeContextRequestSchema.parse(requestInput);
 const contextPackage = KnowledgeContextPackageSchema.parse(packageInput);
+```
+
+```typescript
+import {
+  ContextConsumerDescriptorSchema,
+  GovernedContextDeliveryEnvelopeSchema,
+  GovernedContextDeliveryRequestSchema,
+} from "@founderos/knowledge-schema";
+
+const consumer = ContextConsumerDescriptorSchema.parse(consumerInput);
+const deliveryRequest = GovernedContextDeliveryRequestSchema.parse(requestInput);
+const envelope = GovernedContextDeliveryEnvelopeSchema.parse(envelopeInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.

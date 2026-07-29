@@ -2,7 +2,7 @@
 
 FounderOS is an AI-native operating system for founder decision-making, organizational memory, and governed AI-assisted execution. This repository is a documentation-first TypeScript monorepo.
 
-The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, restart recovery and integrity verification, deterministic queries, and governed context assembly bound to the verified active snapshot. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, LLM execution, Hermes, an agent runtime, MCP connectors, or a user interface.
+The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, restart recovery and integrity verification, deterministic queries, governed context assembly, and a provider-neutral governed Context Consumer delivery boundary. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, LLM execution, Hermes, an agent runtime, MCP connectors, or a user interface.
 
 ## Architecture at a glance
 
@@ -20,8 +20,8 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 
 ## Implemented foundations
 
-- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, candidate sources, repository snapshots, lifecycle records, governed change sets, approval workflows, canonical-JSON manifest commitments, durable registry evidence, and versioned context requests, packages, budgets, evidence, outcomes, and verification results.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, restart integrity verification, and deterministic budget-bounded context assembly from the verified active snapshot.
+- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, repositories, lifecycle and durable registry evidence, governed context packages, Consumer identity and capabilities, delivery requests, policy inputs and decisions, freshness, envelopes, receipts, and consumption placeholders.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, restart integrity verification, deterministic budget-bounded context assembly, and fail-closed provider-neutral governed delivery with bounded replay state.
 - [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
 - [`knowledge/migration-manifest.yaml`](./knowledge/migration-manifest.yaml) binds the eight canonical FounderOS Priority 1 documents to reviewed object identities, logical destinations, metadata, and source hashes.
 
