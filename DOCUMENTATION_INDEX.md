@@ -118,6 +118,22 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 09 Verification Checklist v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Verification_Checklist_v1.0.md)
 - [Milestone 09 Codex Execution Prompt v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 10 — Governed Knowledge Context Assembly Foundation
+
+- [Milestone 10 Package README v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Package_README_v1.0.md)
+- [Governed Knowledge Context Assembly Foundation Specification v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Governed_Knowledge_Context_Assembly_Foundation_Specification_v1.0.md)
+- [Knowledge Context Request Contract v1.0](./docs/milestones/milestone-10/FounderOS_Knowledge_Context_Request_Contract_v1.0.md)
+- [Knowledge Context Package Contract v1.0](./docs/milestones/milestone-10/FounderOS_Knowledge_Context_Package_Contract_v1.0.md)
+- [Active Snapshot Context Binding Specification v1.0](./docs/milestones/milestone-10/FounderOS_Active_Snapshot_Context_Binding_Specification_v1.0.md)
+- [Context Selection and Deterministic Ordering Policy v1.0](./docs/milestones/milestone-10/FounderOS_Context_Selection_and_Deterministic_Ordering_Policy_v1.0.md)
+- [Context Budget and Truncation Evidence Specification v1.0](./docs/milestones/milestone-10/FounderOS_Context_Budget_and_Truncation_Evidence_Specification_v1.0.md)
+- [Context Provenance, Exclusion, and Omission Evidence Specification v1.0](./docs/milestones/milestone-10/FounderOS_Context_Provenance_Exclusion_and_Omission_Evidence_Specification_v1.0.md)
+- [Context Fingerprint and Reproducibility Specification v1.0](./docs/milestones/milestone-10/FounderOS_Context_Fingerprint_and_Reproducibility_Specification_v1.0.md)
+- [Knowledge Context Evaluation Framework v1.0](./docs/milestones/milestone-10/FounderOS_Knowledge_Context_Evaluation_Framework_v1.0.md)
+- [Milestone 10 Acceptance Criteria v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Acceptance_Criteria_v1.0.md)
+- [Milestone 10 Verification Checklist v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Verification_Checklist_v1.0.md)
+- [Milestone 10 Codex Execution Prompt v1.0](./docs/milestones/milestone-10/FounderOS_Milestone_10_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

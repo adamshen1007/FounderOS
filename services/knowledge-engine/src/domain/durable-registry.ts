@@ -664,6 +664,30 @@ export function verifyDurableAuditRecordFingerprint(input: unknown): DurableAudi
   return deepFreeze(record);
 }
 
+export function verifyDurableSnapshotRegistrationRecord(
+  input: unknown,
+): DurableSnapshotRegistrationRecord {
+  const record = verifyDurableAuditRecordFingerprint(input);
+  if (record.recordType !== "snapshot_registration") {
+    throw new DurableRegistryIntegrityError(
+      "invalid_durable_record",
+      "Expected durable snapshot registration evidence",
+      recordLocation(record),
+    );
+  }
+  if (
+    createMilestone07SnapshotContentFingerprint(record.snapshot) !==
+    record.snapshot.contentFingerprint
+  ) {
+    throw new DurableRegistryIntegrityError(
+      "snapshot_fingerprint_mismatch",
+      "Snapshot registration content fingerprint does not match its Milestone 07 payload",
+      recordLocation(record),
+    );
+  }
+  return record;
+}
+
 export function verifyCommittedRegistryTransactionEnvelopeFingerprint(
   input: unknown,
 ): CommittedRegistryTransactionEnvelope {
