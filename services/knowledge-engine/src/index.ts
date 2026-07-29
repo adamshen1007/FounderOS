@@ -1,4 +1,5 @@
 export * from "./application/ingest-markdown.js";
+export * from "./application/assemble-governed-knowledge-context.js";
 export * from "./application/ingest-markdown-directory.js";
 export * from "./application/execute-knowledge-migration.js";
 export * from "./application/compare-knowledge-repository-snapshots.js";
@@ -34,6 +35,12 @@ export * from "./application/query-knowledge-repository.js";
 export * from "./application/run-migration-command.js";
 export * from "./domain/frontmatter.js";
 export * from "./domain/knowledge-query.js";
+export {
+  createKnowledgeContextFingerprint,
+  verifyKnowledgeContextPackage,
+  type VerifiedKnowledgeContextInputs,
+  type VerifyKnowledgeContextPackageInput,
+} from "./domain/knowledge-context.js";
 export * from "./domain/safe-path.js";
 export * from "./infrastructure/load-migration-manifest.js";
 export * from "./infrastructure/knowledge-corpus-candidate-source.js";

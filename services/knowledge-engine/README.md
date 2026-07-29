@@ -81,6 +81,38 @@ The adapter rejects relative roots, lexical traversal, runtime roots outside the
 
 Milestone 09 deliberately defers database and object-store adapters, distributed locks and transactions, hostile local concurrency guarantees, remote coordination, replication, automatic corpus refresh or synchronization, watchers, event streaming, semantic retrieval and ranking, embeddings, vector or graph persistence, agents, Hermes, MCP, integrations, and UI workflows.
 
+## Milestone 10 governed context assembly
+
+`assembleGovernedKnowledgeContext` is the public context boundary. It strictly parses the request, verifies and recovers the durable registry, captures one immutable active registration, re-verifies that registration's canonical record fingerprint, manifest-to-snapshot binding, manifest fingerprint, and Milestone 07 content fingerprint, obtains candidates only through the supplied Knowledge Repository, and proves that the complete repository snapshot and every candidate match the active snapshot descriptors before query execution and packaging. Integrity/recovery disagreement, missing active state, registry/manifest/repository mismatch, or candidate drift fails closed.
+
+Selection reuses the Milestone 05 exact query and Milestone 06 repository contracts. Required IDs, required types, preferred types, lifecycle/governance priority, object type, project/domain identity, and object ID form the versioned deterministic order; binary string comparison avoids locale and caller-order dependence. Conflicting duplicate IDs fail, while canonically equivalent duplicates are represented once with omission evidence. Required knowledge is never silently omitted.
+
+The authoritative budget measures object count and Unicode code points in the canonical serialized Knowledge Object. Optional per-object limits use the same representation. Truncation is opt-in, works on Unicode code-point boundaries, never mutates source objects, and records original/included counts and fingerprints. Every filtered, duplicate, over-budget, and truncated candidate receives stable evidence. Successful empty context is possible only when the request explicitly permits it.
+
+`verifyKnowledgeContextPackage` is a pure verifier supplied with the package, trusted active registry/snapshot bindings, and repository candidates. It recomputes request, query, query-result, included-content, object, provenance, budget, ordering, evidence, and final context fingerprints and reproduces the assembly result. The optional caller evidence timestamp is preserved but excluded from context identity, so identical governed inputs produce byte-identical packages. Context packages are audit artifacts, not prompts; no LLM, tokenizer, agent, authorization, or semantic-ranking behavior is present.
+
+```typescript
+import {
+  assembleGovernedKnowledgeContext,
+  verifyKnowledgeContextPackage,
+} from "@founderos/knowledge-engine";
+
+const result = await assembleGovernedKnowledgeContext({
+  request,
+  registry,
+  repository,
+  repositorySnapshot,
+});
+
+if (result.status === "assembled") {
+  const verification = verifyKnowledgeContextPackage({
+    package: result.package,
+    candidateInputs: await repository.getCandidates(),
+    bindings,
+  });
+}
+```
+
 ```typescript
 import { queryKnowledgeObjects } from "@founderos/knowledge-engine";
 

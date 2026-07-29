@@ -34,3 +34,4 @@ All notable changes to FounderOS will be documented here.
 - Descriptor-only raw error locations that never invoke accessors, plus an adapter-neutral governed storage/writer port proven by an in-memory lifecycle-through-activation integration.
 - Builder-only omission of schema-valid explicit `undefined` object properties preserves Milestone 07/08 change-set compatibility without weakening strict persisted-record verification.
 - Bidirectional runtime/source-root overlap rejection prevents a registry runtime from containing canonical source trees and runs before filesystem mutation.
+- Strict governed context request and package contracts, verified active-snapshot assembly, deterministic exact selection, Unicode-safe budgets and truncation, complete omission evidence, reproducible fingerprints, independent tamper verification, and Priority 1 context evaluations.

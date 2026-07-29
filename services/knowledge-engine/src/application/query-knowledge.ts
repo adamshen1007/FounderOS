@@ -18,7 +18,7 @@ function matchesValue(actual: string, expected: string[] | undefined): boolean {
   return expected === undefined || expected.includes(actual);
 }
 
-function projectReferences(object: KnowledgeObject): string[] {
+export function knowledgeObjectProjectReferences(object: KnowledgeObject): string[] {
   const references = [object.metadata.domain];
 
   if ("name" in object && object.metadata.objectType === "project") {
@@ -35,7 +35,7 @@ function projectReferences(object: KnowledgeObject): string[] {
 function matchesProjects(object: KnowledgeObject, projects: string[] | undefined): boolean {
   return (
     projects === undefined ||
-    projects.some((project) => projectReferences(object).includes(project))
+    projects.some((project) => knowledgeObjectProjectReferences(object).includes(project))
   );
 }
 
@@ -50,24 +50,85 @@ function matchesTags(object: KnowledgeObject, query: KnowledgeQuery): boolean {
     : tags.some((tag) => object.metadata.tags.includes(tag));
 }
 
-function matchesQuery(object: KnowledgeObject, query: KnowledgeQuery): boolean {
+export type KnowledgeQueryMismatchReason =
+  | "category_mismatch"
+  | "domain_mismatch"
+  | "object_type_mismatch"
+  | "project_mismatch"
+  | "source_reference_mismatch"
+  | "source_type_mismatch"
+  | "status_mismatch"
+  | "tag_mismatch";
+
+export interface KnowledgeQueryCandidateEvaluation {
+  readonly filter: KnowledgeQueryAppliedConstraint | null;
+  readonly matches: boolean;
+  readonly reason: KnowledgeQueryMismatchReason | null;
+}
+
+export function evaluateKnowledgeQueryCandidate(
+  object: KnowledgeObject,
+  query: KnowledgeQuery,
+): KnowledgeQueryCandidateEvaluation {
   const { constraints } = query.context;
   const { filters } = query;
+  const checks: readonly [
+    boolean,
+    KnowledgeQueryAppliedConstraint,
+    KnowledgeQueryMismatchReason,
+  ][] = [
+    [
+      matchesValue(object.metadata.category ?? "", filters.categories),
+      "filters.categories",
+      "category_mismatch",
+    ],
+    [matchesValue(object.metadata.domain, filters.domains), "filters.domains", "domain_mismatch"],
+    [
+      matchesValue(object.metadata.objectType, filters.objectTypes),
+      "filters.objectTypes",
+      "object_type_mismatch",
+    ],
+    [matchesProjects(object, filters.projects), "filters.projects", "project_mismatch"],
+    [
+      matchesValue(object.metadata.source.sourceReference ?? "", filters.sourceReferences),
+      "filters.sourceReferences",
+      "source_reference_mismatch",
+    ],
+    [
+      matchesValue(object.metadata.source.sourceType, filters.sourceTypes),
+      "filters.sourceTypes",
+      "source_type_mismatch",
+    ],
+    [matchesValue(object.metadata.status, filters.statuses), "filters.statuses", "status_mismatch"],
+    [matchesTags(object, query), "filters.tags", "tag_mismatch"],
+    [
+      matchesValue(object.metadata.domain, constraints.domains),
+      "context.domains",
+      "domain_mismatch",
+    ],
+    [
+      matchesValue(object.metadata.objectType, constraints.objectTypes),
+      "context.objectTypes",
+      "object_type_mismatch",
+    ],
+    [matchesProjects(object, constraints.projects), "context.projects", "project_mismatch"],
+    [
+      matchesValue(object.metadata.source.sourceType, constraints.sourceTypes),
+      "context.sourceTypes",
+      "source_type_mismatch",
+    ],
+  ];
+  const mismatch = checks.find(([matches]) => !matches);
+  return mismatch === undefined
+    ? { filter: null, matches: true, reason: null }
+    : { filter: mismatch[1], matches: false, reason: mismatch[2] };
+}
 
-  return (
-    matchesValue(object.metadata.category ?? "", filters.categories) &&
-    matchesValue(object.metadata.domain, filters.domains) &&
-    matchesValue(object.metadata.objectType, filters.objectTypes) &&
-    matchesProjects(object, filters.projects) &&
-    matchesValue(object.metadata.source.sourceReference ?? "", filters.sourceReferences) &&
-    matchesValue(object.metadata.source.sourceType, filters.sourceTypes) &&
-    matchesValue(object.metadata.status, filters.statuses) &&
-    matchesTags(object, query) &&
-    matchesValue(object.metadata.domain, constraints.domains) &&
-    matchesValue(object.metadata.objectType, constraints.objectTypes) &&
-    matchesProjects(object, constraints.projects) &&
-    matchesValue(object.metadata.source.sourceType, constraints.sourceTypes)
-  );
+export function knowledgeObjectMatchesQuery(
+  object: KnowledgeObject,
+  query: KnowledgeQuery,
+): boolean {
+  return evaluateKnowledgeQueryCandidate(object, query).matches;
 }
 
 function appliedConstraints(query: KnowledgeQuery): KnowledgeQueryAppliedConstraint[] {
@@ -112,7 +173,7 @@ export function queryKnowledgeObjects(
   const query = KnowledgeQuerySchema.parse(queryInput);
   const candidates = parseCandidates(candidateInputs);
   const objects = candidates
-    .filter((candidate) => matchesQuery(candidate, query))
+    .filter((candidate) => knowledgeObjectMatchesQuery(candidate, query))
     .sort((left, right) => compareStrings(left.metadata.id, right.metadata.id));
 
   return KnowledgeQueryResultSchema.parse({

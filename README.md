@@ -2,7 +2,7 @@
 
 FounderOS is an AI-native operating system for founder decision-making, organizational memory, and governed AI-assisted execution. This repository is a documentation-first TypeScript monorepo.
 
-The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, restart recovery and integrity verification, and deterministic query foundations. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, Hermes, an agent runtime, MCP connectors, or a user interface.
+The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, restart recovery and integrity verification, deterministic queries, and governed context assembly bound to the verified active snapshot. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, LLM execution, Hermes, an agent runtime, MCP connectors, or a user interface.
 
 ## Architecture at a glance
 
@@ -20,12 +20,12 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 
 ## Implemented foundations
 
-- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, candidate sources, repository snapshots, lifecycle records, governed change sets, approval workflows, canonical-JSON manifest commitments bound to snapshot object descriptors, durable audit records and envelopes, activation, recovery, integrity, and derived indexes.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots, governed comparison and change sets, human-controlled review and approval, governed durable activation, local append-only audit persistence, restart recovery and integrity verification, and exact filtering with preserved source provenance.
+- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, candidate sources, repository snapshots, lifecycle records, governed change sets, approval workflows, canonical-JSON manifest commitments, durable registry evidence, and versioned context requests, packages, budgets, evidence, outcomes, and verification results.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, restart integrity verification, and deterministic budget-bounded context assembly from the verified active snapshot.
 - [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
 - [`knowledge/migration-manifest.yaml`](./knowledge/migration-manifest.yaml) binds the eight canonical FounderOS Priority 1 documents to reviewed object identities, logical destinations, metadata, and source hashes.
 
-Automatic corpus refresh, vault watching, background synchronization or activation, database and distributed adapters, remote coordination and replication, semantic retrieval, embeddings, ranking, graph storage, agent behavior, connectors, and interfaces remain unimplemented. Milestone 09 persistence is deliberately limited to an explicit, Git-ignored, cooperative single-writer local runtime; see the [knowledge-engine durability documentation](./services/knowledge-engine/README.md#milestone-09-durable-registry) before operating it.
+Automatic corpus refresh, vault watching, background synchronization or activation, database and distributed adapters, remote coordination and replication, semantic retrieval, embeddings, ranking, graph storage, LLM or agent execution, connectors, and interfaces remain unimplemented. Milestone 09 persistence is deliberately limited to an explicit, Git-ignored, cooperative single-writer local runtime; see the [knowledge-engine durability documentation](./services/knowledge-engine/README.md#milestone-09-durable-registry) before operating it.
 
 ## Repository layout
 

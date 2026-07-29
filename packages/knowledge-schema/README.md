@@ -32,6 +32,8 @@ Milestone 08 adds strict lifecycle, governed comparison, change-set, review-deci
 
 Milestone 09 adds strict, versioned, storage-independent contracts for durable snapshot registrations, canonical manifest evidence, state-specific lifecycle transitions, exact approval and rejection decision envelopes, bootstrap and Milestone 08 governed change-set evidence, activation audit records, ordered audit chains, committed transaction envelopes, optimistic activation requests and results, fail-closed recovery and integrity summaries, and rebuildable derived-index state. `DurableKnowledgeMigrationManifestSchema` preserves valid Milestone 04 entry fields while restricting durable evidence recursively to finite canonical JSON and allowing empty snapshot evidence without changing the general Milestone 04 manifest contract. A registration's approved `ready` or `migrated` manifest entries must match its sorted snapshot descriptors one-to-one by object ID, object type, source path, and source hash. The engine commits the canonical evidence digest without changing the Milestone 07 snapshot-v1 contract or identity. Every authoritative record carries explicit sequence and predecessor evidence plus actor, reason, transaction, stable record identity, and fingerprint fields. Recovery success and failure contracts report lifecycle-transition, decision, and activation counts, while recovery and integrity contracts report derived-index health separately from authoritative validity. Approval, activation, and supersession edges are restricted to their exact atomic envelope shapes. The `DurableSnapshotRegistry` interface exposes safe activation and read/recovery/index operations only; raw prebuilt registration, lifecycle, decision, change-set, and activation-record append capabilities are deliberately absent. The separate bootstrap change-set contract models the first activation without weakening the Milestone 08 comparison contract. These are validation and storage-independent interface contracts only: canonical hashing, replay, locking, filesystem layout, recovery behavior, and persistence remain engine-owned.
 
+Milestone 10 adds strict, versioned, model-independent contracts for governed context requests, explicit object and Unicode-code-point budgets, included/excluded/omitted/truncated evidence, active-registry and repository-snapshot bindings, deterministic context packages, insufficient-context outcomes, and independent verification results. Requests embed the existing query contract and bind consumer identity, required and preferred knowledge, scope, policy, and explicit empty/truncation behavior. Packages preserve the exact request, query identity and result fingerprint, logical provenance, budget arithmetic, stable evidence counts, and content-derived identity without embedding an unbudgeted copy of the full query result. These contracts contain no registry access, selection execution, tokenizer, prompt, LLM, authorization, agent, or storage behavior.
+
 ## Usage
 
 ```typescript
@@ -95,6 +97,16 @@ const envelope = CommittedRegistryTransactionEnvelopeSchema.parse(envelopeInput)
 const activation = SnapshotActivationRequestSchema.parse(activationInput);
 const integrity = parseRegistryIntegrityResult(integrityInput);
 const recovery = parseRegistryRecoveryResult(recoveryInput);
+```
+
+```typescript
+import {
+  KnowledgeContextPackageSchema,
+  KnowledgeContextRequestSchema,
+} from "@founderos/knowledge-schema";
+
+const request = KnowledgeContextRequestSchema.parse(requestInput);
+const contextPackage = KnowledgeContextPackageSchema.parse(packageInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.
