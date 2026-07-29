@@ -3,6 +3,13 @@ export * from "./application/assemble-governed-knowledge-context.js";
 export * from "./application/ingest-markdown-directory.js";
 export * from "./application/execute-knowledge-migration.js";
 export {
+  createGovernedDurableContextDeliveryLedger,
+  emptyDeliveryLedgerHead,
+  type CommitVerifiedOriginalDeliveryInput,
+  type GovernedDurableContextDeliveryLedger,
+  type SubmitDurableReplayAttemptInput,
+} from "./application/manage-governed-durable-context-delivery-ledger.js";
+export {
   BoundedContextDeliveryIdempotencyStore,
   deliverGovernedKnowledgeContext,
   type DeliverGovernedKnowledgeContextInput,
@@ -85,6 +92,11 @@ export * from "./infrastructure/knowledge-corpus-candidate-source.js";
 export * from "./infrastructure/in-memory-candidate-source.js";
 export * from "./infrastructure/in-memory-knowledge-repository.js";
 export * from "./infrastructure/local-file-durable-snapshot-registry.js";
+export {
+  openLocalFileDurableContextDeliveryLedger,
+  type LocalFileDeliveryLedgerLimits,
+  type LocalFileDeliveryLedgerOptions,
+} from "./infrastructure/local-file-durable-context-delivery-ledger.js";
 export * from "./infrastructure/parse-markdown.js";
 export * from "./infrastructure/safe-path.js";
 export * from "./interfaces/ingestion-report.js";

@@ -36,6 +36,8 @@ Milestone 10 adds strict, versioned, model-independent contracts for governed co
 
 Milestone 11 adds strict Consumer identity and capability, governed delivery request, policy input and caller-supplied decision evidence, freshness, replay, compatibility, immutable delivery envelope, acknowledgment, initial-delivery receipt, rejected-attempt evidence, replay-attempt evidence, consumption-placeholder, and artifact-verification contracts. Policy decisions bind the exact canonical Delivery Request identity rather than only its authorization projection. Successful result validation binds the acknowledgment and receipt back to the envelope. The provider-neutral Consumer interface accepts only a governed envelope. Contracts contain no prompts, chat roles, models, credentials, policy engine, provider adapter, repository access, reasoning execution, or agent behavior.
 
+Milestone 12 adds strict, versioned, storage-independent contracts for immutable Delivery Request registration, permanent idempotency ownership, exact Milestone 11 artifact wrappers, atomic original Delivery transactions, separate Replay Attempts, expiration evidence, append-only audit events, deterministic Recovery and Integrity results, and rebuildable derived indexes. Every authoritative wrapper binds an explicit Ledger sequence and previous-audit fingerprint. Derived indexes declare the versioned `bounded-latest-v1` retention policy and an enforced positive entry capacity. Expired keys remain permanently reserved under `permanent-reservation-v1`. The shared `DurableContextDeliveryLedger` exposes governed reads, recovery, verification, and rebuild operations; it does not expose raw record append, filesystem, SQL, provider, prompt, model, agent, Hermes, or MCP concepts.
+
 ## Usage
 
 ```typescript
@@ -121,6 +123,17 @@ import {
 const consumer = ContextConsumerDescriptorSchema.parse(consumerInput);
 const deliveryRequest = GovernedContextDeliveryRequestSchema.parse(requestInput);
 const envelope = GovernedContextDeliveryEnvelopeSchema.parse(envelopeInput);
+```
+
+```typescript
+import {
+  AtomicDeliveryTransactionRequestSchema,
+  DurableReplayAttemptRecordSchema,
+  type DurableContextDeliveryLedger,
+} from "@founderos/knowledge-schema";
+
+const transaction = AtomicDeliveryTransactionRequestSchema.parse(transactionInput);
+const replayAttempt = DurableReplayAttemptRecordSchema.parse(replayInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.

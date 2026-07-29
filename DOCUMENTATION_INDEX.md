@@ -151,6 +151,23 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 11 Verification Checklist v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Verification_Checklist_v1.0.md)
 - [Milestone 11 Codex Execution Prompt v1.0](./docs/milestones/milestone-11/FounderOS_Milestone_11_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 12 — Durable Context Delivery Ledger and Replay Registry Foundation
+
+- [Milestone 12 Package README v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Package_README_v1.0.md)
+- [Durable Context Delivery Ledger and Replay Registry Foundation Specification v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Durable_Context_Delivery_Ledger_and_Replay_Registry_Foundation_Specification_v1.0.md)
+- [Durable Context Delivery Ledger Contract v1.0](./docs/milestones/milestone-12/FounderOS_Durable_Context_Delivery_Ledger_Contract_v1.0.md)
+- [Durable Idempotency Registry Contract v1.0](./docs/milestones/milestone-12/FounderOS_Durable_Idempotency_Registry_Contract_v1.0.md)
+- [Durable Replay Attempt Ledger Contract v1.0](./docs/milestones/milestone-12/FounderOS_Durable_Replay_Attempt_Ledger_Contract_v1.0.md)
+- [Durable Delivery Artifact Record Contract v1.0](./docs/milestones/milestone-12/FounderOS_Durable_Delivery_Artifact_Record_Contract_v1.0.md)
+- [Atomic Context Delivery Transaction Semantics v1.0](./docs/milestones/milestone-12/FounderOS_Atomic_Context_Delivery_Transaction_Semantics_v1.0.md)
+- [Delivery Ledger Recovery and Integrity Verification Specification v1.0](./docs/milestones/milestone-12/FounderOS_Context_Delivery_Ledger_Recovery_and_Integrity_Verification_Specification_v1.0.md)
+- [Delivery Ledger Retention and Derived Index Policy v1.0](./docs/milestones/milestone-12/FounderOS_Context_Delivery_Ledger_Retention_and_Derived_Index_Policy_v1.0.md)
+- [Local File-Backed Context Delivery Ledger Adapter Specification v1.0](./docs/milestones/milestone-12/FounderOS_Local_File_Backed_Context_Delivery_Ledger_Adapter_Specification_v1.0.md)
+- [Durable Context Delivery Evaluation Framework v1.0](./docs/milestones/milestone-12/FounderOS_Durable_Context_Delivery_Evaluation_Framework_v1.0.md)
+- [Milestone 12 Acceptance Criteria v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Acceptance_Criteria_v1.0.md)
+- [Milestone 12 Verification Checklist v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Verification_Checklist_v1.0.md)
+- [Milestone 12 Codex Execution Prompt v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)
