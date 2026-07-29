@@ -103,6 +103,21 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 08 Verification Checklist v1.0](./docs/milestones/milestone-08/FounderOS_Milestone_08_Verification_Checklist_v1.0.md)
 - [Milestone 08 Codex Execution Prompt v1.0](./docs/milestones/milestone-08/FounderOS_Milestone_08_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 09 — Durable Snapshot Registry and Activation Audit Foundation
+
+- [Milestone 09 Package README v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Package_README_v1.0.md)
+- [Durable Snapshot Registry and Activation Audit Foundation Specification v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Durable_Snapshot_Registry_and_Activation_Audit_Foundation_Specification_v1.0.md)
+- [Durable Snapshot Registry Contract v1.0](./docs/milestones/milestone-09/FounderOS_Durable_Snapshot_Registry_Contract_v1.0.md)
+- [Durable Lifecycle Transition Record Specification v1.0](./docs/milestones/milestone-09/FounderOS_Durable_Lifecycle_Transition_Record_Specification_v1.0.md)
+- [Activation Audit Record Contract v1.0](./docs/milestones/milestone-09/FounderOS_Activation_Audit_Record_Contract_v1.0.md)
+- [Durable Activation Audit Store Architecture v1.0](./docs/milestones/milestone-09/FounderOS_Durable_Activation_Audit_Store_Architecture_v1.0.md)
+- [Atomic Snapshot Activation Transaction Semantics v1.0](./docs/milestones/milestone-09/FounderOS_Atomic_Snapshot_Activation_Transaction_Semantics_v1.0.md)
+- [Snapshot Registry Recovery and Integrity Verification Specification v1.0](./docs/milestones/milestone-09/FounderOS_Snapshot_Registry_Recovery_and_Integrity_Verification_Specification_v1.0.md)
+- [Local File-Backed Snapshot Registry Adapter Specification v1.0](./docs/milestones/milestone-09/FounderOS_Local_File_Backed_Snapshot_Registry_Adapter_Specification_v1.0.md)
+- [Milestone 09 Acceptance Criteria v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Acceptance_Criteria_v1.0.md)
+- [Milestone 09 Verification Checklist v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Verification_Checklist_v1.0.md)
+- [Milestone 09 Codex Execution Prompt v1.0](./docs/milestones/milestone-09/FounderOS_Milestone_09_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

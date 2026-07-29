@@ -1,4 +1,6 @@
+export * from "./canonical-json.js";
 export * from "./corpus.js";
+export * from "./durable-registry.js";
 export * from "./enums.js";
 export * from "./metadata.js";
 export * from "./migration.js";

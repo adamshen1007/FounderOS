@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { KnowledgeObjectSchema } from "@founderos/knowledge-schema";
+
 import {
   createKnowledgeRepositorySnapshot,
   createKnowledgeSnapshotComparisonEvidence,
@@ -39,6 +41,81 @@ describe("knowledge repository snapshot content fingerprints", () => {
       "metadataFingerprint",
       "objectFingerprint",
     ]);
+  });
+
+  it("preserves historical hashes for schema-valid explicit undefined optionals", () => {
+    const decisionMetadata = metadata("decision-optional", "decision");
+    const explicit = KnowledgeObjectSchema.parse({
+      metadata: {
+        ...decisionMetadata,
+        category: undefined,
+        source: { ...decisionMetadata.source, author: undefined },
+      },
+      context: "Context",
+      problem: "Problem",
+      options: ["A", "B"],
+      chosenOption: "A",
+      reasoning: "Reason",
+      expectedOutcome: "Outcome",
+      risks: [],
+      relatedProjectIds: [],
+      reviewDate: "2026-08-28T00:00:00.000Z",
+      result: undefined,
+      lessonsLearned: [],
+    });
+    const omitted = structuredClone(explicit);
+    delete omitted.metadata.category;
+    delete omitted.metadata.source.author;
+    if (!("result" in omitted)) throw new Error("Expected a decision object");
+    delete omitted.result;
+
+    expect(Object.hasOwn(explicit, "result")).toBe(true);
+    expect(Object.hasOwn(explicit.metadata, "category")).toBe(true);
+    expect(Object.hasOwn(explicit.metadata.source, "author")).toBe(true);
+
+    const creation = { createdAt: CREATED_AT, createdBy: "founderos-engine" };
+    const explicitDocuments = [document(explicit)];
+    const omittedDocuments = [document(omitted)];
+    const explicitSnapshot = createKnowledgeRepositorySnapshot({
+      corpus,
+      creation,
+      documents: explicitDocuments,
+    });
+    const omittedSnapshot = createKnowledgeRepositorySnapshot({
+      corpus,
+      creation,
+      documents: omittedDocuments,
+    });
+    const explicitEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: explicitSnapshot,
+      documents: explicitDocuments,
+    });
+    const omittedEvidence = createKnowledgeSnapshotComparisonEvidence({
+      snapshot: omittedSnapshot,
+      documents: omittedDocuments,
+    });
+
+    expect(explicitSnapshot).toEqual(omittedSnapshot);
+    expect(explicitSnapshot).toMatchObject({
+      snapshotId: "snapshot-8cf0bb165911eaefc37b2a06e02e9d4d5f1512b5bf875f1705e4b90a2605d00b",
+      contentFingerprint: "8cf0bb165911eaefc37b2a06e02e9d4d5f1512b5bf875f1705e4b90a2605d00b",
+      objects: [
+        {
+          objectId: "decision-optional",
+          objectType: "decision",
+          sourcePath: "docs/decision-optional.md",
+          sourceHash: "0a058d0a4738891c486c7a93aa427268639c8ec14f0b2ca35d16d4243c702882",
+          metadataFingerprint: "83726190f81d48947090c86597c11ca972db987e127fc8e2ec1717a1efa70a3d",
+          objectFingerprint: "37f3e7f0dda272df23037bba818f945d93d2a194bfeba88eb180f3b401e8fa36",
+        },
+      ],
+    });
+    expect(explicitEvidence.objects[0]!.contentFingerprint).toBe(
+      omittedEvidence.objects[0]!.contentFingerprint,
+    );
+    expect(Object.hasOwn(explicitEvidence.objects[0]!.object, "result")).toBe(true);
+    expect(Object.hasOwn(explicitEvidence.objects[0]!.object.metadata, "category")).toBe(true);
+    expect(Object.hasOwn(explicitEvidence.objects[0]!.object.metadata.source, "author")).toBe(true);
   });
 
   it("keeps metadata separate from non-metadata decision payloads", () => {
