@@ -117,6 +117,45 @@ const delivery = await deliverGovernedKnowledgeContext({
 
 Milestone 11 does not authenticate callers, define authorization rules, invoke a model, execute reasoning, run an agent, persist delivery state, or add provider, Hermes, MCP, integration, or UI behavior.
 
+## Milestone 12 durable Context Delivery Ledger
+
+`openLocalFileDurableContextDeliveryLedger` opens the governed Milestone 12 boundary. `commitVerifiedOriginalDelivery` first requires the complete Milestone 11 Envelope verification inputs and independently verifies the Request, Consumer, Context Package identity, Policy evidence, compatibility, Freshness evidence, Envelope, Acknowledgment, and Receipt. It then acquires one writer lock, replays the authoritative Ledger, checks the expected head and permanent idempotency owner, and commits the exact original artifact set in one immutable transaction event. Identical transaction retries and identical key retries return the original result; conflicting identity reuse fails.
+
+Each Replay Attempt is a new audit event. Current Policy and Freshness evidence is independently fingerprint-checked and stored separately. Accepted repeatable replay returns the exact original Envelope, Acknowledgment, and Receipt; single-delivery, expired, policy-denied, freshness-denied, conflict, and evaluation-only attempts never rewrite the original result. Expired keys remain permanently reserved.
+
+The local adapter uses this Git-ignored layout:
+
+```text
+.founderos/runtime/context-delivery-ledger/
+├── commit-head.json
+├── transactions/
+├── replay-attempts/
+├── staging/
+├── derived/
+└── .writer.lock
+```
+
+An event file is prepared and flushed before atomic installation. Installation is not the commit point. Atomic replacement of the separately fingerprinted `commit-head.json` commits the exact event-bounded prefix. A pre-head crash leaves the prior committed state; a post-head crash requires the complete referenced event. Staging data and suffix orphans are ignored. Recovery recomputes every embedded Milestone 11 fingerprint, durable wrapper fingerprint, transaction fingerprint, event fingerprint, sequence, previous link, and global binding. Derived indexes are non-authoritative and rebuilt only through the explicit API. Their `bounded-latest-v1` policy retains at most the latest 1,024 records in each lookup category; governed reads replay the complete authoritative history, so index retention cannot erase ownership or audit evidence.
+
+The adapter requires an absolute dedicated child of `<repositoryRoot>/.founderos/runtime`, rejects runtime/source overlap in both directions, traversal, symlinks, nested protected trees, runtime identity replacement, unsafe entry types, and resource-limit breaches before mutation. Public results and normalized failures contain only logical locations. The adapter assumes cooperative local administration, one writer, same-filesystem atomic rename, and supported file flushing. It does not provide hostile privileged-filesystem protection, distributed locking, remote consensus, coordinated rollback detection, archival, or destructive compaction.
+
+```typescript
+import { openLocalFileDurableContextDeliveryLedger } from "@founderos/knowledge-engine";
+
+const ledger = await openLocalFileDurableContextDeliveryLedger({
+  repositoryRoot,
+  runtimeRoot: `${repositoryRoot}/.founderos/runtime/context-delivery-ledger`,
+  canonicalSourceRoots: [`${repositoryRoot}/docs`, `${repositoryRoot}/knowledge`],
+});
+
+const result = await ledger.commitVerifiedOriginalDelivery({
+  transaction,
+  envelopeVerification,
+});
+```
+
+Milestone 12 does not invoke a provider or LLM, execute prompts, run Agents or Hermes, call MCP, implement authentication or authorization, add semantic retrieval, or introduce a database.
+
 ```typescript
 import {
   assembleGovernedKnowledgeContext,
