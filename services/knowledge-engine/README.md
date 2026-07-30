@@ -156,6 +156,38 @@ const result = await ledger.commitVerifiedOriginalDelivery({
 
 Milestone 12 does not invoke a provider or LLM, execute prompts, run Agents or Hermes, call MCP, implement authentication or authorization, add semantic retrieval, or introduce a database.
 
+## Milestone 13 governed reasoning invocation
+
+`invokeGovernedReasoning` is the only public execution path. It accepts an exact Milestone 12 transaction identity and the Durable Delivery Ledger, independently recovers and verifies that Ledger, resolves the authoritative transaction, and verifies the Request registration, permanent idempotency owner, Envelope, Acknowledgment, Receipt, Context Package, Consumer, Policy, Freshness, Active Snapshot, and Registry bindings before accepting an Invocation. It then verifies provider-neutral input and policy fingerprints, performs deterministic capability matching, registers Invocation ownership, appends immutable ordered Attempts and Outcomes, independently verifies the terminal Result Envelope, and atomically finalizes Consumption Evidence.
+
+Milestone 13 instantiates exactly one executor: a deterministic fake provider. Its explicit fixture modes cover structured and empty success, transient and permanent failure, timeout, three cancellation phases, output overflow, malformed and contradictory outcomes, and physical-path or credential-bearing output. The adapter has no Repository, corpus, environment, credential, network, random, implicit-clock, tool, Agent, Hermes, or MCP dependency. Unsafe or malformed output is normalized into sanitized failure evidence before persistence.
+
+`openLocalFileGovernedReasoningExecutionEvidence` opens the local append-only execution-evidence runtime. Its public value exposes only verified reads, recovery, integrity verification, and derived-index rebuild; ownership registration, Attempt append, Outcome append, and finalization remain inaccessible outside the governed Invocation facade. The ownership envelope commits the exact Invocation Request, selected Provider Capability, and delivered Context Package object count under a separate rolling authority fingerprint in the atomic head. Result construction, finalization, recovery, and integrity verification independently reconstruct Receipt, Usage, deterministic-fake Cost, complete Attempt/Outcome history, full execution span, transaction identity, and terminal evidence from that authority. The complete explicit Attempt schedule is validated before ownership. Deadline and cancellation signals are execution controls with deterministic precedence: cancellation observed before execution wins first, explicit deadline cancellation wins at the deadline, an expired execution deadline then wins over cooperative cancellation, and cooperative cancellation applies only while the deadline remains live. An observed terminal control cannot become success, and pre-execution cancellation skips Provider execution. Authoritative events use expected-head compare-and-swap, a single-writer lock, fingerprinted atomic commit markers, immutable event envelopes, file sync, and containing-directory sync. The adapter rejects accessor-backed options, symlinked runtime parents/root/managed directories, and physical confinement changes around writes while normalizing filesystem failures to path-private logical errors. Writer settlement preserves a primary governed-operation error if cleanup also fails; without a primary error, handle-close failure precedes lock-removal failure, and every cleanup failure is normalized before crossing the public boundary. Staging and uncommitted suffix files are ignored; missing, malformed, invalid, or oversized derived indexes remain non-authoritative and cannot block authoritative replay; authoritative corruption fails closed.
+
+```typescript
+import {
+  invokeGovernedReasoning,
+  openLocalFileGovernedReasoningExecutionEvidence,
+} from "@founderos/knowledge-engine";
+
+const executionEvidence = await openLocalFileGovernedReasoningExecutionEvidence({
+  repositoryRoot,
+  runtimeRoot: `${repositoryRoot}/.founderos/runtime/reasoning-execution-ledger`,
+  canonicalSourceRoots: [`${repositoryRoot}/docs`, `${repositoryRoot}/knowledge`],
+});
+
+const finalized = await invokeGovernedReasoning({
+  deliveryLedger,
+  executionEvidence,
+  deliveryIdentity,
+  invocationRequest,
+  fixtureMode: "successful-structured-response",
+  attemptSchedule,
+});
+```
+
+The local adapter remains a cooperative single-process runtime. It does not provide a production model, provider selection, credentials, streaming, tools, distributed coordination, remote persistence, authentication, authorization, or Agent execution.
+
 ```typescript
 import {
   assembleGovernedKnowledgeContext,

@@ -1,4 +1,13 @@
 export * from "./application/ingest-markdown.js";
+export {
+  invokeGovernedReasoning,
+  GovernedReasoningInvocationError,
+  type DurableDeliveryTransactionIdentity,
+  type GovernedReasoningInvocationResult,
+  type InvokeGovernedReasoningInput,
+  type ReasoningAttemptSchedule,
+} from "./application/invoke-governed-reasoning.js";
+export type { GovernedReasoningExecutionEvidenceReader } from "./application/manage-governed-reasoning-execution-ledger.js";
 export * from "./application/assemble-governed-knowledge-context.js";
 export * from "./application/ingest-markdown-directory.js";
 export * from "./application/execute-knowledge-migration.js";
@@ -86,6 +95,62 @@ export {
   type VerifyContextDeliveryReplayEvidenceInput,
   type VerifyGovernedContextDeliveryEnvelopeInput,
 } from "./domain/context-delivery.js";
+export {
+  countCanonicalCharacters,
+  countOutputCharacters,
+  createFinalizedReasoningConsumptionEvidence,
+  createProviderNeutralReasoningInput,
+  createReasoningCancellationEvidence,
+  createReasoningConstraintBlock,
+  createReasoningCostEvidence,
+  createReasoningExecutionAttempt,
+  createReasoningExecutionPolicy,
+  createReasoningExecutionReceipt,
+  createReasoningFailureEvidence,
+  createReasoningInstructionBlock,
+  createReasoningInvocationRequest,
+  createReasoningProviderCapabilityDescriptor,
+  createReasoningProviderCapabilityRequirements,
+  createReasoningProviderOutcome,
+  createReasoningResultEnvelope,
+  createReasoningTimeoutEvidence,
+  createReasoningUsageEvidence,
+  matchReasoningProviderCapabilities,
+  ReasoningIntegrityError,
+  verifyFinalizedReasoningConsumptionEvidence,
+  verifyProviderNeutralReasoningInput,
+  verifyReasoningCancellationEvidence,
+  verifyReasoningCostEvidence,
+  verifyReasoningExecutionAttempt,
+  verifyReasoningExecutionPolicy,
+  verifyReasoningExecutionReceipt,
+  verifyReasoningFailureEvidence,
+  verifyReasoningInvocationRequest,
+  verifyReasoningProviderCapabilityDescriptor,
+  verifyReasoningProviderCompatibilityResult,
+  verifyReasoningProviderOutcome,
+  verifyReasoningResultEnvelope,
+  verifyReasoningResultEnvelopeArtifact,
+  verifyReasoningTimeoutEvidence,
+  verifyReasoningUsageEvidence,
+  type FinalizedReasoningConsumptionEvidenceInput,
+  type ProviderNeutralReasoningInputInput,
+  type ReasoningCancellationEvidenceInput,
+  type ReasoningConstraintBlockInput,
+  type ReasoningCostEvidenceInput,
+  type ReasoningExecutionAttemptInput,
+  type ReasoningExecutionPolicyInput,
+  type ReasoningExecutionReceiptInput,
+  type ReasoningFailureEvidenceInput,
+  type ReasoningInstructionBlockInput,
+  type ReasoningInvocationRequestInput,
+  type ReasoningProviderCapabilityDescriptorInput,
+  type ReasoningProviderCapabilityRequirementsInput,
+  type ReasoningProviderOutcomeInput,
+  type ReasoningResultEnvelopeInput,
+  type ReasoningTimeoutEvidenceInput,
+  type ReasoningUsageEvidenceInput,
+} from "./domain/reasoning.js";
 export * from "./domain/safe-path.js";
 export * from "./infrastructure/load-migration-manifest.js";
 export * from "./infrastructure/knowledge-corpus-candidate-source.js";
@@ -97,6 +162,11 @@ export {
   type LocalFileDeliveryLedgerLimits,
   type LocalFileDeliveryLedgerOptions,
 } from "./infrastructure/local-file-durable-context-delivery-ledger.js";
+export {
+  openLocalFileGovernedReasoningExecutionEvidence,
+  type LocalFileReasoningExecutionEvidenceLimits,
+  type LocalFileReasoningExecutionEvidenceOptions,
+} from "./infrastructure/local-file-governed-reasoning-execution-evidence.js";
 export * from "./infrastructure/parse-markdown.js";
 export * from "./infrastructure/safe-path.js";
 export * from "./interfaces/ingestion-report.js";
