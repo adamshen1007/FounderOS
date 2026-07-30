@@ -168,6 +168,29 @@ The documents below are the official FounderOS v1.0 bootstrap specification, org
 - [Milestone 12 Verification Checklist v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Verification_Checklist_v1.0.md)
 - [Milestone 12 Codex Execution Prompt v1.0](./docs/milestones/milestone-12/FounderOS_Milestone_12_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 13 — Provider-Neutral Reasoning Invocation and Result Evidence Foundation
+
+Milestone 13 is implemented by storage-independent contracts in [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) and the governed invocation facade, deterministic fake provider, and local append-only execution-evidence adapter in [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md). It consumes an exact committed Milestone 12 Delivery transaction; it does not implement a production provider or a general reasoning runtime.
+
+- [Milestone 13 Package README v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Package_README_v1.0.md)
+- [Provider-Neutral Reasoning Invocation and Result Evidence Foundation Specification v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Provider_Neutral_Reasoning_Invocation_and_Result_Evidence_Foundation_Specification_v1.0.md)
+- [Reasoning Invocation Request Contract v1.0](./docs/milestones/milestone-13/FounderOS_Reasoning_Invocation_Request_Contract_v1.0.md)
+- [Provider-Neutral Reasoning Input Contract v1.0](./docs/milestones/milestone-13/FounderOS_Provider_Neutral_Reasoning_Input_Contract_v1.0.md)
+- [Reasoning Provider Capability Descriptor Contract v1.0](./docs/milestones/milestone-13/FounderOS_Reasoning_Provider_Capability_Descriptor_Contract_v1.0.md)
+- [Reasoning Execution Policy and Budget Contract v1.0](./docs/milestones/milestone-13/FounderOS_Reasoning_Execution_Policy_and_Budget_Contract_v1.0.md)
+- [Provider-Neutral Reasoning Execution Port v1.0](./docs/milestones/milestone-13/FounderOS_Provider_Neutral_Reasoning_Execution_Port_v1.0.md)
+- [Deterministic Fake Reasoning Provider Adapter Specification v1.0](./docs/milestones/milestone-13/FounderOS_Deterministic_Fake_Reasoning_Provider_Adapter_Specification_v1.0.md)
+- [Reasoning Invocation Idempotency, Retry, Timeout, and Cancellation Specification v1.0](./docs/milestones/milestone-13/FounderOS_Reasoning_Invocation_Idempotency_Retry_Timeout_and_Cancellation_Specification_v1.0.md)
+- [Reasoning Execution Receipt, Usage, Cost, Failure, and Cancellation Evidence Contract v1.0](./docs/milestones/milestone-13/FounderOS_Reasoning_Execution_Receipt_Usage_Cost_Failure_and_Cancellation_Evidence_Contract_v1.0.md)
+- [Reasoning Result Envelope Contract v1.0](./docs/milestones/milestone-13/FounderOS_Reasoning_Result_Envelope_Contract_v1.0.md)
+- [Consumption Evidence Finalization Specification v1.0](./docs/milestones/milestone-13/FounderOS_Consumption_Evidence_Finalization_Specification_v1.0.md)
+- [Durable Reasoning Execution Evidence Ledger Contract v1.0](./docs/milestones/milestone-13/FounderOS_Durable_Reasoning_Execution_Evidence_Ledger_Contract_v1.0.md)
+- [No-Provider-Bypass and Reasoning Result Integrity Enforcement Policy v1.0](./docs/milestones/milestone-13/FounderOS_No_Provider_Bypass_and_Reasoning_Result_Integrity_Enforcement_Policy_v1.0.md)
+- [Provider-Neutral Reasoning Evaluation Framework v1.0](./docs/milestones/milestone-13/FounderOS_Provider_Neutral_Reasoning_Evaluation_Framework_v1.0.md)
+- [Milestone 13 Acceptance Criteria v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Acceptance_Criteria_v1.0.md)
+- [Milestone 13 Verification Checklist v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Verification_Checklist_v1.0.md)
+- [Milestone 13 Codex Execution Prompt v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Codex_Execution_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

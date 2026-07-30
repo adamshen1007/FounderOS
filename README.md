@@ -2,11 +2,13 @@
 
 FounderOS is an AI-native operating system for founder decision-making, organizational memory, and governed AI-assisted execution. This repository is a documentation-first TypeScript monorepo.
 
-The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, deterministic queries, governed context assembly, a provider-neutral governed Context Consumer delivery boundary, and a restart-safe local Context Delivery Ledger with durable idempotency and Replay Attempt evidence. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, LLM execution, Hermes, an agent runtime, MCP connectors, or a user interface.
+The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, deterministic queries, governed context assembly, a provider-neutral governed Context Consumer delivery boundary, and a restart-safe local Context Delivery Ledger with durable idempotency and Replay Attempt evidence. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, real-provider or production-model execution, Hermes, an agent runtime, MCP connectors, or a user interface.
 
 ## Architecture at a glance
 
 FounderOS separates human interaction, intelligence, orchestration, knowledge and memory, integrations, and infrastructure. Knowledge is retrieved before important actions; reasoning is separate from execution; human approval remains authoritative for strategic, external, irreversible, and high-risk actions.
+
+Milestone 13 also provides a governed provider-neutral reasoning boundary backed only by a deterministic fake provider and append-only execution evidence. It does not connect to or emulate a production model provider.
 
 Repository dependencies must flow in one direction:
 
@@ -20,12 +22,12 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 
 ## Implemented foundations
 
-- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, repositories, lifecycle and durable registry evidence, governed context packages, Consumer delivery, and storage-independent durable Delivery Ledger records and results.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, deterministic budget-bounded context assembly, fail-closed provider-neutral delivery, and a governed append-only Delivery Ledger with restart recovery, audit verification, and rebuildable derived indexes.
+- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, repositories, lifecycle and durable registry evidence, governed context packages, Consumer delivery, and storage-independent durable Delivery and Reasoning Execution Ledger contracts and results.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, deterministic budget-bounded context assembly, fail-closed provider-neutral delivery, governed append-only Delivery and Reasoning Execution ledgers, and deterministic fake-provider reasoning with independently verifiable result evidence.
 - [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
 - [`knowledge/migration-manifest.yaml`](./knowledge/migration-manifest.yaml) binds the eight canonical FounderOS Priority 1 documents to reviewed object identities, logical destinations, metadata, and source hashes.
 
-Automatic corpus refresh, vault watching, background synchronization or activation, database and distributed adapters, remote coordination and replication, semantic retrieval, embeddings, ranking, graph storage, LLM or agent execution, connectors, and interfaces remain unimplemented. Milestone 09 and 12 persistence is deliberately limited to explicit, Git-ignored, cooperative single-writer local runtimes; see the [knowledge-engine durability documentation](./services/knowledge-engine/README.md#milestone-12-durable-context-delivery-ledger) before operating them.
+Automatic corpus refresh, vault watching, background synchronization or activation, database and distributed adapters, remote coordination and replication, semantic retrieval, embeddings, ranking, graph storage, real-provider or agent execution, connectors, and interfaces remain unimplemented. Milestone 09, 12, and 13 persistence is deliberately limited to explicit, Git-ignored, cooperative single-writer local runtimes; see the [Milestone 12](./services/knowledge-engine/README.md#milestone-12-durable-context-delivery-ledger) and [Milestone 13](./services/knowledge-engine/README.md#milestone-13-governed-reasoning-invocation) durability documentation before operating them.
 
 ## Repository layout
 
