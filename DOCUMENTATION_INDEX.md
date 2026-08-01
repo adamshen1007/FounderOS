@@ -191,6 +191,31 @@ Milestone 13 is implemented by storage-independent contracts in [`@founderos/kno
 - [Milestone 13 Verification Checklist v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Verification_Checklist_v1.0.md)
 - [Milestone 13 Codex Execution Prompt v1.0](./docs/milestones/milestone-13/FounderOS_Milestone_13_Codex_Execution_Prompt_v1.0.md)
 
+### Milestone 14 — Production Reasoning Provider Readiness and Secure Adapter Boundary Foundation
+
+Milestone 14 is implemented by provider-neutral readiness contracts in [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) and the sole composed readiness facade plus the disabled 11-mode validation/simulation harness in [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md). It consumes exact durable Milestone 12 Delivery and Milestone 13 Invocation authority and externally supplied authorization evidence, uses reference-only credentials and deterministic dry-run fixtures, and stops structurally before transport. It does not enable a real provider, resolve credentials, perform network activity, or write Milestone 13 execution evidence.
+
+- [Disabled Production Provider Adapter Harness Specification v1.0](./docs/milestones/milestone-14/FounderOS_Disabled_Production_Provider_Adapter_Harness_Specification_v1.0.md)
+- [Milestone 14 Acceptance Criteria v1.0](./docs/milestones/milestone-14/FounderOS_Milestone_14_Acceptance_Criteria_v1.0.md)
+- [Milestone 14 Codex Execution Prompt v1.0](./docs/milestones/milestone-14/FounderOS_Milestone_14_Codex_Execution_Prompt_v1.0.md)
+- [Milestone 14 Package README v1.0](./docs/milestones/milestone-14/FounderOS_Milestone_14_Package_README_v1.0.md)
+- [Production Reasoning Provider Readiness and Secure Adapter Boundary Foundation Specification v1.0](./docs/milestones/milestone-14/FounderOS_Milestone_14_Production_Reasoning_Provider_Readiness_and_Secure_Adapter_Boundary_Foundation_Specification_v1.0.md)
+- [Milestone 14 Verification Checklist v1.0](./docs/milestones/milestone-14/FounderOS_Milestone_14_Verification_Checklist_v1.0.md)
+- [No-Direct-Provider-Bypass and Secure Execution Enforcement Policy v1.0](./docs/milestones/milestone-14/FounderOS_No_Direct_Provider_Bypass_and_Secure_Execution_Enforcement_Policy_v1.0.md)
+- [Production Provider Readiness Decision Contract v1.0](./docs/milestones/milestone-14/FounderOS_Production_Provider_Readiness_Decision_Contract_v1.0.md)
+- [Production Provider Readiness Evaluation Framework v1.0](./docs/milestones/milestone-14/FounderOS_Production_Provider_Readiness_Evaluation_Framework_v1.0.md)
+- [Production Reasoning Provider Adapter Contract v1.0](./docs/milestones/milestone-14/FounderOS_Production_Reasoning_Provider_Adapter_Contract_v1.0.md)
+- [Provider Circuit Breaker and Failure Containment Specification v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Circuit_Breaker_and_Failure_Containment_Specification_v1.0.md)
+- [Provider Cost Ceiling and Execution Budget Enforcement Specification v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Cost_Ceiling_and_Execution_Budget_Enforcement_Specification_v1.0.md)
+- [Provider Credential Reference and Isolation Contract v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Credential_Reference_and_Isolation_Contract_v1.0.md)
+- [Provider Health State and Readiness Contract v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Health_State_and_Readiness_Contract_v1.0.md)
+- [Provider Observability, Logging, Metrics, Tracing, and Redaction Specification v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Observability_Logging_Metrics_Tracing_and_Redaction_Specification_v1.0.md)
+- [Provider Rate Limit and Capacity Control Specification v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Rate_Limit_and_Capacity_Control_Specification_v1.0.md)
+- [Provider Request Mapping Contract v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Request_Mapping_Contract_v1.0.md)
+- [Provider Response and Evidence Mapping Contract v1.0](./docs/milestones/milestone-14/FounderOS_Provider_Response_and_Evidence_Mapping_Contract_v1.0.md)
+- [Reasoning Authorization Enforcement Boundary Specification v1.0](./docs/milestones/milestone-14/FounderOS_Reasoning_Authorization_Enforcement_Boundary_Specification_v1.0.md)
+- [Secure Outbound Provider Transport Policy v1.0](./docs/milestones/milestone-14/FounderOS_Secure_Outbound_Provider_Transport_Policy_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

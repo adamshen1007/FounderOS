@@ -188,6 +188,39 @@ const finalized = await invokeGovernedReasoning({
 
 The local adapter remains a cooperative single-process runtime. It does not provide a production model, provider selection, credentials, streaming, tools, distributed coordination, remote persistence, authentication, authorization, or Agent execution.
 
+## Milestone 14 production-provider readiness
+
+`createProductionProviderReadinessEvaluator` constructs the sole public composed readiness facade. It captures one approved Transport Policy authority at configuration time and returns frozen `evaluate` and `verifyDecision` operations; neither operation accepts a per-request authority. Evaluator, verifier, harness, response-fixture, and authority wrappers require an exact plain own-key shape and own enumerable data descriptors. Non-enumerable fields, symbols, accessors, inherited capabilities, and custom prototypes fail before any wrapper value, Delivery Ledger, or Transport authority is read. The evaluator accepts one exact durable Milestone 12 Delivery identity and its Milestone 13 Invocation Request, recovers and independently verifies the existing Delivery authority, and then evaluates the following fail-closed workflow in order:
+
+1. Verify the durable Delivery and exact Invocation.
+2. Enforce externally supplied Authorization Decision evidence before any Adapter, Credential, Capability, Transport, Rate, or Cost preparation. Milestone 14 consumes exact authorization evidence; it does not authenticate a subject or create an authorization engine.
+3. Verify the disabled/validation-only/dry-run Adapter descriptor.
+4. Validate the Credential Reference and its availability, scope, provider, rotation, and Adapter bindings. This is reference validation only; no secret resolution, read, storage, or return occurs.
+5. Match the existing Milestone 13 provider-neutral Capability descriptor.
+6. Resolve the expected signed Transport Policy from a provider-neutral deterministic authority
+   keyed by the exact Adapter binding, verify the caller candidate against it, enforce exact
+   Invocation timeout compatibility, and construct a non-executable dry-run Transport Plan. Milestone
+   13 application-attempt retry and Milestone 14 transport retry are independent controls.
+7. Simulate bounded Rate/Capacity admission with caller-supplied counters and explicit time.
+8. Simulate Cost/Budget admission with deterministic fixture pricing and integer minor-unit arithmetic.
+9. Reject Circuit reset, then derive and verify Circuit state, permitting only closed state or an
+   explicitly bounded half-open dry-run probe while preserving Disabled and Quarantined containment.
+10. Build redacted Logs, Metrics, Traces, public-error evidence, and readiness; append that exact
+    bundle once to an internally constructed bounded deterministic in-memory sink; immediately
+    capture and verify the retained snapshot in exact order and content; and sign provider-neutral
+    retention evidence for the exact sink configuration, ordered fingerprints, counts, snapshot,
+    and single append before continuing.
+11. Derive and verify Health from the exact preceding evidence.
+12. Construct and independently verify a byte-stable, redacted dry-run Request Plan.
+13. Construct and independently verify the final Readiness Decision.
+14. Record the structural stop before transport.
+
+The facade returns immutable evidence and may report `ready-for-dry-run`, but no live-ready or enabled state exists. The final Decision binds the retention-evidence fingerprint. After the final Decision is constructed and internally verified, its configured evaluator records the exact Decision and retention-evidence canonical bytes plus Adapter, Invocation, and Observability bindings in an evaluator-private issuance registry. The registry has a fixed capacity of four and deterministic `first-issued-fifo-v1` eviction. Repeating an identical evaluation is idempotent for issuance and does not refresh its FIFO position, although each evaluation still performs its own single sink append. `verifyDecision` requires the original retention evidence alongside the Decision and authoritative input, requires that exact pair to remain issued by the same evaluator instance, and reconstructs the observability bundle and retained snapshot without instantiating a sink or emitting a second artifact. A fresh evaluator and an evicted pair fail closed. The registry is not exposed or configurable and provides no persistence or cross-process verification. Its Transport authority has one synchronous policy-lookup method and no endpoint, provider client, network, credential, secret, DNS, TLS, or socket method. Response Mapping uses 12 fixed deterministic, ephemeral fixtures to normalize success and sanitized failure cases into Milestone 13-compatible Attempt, Outcome, Receipt, Usage, Cost, terminal, Result, and mapping evidence. The mapped chain is independently verified in memory and never appended to the Milestone 13 execution Ledger; no raw provider response, header, or error body is retained. Transport response limits reserve one safe-integer byte so the oversized fixture remains valid at its maximum boundary.
+
+`createDisabledProductionProviderAdapterHarness` captures the same kind of approved Transport Policy authority once and exposes a frozen `run` facade with exactly 11 validation/simulation modes: contract validation, authorization validation, Credential Reference validation, Transport Plan dry run, Request Mapping dry run, Response Mapping fixture, Rate/Cost admission simulation, Circuit simulation, Health evaluation, Observability/Redaction simulation, and full readiness evaluation. Observability and Health simulation each construct and verify one private bounded sink and return immutable retention evidence; full readiness relies only on the evaluator's single append and passes its returned retention evidence into non-emitting Decision verification. Every mode uses explicit time and deterministic fixtures, returns immutable evidence, and rejects enabled Adapter states, raw credentials, arbitrary URLs, callbacks, provider clients, raw Knowledge or Query Results, unverified Delivery/Invocation material, caller-supplied authorities, caller-supplied sinks, and caller-supplied low-level readiness artifacts.
+
+Milestone 14 does not perform DNS resolution, TLS negotiation, socket creation, HTTP requests, SDK or client calls, secret-store access, live provider pricing synchronization, persistence, or external log/metric/trace delivery. There is no real provider response or production-provider execution. Streaming, tools/functions, Agents, Hermes, MCP, multi-provider routing/failover, authentication or authorization systems, distributed admission/containment, UI, and real-provider enablement remain deferred.
+
 ```typescript
 import {
   assembleGovernedKnowledgeContext,
