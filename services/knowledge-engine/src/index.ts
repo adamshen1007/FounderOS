@@ -1,5 +1,27 @@
 export * from "./application/ingest-markdown.js";
 export {
+  createProductionProviderReadinessEvaluator,
+  ProductionProviderReadinessError,
+  type EvaluateProductionProviderReadinessInput,
+  type ProductionProviderReadinessEvaluation,
+  type ProductionProviderReadinessEvidence,
+  type ProductionProviderReadinessGate,
+  type ProductionProviderReadinessGateTraceEntry,
+  type ProductionProviderReadinessEvaluator,
+} from "./application/evaluate-production-provider-readiness.js";
+export {
+  createDisabledProductionProviderAdapterHarness,
+  type DisabledProductionProviderAdapterHarness,
+  type DisabledProductionProviderHarnessInput,
+  type DisabledProductionProviderHarnessMode,
+  type DisabledProductionProviderHarnessResult,
+} from "./application/disabled-production-provider-adapter-harness.js";
+export {
+  createStaticProductionProviderTransportPolicyAuthority,
+  type ProductionProviderTransportPolicyAuthority,
+  type ProductionProviderTransportPolicyBinding,
+} from "./application/production-provider-transport-policy-authority.js";
+export {
   invokeGovernedReasoning,
   GovernedReasoningInvocationError,
   type DurableDeliveryTransactionIdentity,

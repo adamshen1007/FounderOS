@@ -36,6 +36,7 @@ import {
 } from "../src/index.js";
 import { invokeGovernedReasoningWithProvider } from "../src/application/invoke-governed-reasoning.js";
 import { resolveInternalReasoningExecutionEvidence } from "../src/application/manage-governed-reasoning-execution-ledger.js";
+import { resolveVerifiedGovernedReasoningAuthority } from "../src/application/resolve-verified-governed-reasoning-authority.js";
 import { createDurableCanonicalJsonSha256Fingerprint } from "../src/domain/canonical-fingerprint.js";
 import { verifyReasoningAttemptLifecycle } from "../src/domain/reasoning.js";
 import {
@@ -941,6 +942,62 @@ describe("Milestone 13 governed provider-neutral reasoning", () => {
     ).rejects.toMatchObject({ code: "invalid_invocation" });
     expect("createDeterministicFakeReasoningProvider" in PublicKnowledgeEngine).toBe(false);
     expect("createGovernedReasoningExecutionEvidence" in PublicKnowledgeEngine).toBe(false);
+  });
+
+  it("reuses one internal verifier for the exact durable Delivery and Invocation authority", async () => {
+    const runtime = await createReasoningTestRuntime(roots);
+    const request = createInvocation(runtime, {
+      idempotencyKey: "reasoning:key:shared-authority",
+    });
+    const verified = await resolveVerifiedGovernedReasoningAuthority({
+      deliveryLedger: runtime.deliveryLedger,
+      deliveryIdentity: runtime.deliveryIdentity,
+      invocationRequest: request,
+    });
+    expect(verified.invocationRequest).toEqual(request);
+    expect(verified.transaction.transactionId).toBe(runtime.deliveryIdentity.transactionId);
+    expect(verified.envelope.deliveryFingerprint).toBe(
+      runtime.deliveryIdentity.deliveryEnvelopeFingerprint,
+    );
+    expect(verified.receipt.receiptFingerprint).toBe(
+      runtime.deliveryIdentity.deliveryReceiptFingerprint,
+    );
+    expect(Object.isFrozen(verified)).toBe(true);
+
+    await expect(
+      resolveVerifiedGovernedReasoningAuthority({
+        deliveryLedger: runtime.deliveryLedger,
+        deliveryIdentity: {
+          ...runtime.deliveryIdentity,
+          transactionId: "substituted-delivery-transaction",
+        },
+        invocationRequest: request,
+      }),
+    ).rejects.toMatchObject({ code: "delivery_integrity_failure" });
+
+    await expect(
+      resolveVerifiedGovernedReasoningAuthority({
+        deliveryLedger: runtime.deliveryLedger,
+        deliveryIdentity: runtime.deliveryIdentity,
+        invocationRequest: { ...request, reason: "Tampered without re-signing" },
+      }),
+    ).rejects.toMatchObject({ code: "invalid_invocation" });
+
+    const { requestFingerprint: _fingerprint, ...unsigned } = request;
+    void _fingerprint;
+    const substituted = createReasoningInvocationRequest({
+      ...unsigned,
+      consumerId: "substituted-consumer",
+    });
+    await expect(
+      resolveVerifiedGovernedReasoningAuthority({
+        deliveryLedger: runtime.deliveryLedger,
+        deliveryIdentity: runtime.deliveryIdentity,
+        invocationRequest: substituted,
+      }),
+    ).rejects.toMatchObject({ code: "delivery_integrity_failure" });
+    expect("resolveVerifiedGovernedReasoningAuthority" in PublicKnowledgeEngine).toBe(false);
+    expect((await runtime.executionEvidence.verifyIntegrity()).verifiedInvocationCount).toBe(0);
   });
 
   it("keeps the sole fake-provider adapter free of network, credentials, randomness, implicit time, repository reads, and agents", async () => {

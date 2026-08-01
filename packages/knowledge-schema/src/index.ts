@@ -11,6 +11,7 @@ export * from "./migration.js";
 export * from "./objects.js";
 export * from "./parse.js";
 export * from "./primitives.js";
+export * from "./provider-readiness.js";
 export * from "./query.js";
 export * from "./query-result.js";
 export * from "./reasoning.js";

@@ -1,6 +1,4 @@
 import {
-  DeliveryLedgerIntegrityVerificationResultSchema,
-  DeliveryLedgerRecoveryResultSchema,
   ReasoningProviderOutcomeSchema,
   findDurableCanonicalJsonIssue,
   type DurableContextDeliveryLedger,
@@ -20,8 +18,12 @@ import {
   resolveInternalReasoningExecutionEvidence,
   type GovernedReasoningExecutionEvidenceReader,
 } from "./manage-governed-reasoning-execution-ledger.js";
+import {
+  GovernedReasoningAuthorityVerificationError,
+  resolveVerifiedGovernedReasoningAuthority,
+  type DurableDeliveryTransactionIdentity,
+} from "./resolve-verified-governed-reasoning-authority.js";
 import { createDurableCanonicalJsonSha256Fingerprint } from "../domain/canonical-fingerprint.js";
-import { verifyOriginalDeliveryArtifacts } from "../domain/durable-context-delivery-ledger.js";
 import {
   countCanonicalCharacters,
   countOutputCharacters,
@@ -46,15 +48,7 @@ import {
 import { deepFreeze } from "../domain/snapshot-lifecycle.js";
 import { createDeterministicFakeReasoningProvider } from "../infrastructure/deterministic-fake-reasoning-provider.js";
 
-export interface DurableDeliveryTransactionIdentity {
-  readonly transactionId: string;
-  readonly deliveryRequestId: string;
-  readonly deliveryRequestFingerprint: string;
-  readonly deliveryEnvelopeId: string;
-  readonly deliveryEnvelopeFingerprint: string;
-  readonly deliveryReceiptId: string;
-  readonly deliveryReceiptFingerprint: string;
-}
+export type { DurableDeliveryTransactionIdentity } from "./resolve-verified-governed-reasoning-authority.js";
 
 export interface ReasoningAttemptSchedule {
   readonly startedAt: string;
@@ -104,9 +98,6 @@ export class GovernedReasoningInvocationError extends Error {
 
 function immutableCopy<T>(value: T): T {
   return deepFreeze(structuredClone(value));
-}
-function same(left: unknown, right: unknown): boolean {
-  return JSON.stringify(left) === JSON.stringify(right);
 }
 function head(sequence: number, fingerprint: string) {
   return { ledgerSequence: sequence, auditFingerprint: fingerprint };
@@ -237,11 +228,18 @@ export async function invokeGovernedReasoningWithProvider(
     );
   validateCompleteSchedule(request, input.fixtureMode, schedule);
 
-  const delivery = await resolveVerifiedDelivery(
-    input.deliveryLedger,
-    input.deliveryIdentity,
-    request,
-  );
+  let delivery;
+  try {
+    delivery = await resolveVerifiedGovernedReasoningAuthority({
+      deliveryLedger: input.deliveryLedger,
+      deliveryIdentity: input.deliveryIdentity,
+      invocationRequest: request,
+    });
+  } catch (error) {
+    if (error instanceof GovernedReasoningAuthorityVerificationError)
+      throw new GovernedReasoningInvocationError(error.code, error.message);
+    throw error;
+  }
   const executionIntegrity = await executionEvidence.verifyIntegrity();
   const executionRecovery = await executionEvidence.recover();
   if (executionIntegrity.status !== "valid" || executionRecovery.status !== "recovered")
@@ -663,92 +661,6 @@ function controlledTerminalOutcome(
     });
   }
   return null;
-}
-
-async function resolveVerifiedDelivery(
-  ledger: DurableContextDeliveryLedger,
-  identity: DurableDeliveryTransactionIdentity,
-  request: ReasoningInvocationRequest,
-) {
-  if (findDurableCanonicalJsonIssue(identity) !== null)
-    throw new GovernedReasoningInvocationError(
-      "delivery_integrity_failure",
-      "Durable Delivery identity is not accessor-safe canonical data",
-    );
-  const integrity = DeliveryLedgerIntegrityVerificationResultSchema.parse(
-    await ledger.verifyIntegrity(),
-  );
-  const recovery = DeliveryLedgerRecoveryResultSchema.parse(await ledger.recover());
-  if (integrity.status !== "valid" || recovery.status !== "recovered")
-    throw new GovernedReasoningInvocationError(
-      "delivery_integrity_failure",
-      "Durable Delivery Ledger failed integrity verification",
-    );
-  const transaction = (await ledger.listCommittedOriginalDeliveries()).find(
-    (candidate) => candidate.transactionId === identity.transactionId,
-  );
-  if (transaction === undefined)
-    throw new GovernedReasoningInvocationError(
-      "delivery_integrity_failure",
-      "Durable Delivery transaction does not exist",
-    );
-  const result = await ledger.readOriginalDeliveryResult(identity.transactionId);
-  if (result === null)
-    throw new GovernedReasoningInvocationError(
-      "delivery_integrity_failure",
-      "Durable Delivery transaction is incomplete",
-    );
-  const verified = verifyOriginalDeliveryArtifacts({
-    request: transaction.requestRegistration.request,
-    result,
-  });
-  const envelope = verified.result.envelope;
-  const receipt = verified.result.receipt;
-  const exactIdentity =
-    transaction.requestRegistration.deliveryRequestId === identity.deliveryRequestId &&
-    transaction.requestRegistration.deliveryRequestFingerprint ===
-      identity.deliveryRequestFingerprint &&
-    envelope.deliveryEnvelopeId === identity.deliveryEnvelopeId &&
-    envelope.deliveryFingerprint === identity.deliveryEnvelopeFingerprint &&
-    receipt.receiptId === identity.deliveryReceiptId &&
-    receipt.receiptFingerprint === identity.deliveryReceiptFingerprint;
-  const requestBinding =
-    request.deliveryTransactionId === identity.transactionId &&
-    request.deliveryEnvelopeId === envelope.deliveryEnvelopeId &&
-    request.deliveryEnvelopeFingerprint === envelope.deliveryFingerprint &&
-    request.deliveryReceiptId === receipt.receiptId &&
-    request.deliveryReceiptFingerprint === receipt.receiptFingerprint &&
-    request.contextPackageId === envelope.contextPackageId &&
-    request.contextPackageFingerprint === envelope.contextPackageFingerprint &&
-    request.consumerId === envelope.consumerId &&
-    request.consumerDescriptorFingerprint === envelope.consumerDescriptorFingerprint &&
-    request.policyDecisionFingerprint === envelope.policyDecisionEvidence.decisionFingerprint &&
-    same(request.activeSnapshotBinding, envelope.activeSnapshotBinding) &&
-    same(request.registryIntegrityBinding, envelope.registryIntegrityBinding);
-  const sourceBinding =
-    transaction.idempotencyOwnership.deliveryRequestId ===
-      transaction.requestRegistration.deliveryRequestId &&
-    transaction.idempotencyOwnership.deliveryRequestFingerprint ===
-      transaction.requestRegistration.deliveryRequestFingerprint &&
-    verified.result.acknowledgment.status === "accepted" &&
-    receipt.deliveryStatus === "accepted";
-  const requested = Date.parse(request.requestedAt);
-  const deliveryRequest = transaction.requestRegistration.request;
-  const temporal =
-    (deliveryRequest.freshnessPolicy.notBefore === undefined ||
-      requested >= Date.parse(deliveryRequest.freshnessPolicy.notBefore)) &&
-    (deliveryRequest.freshnessPolicy.expiresAt === undefined ||
-      requested < Date.parse(deliveryRequest.freshnessPolicy.expiresAt) ||
-      deliveryRequest.freshnessPolicy.allowHistoricalReplay) &&
-    (envelope.policyDecisionEvidence.expiresAt === undefined ||
-      requested < Date.parse(envelope.policyDecisionEvidence.expiresAt) ||
-      deliveryRequest.freshnessPolicy.allowHistoricalReplay);
-  if (!exactIdentity || !requestBinding || !sourceBinding || !temporal)
-    throw new GovernedReasoningInvocationError(
-      "delivery_integrity_failure",
-      "Invocation does not bind an acceptable complete Durable Delivery transaction",
-    );
-  return immutableCopy({ transaction, envelope, receipt });
 }
 
 function normalizeProviderOutcome(
