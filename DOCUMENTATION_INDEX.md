@@ -216,6 +216,24 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 - [Reasoning Authorization Enforcement Boundary Specification v1.0](./docs/milestones/milestone-14/FounderOS_Reasoning_Authorization_Enforcement_Boundary_Specification_v1.0.md)
 - [Secure Outbound Provider Transport Policy v1.0](./docs/milestones/milestone-14/FounderOS_Secure_Outbound_Provider_Transport_Policy_v1.0.md)
 
+### Milestone 15 — Durable Production-Provider Readiness Evaluation Ledger and Replay Verification Registry Foundation
+
+**Specified — not implemented.** Milestone 15 defines future durable registration and dual-time fresh-evaluator replay verification for the non-executing Milestone 14 readiness package. Historical reconstruction uses immutable original time; current admissibility uses explicit replay time. One deterministic genesis history/head/marker commitment authorizes the initialized empty ledger, and every later event preserves an immutable archived marker value. Atomic installation of the byte-identical fixed current-marker copy is the sole visibility boundary; the marker-embedded head and `readHead()` are byte-identical, while separate `HEAD` projections and indexes remain derived. Registration callers explicitly request every original-event ID, and integrity/recovery results remain ephemeral. It does not implement runtime contracts, persistence, credential resolution, provider transport, a real provider, or live-execution authority.
+
+- [Milestone 15 Package README v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Package_README_v1.0.md)
+- [Durable Production-Provider Readiness Evaluation Ledger and Replay Verification Registry Foundation Specification v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Durable_Production_Provider_Readiness_Evaluation_Ledger_and_Replay_Verification_Registry_Foundation_Specification_v1.0.md)
+- [Milestone 15 Architecture Specification v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Architecture_Specification_v1.0.md)
+- [Durable Readiness Evaluation Transaction Contract v1.0](./docs/milestones/milestone-15/FounderOS_Durable_Readiness_Evaluation_Transaction_Contract_v1.0.md)
+- [Readiness Evaluation Registration and Idempotency Contract v1.0](./docs/milestones/milestone-15/FounderOS_Readiness_Evaluation_Registration_and_Idempotency_Contract_v1.0.md)
+- [Durable Readiness Evaluation Ledger Contract v1.0](./docs/milestones/milestone-15/FounderOS_Durable_Readiness_Evaluation_Ledger_Contract_v1.0.md)
+- [Readiness Replay Verification Registry Contract v1.0](./docs/milestones/milestone-15/FounderOS_Readiness_Replay_Verification_Registry_Contract_v1.0.md)
+- [Readiness Ledger Integrity and Recovery Specification v1.0](./docs/milestones/milestone-15/FounderOS_Readiness_Ledger_Integrity_and_Recovery_Specification_v1.0.md)
+- [Local File Readiness Ledger Adapter Specification v1.0](./docs/milestones/milestone-15/FounderOS_Local_File_Readiness_Ledger_Adapter_Specification_v1.0.md)
+- [Readiness Evidence Privacy and No-Execution Policy v1.0](./docs/milestones/milestone-15/FounderOS_Readiness_Evidence_Privacy_and_No_Execution_Policy_v1.0.md)
+- [Milestone 15 Acceptance Criteria v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Acceptance_Criteria_v1.0.md)
+- [Milestone 15 Verification Checklist v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Verification_Checklist_v1.0.md)
+- [Milestone 15 Codex Implementation Prompt v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Codex_Implementation_Prompt_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)
