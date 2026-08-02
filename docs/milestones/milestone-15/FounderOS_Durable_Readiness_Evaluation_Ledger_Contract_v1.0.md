@@ -27,34 +27,55 @@ The exact interface names may change during implementation. The authority separa
 
 ## Authoritative Record Categories
 
-1. Registration request record
-2. Permanent idempotency ownership record
-3. Committed readiness evaluation transaction
-4. Registration audit entry
-5. Replay attempt record
-6. Replay audit entry
-7. Immutable event-local commit-marker archives and the fixed current marker
+1. Canonical genesis complete-history commitment, genesis head, genesis marker archive, and fixed current marker
+2. Registration request record
+3. Permanent idempotency ownership record
+4. Committed readiness evaluation transaction
+5. Registration audit entry
+6. Replay attempt record
+7. Replay audit entry
+8. Immutable event-local commit-marker archives and the fixed current marker
 
 All authoritative event records, including archived per-event marker values, are immutable and marker bounded. The fixed current-marker file is the single intentional replacement point: its verified atomic replacement activates the byte-identical archived marker value and is the sole authoritative visibility boundary (`M15-TXN-001`, `M15-TXN-002`).
 
 ## Ledger Head
 
-The canonical ledger head contains:
+The canonical ledger head is exactly the signed `ReadinessLedgerHeadUnsignedV1` field set from `M15-COMMIT-001` plus `ledgerHeadFingerprint`:
 
-- head contract version;
-- committed registration count;
-- committed replay-attempt count;
-- total authoritative event count;
-- last committed ledger sequence;
-- last audit-entry fingerprint;
-- last committed event ID and fingerprint;
-- complete-history fingerprint;
-- head generation or coordinate;
+- `headContractVersion`;
+- `headGeneration`;
+- `committedRegistrationCount`;
+- `committedReplayAttemptCount`;
+- `totalAuthoritativeEventCount`;
+- `lastCommittedLedgerSequence`;
+- `latestAuditEntryId` and `latestAuditEntryFingerprint`;
+- `latestSemanticEventId` and `latestSemanticEventFingerprint`;
+- `latestSubjectTransactionId` and `latestSubjectTransactionFingerprint`;
+- `completeHistoryFingerprint`;
 - `ledgerHeadFingerprint`.
 
-An empty ledger has an explicit versioned genesis head rather than an absent or inferred head.
+The initialized empty ledger uses the separate `ReadinessGenesisLedgerHeadUnsignedV1` domain with this identical key set. Its generation, counts, and sequence are zero, and all six latest-coordinate fields are exactly `null`. Registration and replay heads require every latest-coordinate field to be non-null and to identify the just-committed audit entry, semantic event, and subject transaction. The phrase `last committed event` is not a schema field or authority coordinate.
 
-Any separately stored `HEAD` file is a non-authoritative cache of this projection and is rebuildable from verified markers.
+The exact head object returned by `readHead()`, embedded in the installed marker, and written as any separately stored derived `HEAD` projection must be byte-identical. The separate `HEAD` file is a non-authoritative cache rebuildable from verified markers.
+
+## Genesis Authority (`M15-GENESIS-001`)
+
+An open/create operation returns exactly one of two valid states: `uninitialized`, with no FounderOS-created genesis component present, or `initialized-empty`, with a complete verified genesis archive and byte-identical fixed current marker. It never treats partial initialization as empty authority.
+
+Initialization under the cooperative writer lock:
+
+1. safely proves that the root is uninitialized;
+2. constructs the exact canonical genesis complete-history commitment and genesis head from `M15-COMMIT-001`;
+3. constructs deterministic marker ID `m15-genesis`, generation `0`, and the canonical genesis marker;
+4. stages and synchronizes the complete genesis archive and temporary fixed-marker copy;
+5. atomically installs the immutable genesis archive;
+6. atomically replaces the fixed current marker with byte-identical bytes as the sole genesis visibility boundary;
+7. synchronizes the marker directory where supported;
+8. optionally publishes a byte-identical derived `HEAD` only after genesis authority exists.
+
+A crash before genesis staging leaves an uninitialized root. A crash during staging leaves no authority and only a classifiable staging orphan. A crash after genesis archive installation but before fixed-marker replacement leaves incomplete genesis initialization and must not be opened as empty authority; a later locked create may remove or replace it only after proving exact canonical genesis bytes and no conflicting state. A crash after fixed-marker replacement yields a valid initialized empty ledger only when the archive and fixed copy are byte-identical and independently recompute. Missing, extra, malformed, noncanonical, or fingerprint-invalid genesis components fail closed.
+
+The first registration requires the verified genesis head as its previous and expected head, uses ledger sequence and generation `1`, and advances every latest coordinate from `null` to the registration audit entry, registration semantic event, and original transaction.
 
 ## Audit Entry
 
@@ -76,13 +97,14 @@ The audit entry binds the previous ledger head, not the resulting head. Complete
 
 ## Commit Marker
 
-The commit marker uses exactly the `ReadinessCommitMarkerUnsignedV1` field set, category discriminator, exclusions, dependencies, and fingerprint field in the sole `M15-COMMIT-001` table. No summary in another document adds, removes, or renames a marker field.
+Genesis uses exactly `ReadinessGenesisCommitMarkerUnsignedV1`. Registration and replay use exactly the separate `ReadinessCommitMarkerUnsignedV1` field set, category discriminator, exclusions, dependencies, and fingerprint field in the sole `M15-COMMIT-001` table. No summary in another document adds, removes, or renames a marker field.
 
 The canonical marker value is computed last. Its immutable event-local archive preserves marker history and global marker-ID ownership. Commit occurs only when byte-identical canonical marker bytes are atomically installed at the fixed current-marker location. Installed components or an archived marker without that fixed current-marker activation are crash orphans, not committed history. Missing derived `HEAD` or index state after activation does not roll back the commit.
 
 ## Read Semantics
 
 - Reads operate only on recovered and verified marker-bounded history.
+- `readHead()` returns the exact marker-embedded head bytes, including the verified genesis head for an initialized empty ledger.
 - Lists use explicit ledger sequence and deterministic tie-free ordering.
 - Returned values are deeply immutable or defensive copies.
 - Missing IDs return a stable absent result; corrupt state returns an integrity failure.
@@ -106,7 +128,7 @@ The ledger must detect:
 - missing marker-bounded events;
 - extra ambiguous installed records;
 - record, transaction, request, package, ownership, or marker fingerprint failure;
-- duplicate or conflicting globally owned idempotency, registration-request, transaction, Decision, replay-request, replay-attempt, semantic-event, audit-entry, or marker IDs;
+- duplicate or conflicting globally owned registration idempotency keys, ownership IDs, registration-request IDs, transaction IDs, Decision IDs, registration semantic-event IDs, registration audit-entry IDs, registration marker IDs, replay idempotency keys, replay-request IDs, replay-attempt IDs, replay semantic-event IDs, replay audit-entry IDs, or replay marker IDs;
 - mismatched Delivery, Invocation, configuration, gate, retention, or package bindings;
 - replay references to missing original transactions;
 - authoritative records containing prohibited material;

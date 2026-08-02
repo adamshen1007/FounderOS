@@ -8,9 +8,17 @@
 
 Prevent the Milestone 15 durable ledger, registration facade, replay verifier, adapter, logs, errors, and indexes from becoming a credential, context, provider-payload, or execution bypass.
 
-## Allowed Durable Material
+## Evidence Durability Inventory
 
-Durable records may contain only strict non-secret governance evidence such as:
+This section is the sole exhaustive Milestone 15 durability classification. A schema, contract, facade, adapter, test fixture, report, or implementation may not introduce another durable evidence class or persist an item classified here as ephemeral.
+
+| Evidence class | Exact members | Authority rule |
+| --- | --- | --- |
+| Authoritative durable | Marker-committed registration requests and permanent ownership records; evaluator-configuration and Delivery/Invocation authority projections; canonical evaluation packages; committed original transactions; recorded replay requests, historical comparisons, current-admissibility evidence, and replay attempts; semantic events; audit entries; genesis and event complete-history commitments; genesis and event ledger-head projections embedded in markers; immutable activated marker archives; and the byte-identical installed fixed current marker | Immutable marker-bounded ledger authority governed by `M15-COMMIT-001`; no other durable record is authoritative |
+| Derived durable | Rebuildable `HEAD` projections, derived index entries, and derived index snapshots | Non-authoritative; may be discarded and rebuilt only from verified marker-bounded history |
+| Ephemeral and non-persisted | Every public application/adapter operation-result envelope and transient result metadata, including registration, replay, append status, integrity, recovery, derived-state verification/rebuild, initialization/open, and failed-mutation results; validation reports, including documentation lint, traceability, verification, test, completion, and review reports, unless a separately reviewed specification outside readiness-ledger authority explicitly defines a durable report | Must not be fingerprinted or written to authoritative records, installable staging envelopes, marker archives, the fixed current marker, derived state, logs, traces, metrics, or observability artifacts; an authoritative or derived record returned inside an ephemeral envelope retains its inventory class, but the envelope creates no second durable copy |
+
+Authoritative durable records may contain only strict non-secret governance evidence such as:
 
 - contract versions;
 - logical IDs and lowercase SHA-256 fingerprints;
@@ -21,7 +29,9 @@ Durable records may contain only strict non-secret governance evidence such as:
 - evaluator configuration projection;
 - Delivery and Invocation identity projection;
 - explicit timestamps, sequences, latest audit-entry fingerprints, ledger-head fingerprints, and marker coordinates;
-- deterministic comparison and integrity results.
+- deterministic durable historical-comparison and current-admissibility evidence.
+
+Every ephemeral member in the inventory is a non-authoritative public or validation output. It has no fingerprint field or readiness-ledger commitment domain and is discarded after return or validation unless the table's explicit separately reviewed, outside-ledger exception applies.
 
 ## Prohibited Material
 
@@ -103,6 +113,8 @@ Standard filesystem and cryptographic hashing APIs are allowed only inside the l
 ## Stored-Data Inspection
 
 Acceptance tests must inspect every authoritative record, staging envelope used by fixtures, public result, error, derived index, and observability artifact for prohibited keys and representative secret-like sentinels.
+
+Stored-data inspection must also prove that no authoritative record, installable staging envelope, derived record, log, trace, metric, or observability artifact contains any public operation-result envelope, transient append/status metadata, integrity-result object, recovery-result object, derived-state operation result, or validation report. Public operation, integrity, recovery, and derived-state results remain strict canonical, redacted, non-fingerprinted return values and are discarded after return; logging their whole object would create a prohibited second durable registry.
 
 ## Principle
 

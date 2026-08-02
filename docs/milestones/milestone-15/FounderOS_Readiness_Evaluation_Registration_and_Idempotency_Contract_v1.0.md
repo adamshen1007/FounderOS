@@ -34,9 +34,14 @@ The canonical registration request fingerprint binds:
 - request contract version and request ID;
 - proposed transaction ID;
 - idempotency key;
+- caller-requested ownership ID;
+- caller-requested registration semantic-event ID;
+- caller-requested registration audit-entry ID;
+- caller-requested registration marker ID;
 - complete Delivery and Invocation identity projection;
 - evaluator configuration projection;
 - canonical readiness-input fingerprint;
+- immutable `originalEvaluationTime`;
 - optional complete expected evaluation package and its fingerprint, when supplied;
 - submitted-at evidence;
 - expected ledger-head fingerprint.
@@ -51,6 +56,9 @@ The durable ownership record contains (`M15-IDEM-001`):
 - registration request ID and fingerprint;
 - transaction ID;
 - Readiness Decision ID and fingerprint;
+- registration semantic-event ID;
+- registration audit-entry ID;
+- registration marker ID;
 - canonical evaluation-package fingerprint;
 - Delivery transaction ID and fingerprint;
 - Invocation Request ID and fingerprint;
@@ -63,17 +71,20 @@ The durable ownership record contains (`M15-IDEM-001`):
 
 The ownership fingerprint covers only this semantic ownership payload. The enclosing registration event binds ownership and transaction fingerprints to the audit sequence and heads, avoiding circular fingerprints.
 
+The request is the sole source of `ownershipId`, registration `semanticEventId`, registration `auditEntryId`, and registration `markerId`. Every corresponding record must equal its `requested*Id` field byte-for-byte. These identities are never random, clock-derived, sequence-derived, process-derived, filesystem-derived, or index-derived.
+
 ## Ownership Rules
 
-- The first valid registration atomically and permanently owns an unused idempotency key, registration request ID, requested transaction ID, and Readiness Decision ID.
+- The first valid registration atomically and permanently owns an unused idempotency key, caller-requested ownership ID, registration request ID, requested transaction ID, Readiness Decision ID, caller-requested registration semantic-event ID, caller-requested registration audit-entry ID, and caller-requested registration marker ID (`M15-IDEM-001`).
 - Identical registration retry is not a lookup-only shortcut. It performs readiness-ledger verification, current governed authority resolution, approved evaluation, same-instance Decision verification, and canonical request/package reconstruction exactly once before returning the exact original committed transaction.
 - Identical replay does not append a duplicate transaction or refresh ownership ordering.
 - Exact replay compares the original canonical request bytes, including the original submitted-at and expected-head evidence; an already-owned exact request returns the original even if later replay events advanced the current ledger head.
-- Exact return requires the same key, request ID/fingerprint, requested transaction ID, Decision ID/fingerprint, authority projection, evaluator configuration projection, and complete evaluation package.
+- Exact return requires byte-identical canonical request bytes and the same key; ownership, request, transaction, registration semantic-event, registration audit-entry, and registration marker IDs; request and Decision fingerprints; authority projection; evaluator configuration projection; and complete evaluation package.
 - The same Decision ID under a different key or request ID is a conflict even when bytes are otherwise identical.
 - The same transaction ID under a different key or request is a conflict.
 - The same request ID under a different key is a conflict.
 - The same key with a different request fingerprint is a conflict.
+- Reuse of an ownership, registration semantic-event, registration audit-entry, or registration marker ID under a different key, request, or requested-ID tuple is a coordinate-specific conflict even when all other bytes match.
 - No second original transaction may exist for one Readiness Decision ID.
 - A partial ownership record without its marker-bounded transaction is authoritative corruption.
 - A transaction without its required ownership is authoritative corruption.
@@ -96,7 +107,7 @@ The operation must use:
 4. one complete staged event envelope;
 5. canonical serialization and fingerprinting;
 6. atomic installation and synchronization;
-7. atomic commit-head replacement as the commit point.
+7. atomic fixed current-marker replacement as the commit point.
 
 ## Registration Outcomes
 
@@ -107,7 +118,7 @@ The application result is one of:
 - `rejected` with stable, redacted reason codes;
 - `integrity-failed` with stable, redacted failure evidence.
 
-Rejected and integrity-failed results commit no registration record.
+The complete application-result envelope is ephemeral, non-authoritative, non-fingerprinted, and non-persisted under the sole Evidence Durability Inventory in the privacy policy. A `committed` or `idempotent-original-returned` result may return the one authoritative transaction already governed by its marker, but the result envelope never creates or permits a second durable copy. Rejected and integrity-failed results commit no registration record.
 
 ## Required Conflict Detection
 
@@ -118,6 +129,9 @@ Fail closed on:
 - `registration-request-id-conflict`;
 - `transaction-id-conflict`;
 - `decision-id-conflict`;
+- `registration-semantic-event-id-conflict`;
+- `registration-audit-entry-id-conflict`;
+- `registration-marker-id-conflict`;
 - stale expected head;
 - concurrent writer state change;
 - mismatched Delivery or Invocation identity;

@@ -44,7 +44,7 @@ knowledge-engine -> knowledge-schema
 - Durable registration requests and permanent idempotency ownership
 - Exact Delivery, Invocation, Adapter, capability, Credential Reference, Transport Policy, Decision, gate-trace, retention, and evaluator-configuration bindings
 - Immutable committed readiness evaluation transactions
-- Hash-chained audit entries and an authoritative commit-head marker
+- Explicit canonical genesis history/head/marker authority, hash-chained audit entries, and an authoritative fixed current marker
 - Fresh-evaluator replay verification after restart
 - Append-only replay attempts with separate historical reconstruction, current admissibility, and append statuses, plus distinct `recorded`/`not-recorded` operation results
 - Integrity verification and deterministic recovery
@@ -79,7 +79,7 @@ knowledge-engine -> knowledge-schema
 8. Compare any caller-supplied evaluation package with the evaluator-produced canonical package.
 9. Reject prohibited, hidden, executable, credential-bearing, endpoint-bearing, or low-level capabilities.
 10. For an exact owned retry, reconstruct and verify the same request and package through the resolver and evaluator exactly once, then return the original without append or head advancement.
-11. For a first registration, claim permanent global ownership of the idempotency key, registration request ID, transaction ID, and Decision ID against the verified expected ledger head.
+11. For a first registration, claim permanent global ownership of the idempotency key, caller-requested ownership ID, registration request ID, transaction ID, Decision ID, and caller-requested registration semantic-event, registration audit-entry, and registration marker IDs against the verified expected ledger head.
 12. Commit one complete immutable readiness evaluation transaction atomically.
 13. Advance the audit chain and authoritative commit marker.
 14. Stop before credential resolution or transport.
@@ -110,14 +110,14 @@ Milestone 15 specifies:
 - canonical readiness evaluation package;
 - committed readiness evaluation transaction;
 - idempotency ownership record;
-- audit entry, ledger head, and commit marker;
+- genesis complete-history commitment, genesis head and marker, audit entry, exact event ledger head, and event commit marker;
 - replay attempt and replay verification result;
 - integrity and recovery results;
 - derived index snapshot.
 
 ## Authoritative and Derived State
 
-Authoritative state consists only of marker-bounded, schema-valid, fingerprint-valid immutable registration transactions, idempotency ownership, audit entries, replay attempts, immutable event-local marker archives, and the fixed current marker. Each archived marker is byte-identical to the canonical marker value that activated its event; only atomic installation at the fixed current-marker location activates visibility (`M15-TXN-001`, `M15-TXN-002`).
+Authoritative state begins with one explicit canonical genesis complete-history commitment, zero-event ledger head, immutable genesis marker archive, and byte-identical fixed current marker (`M15-GENESIS-001`). Non-empty authority consists only of marker-bounded, schema-valid, fingerprint-valid immutable registration transactions, idempotency ownership, audit entries, replay attempts, immutable event-local marker archives, and that fixed current marker. Each archived marker is byte-identical to the canonical marker value that activated genesis or its event; only atomic installation at the fixed current-marker location activates visibility (`M15-TXN-001`, `M15-TXN-002`).
 
 Derived indexes may accelerate lookup by transaction ID, Decision ID, idempotency key, Adapter ID, Invocation ID, or replay sequence. They are non-authoritative, must verify against complete replay, and may be discarded and rebuilt. Corrupt derived state must never invalidate otherwise valid authoritative history or silently replace it.
 
@@ -131,6 +131,7 @@ Derived indexes may accelerate lookup by transaction ID, Decision ID, idempotenc
 - Every record binds its semantic category into its fingerprint domain.
 - A transaction or replay-attempt fingerprint covers its semantic payload and excludes outer commit coordinates.
 - All commitment tags, named unsigned schemas, included and excluded fields, authority classes, and the acyclic computation order are defined solely by the normative table in `FounderOS_Durable_Readiness_Evaluation_Transaction_Contract_v1.0.md` (`M15-COMMIT-001`).
+- The exact ledger-head field set is version/generation, registration/replay/total counts, last sequence, latest audit-entry ID/fingerprint, latest semantic-event ID/fingerprint, latest subject transaction ID/fingerprint, complete-history fingerprint, and head fingerprint. Genesis makes all latest coordinates null; event heads make them non-null. Marker embedding, `readHead()`, and derived `HEAD` use byte-identical head bytes.
 - The canonical marker is archived immutably per event, and its byte-identical fixed current-marker copy embeds the resulting ledger head. Only atomic fixed-marker installation is the visibility boundary. Separate `HEAD` and index files are derived only.
 
 ## Required Invariants
@@ -143,7 +144,7 @@ Derived indexes may accelerate lookup by transaction ID, Decision ID, idempotenc
 6. Only canonical Milestone 14 statuses may be stored; no live-ready equivalent exists.
 7. Credential material is never accepted or persisted; only validated IDs and fingerprints are recorded.
 8. Original transactions are immutable; replay attempts are separate append-only evidence.
-9. First valid ownership of the idempotency key, registration request ID, transaction ID, and Decision ID is permanent and globally unambiguous.
+9. First valid ownership of the registration idempotency key, ownership ID, registration request ID, transaction ID, Decision ID, registration semantic-event ID, registration audit-entry ID, and registration marker ID is permanent and globally unambiguous; replay idempotency-key and five replay-ID ownership is equally permanent.
 10. Reuse outside the complete exact-retry tuple fails closed, including cross-key or cross-request reuse of otherwise identical bytes.
 11. Coherently re-signed substitutions fail when any authority binding differs.
 12. Ambiguous, partial, reordered, missing, or corrupt authoritative state is never silently repaired.

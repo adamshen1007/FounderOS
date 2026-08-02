@@ -2,7 +2,9 @@
 
 ## Status
 
-**Future implementation artifact — do not execute during the documentation-only phase**
+**Specified — not implemented**
+
+This is a future implementation artifact. Do not execute it during the documentation-only phase.
 
 ## Role and Mission
 
@@ -83,7 +85,7 @@ Implement strict, versioned schemas and inferred TypeScript types for:
 - canonical readiness evaluation package;
 - committed readiness evaluation transaction;
 - permanent idempotency ownership;
-- audit entry, ledger head, and commit marker;
+- genesis complete-history commitment, genesis ledger head and marker, audit entry, exact event ledger head, and event commit marker;
 - replay request, attempt, comparison, and verification result;
 - integrity and recovery results;
 - derived index snapshot and status;
@@ -97,20 +99,21 @@ Implement one governed registration facade that:
 
 1. captures exact plain own data before authority access;
 2. rejects prohibited and executable material;
-3. recovers and verifies the readiness ledger;
-4. recovers and verifies the supplied Milestone 12 Delivery Ledger;
-5. reuses the sole Milestone 13 Delivery/Invocation authority resolver;
-6. reconstructs the evaluator configuration projection;
-7. evaluates through an approved configured Milestone 14 evaluator;
-8. verifies the Decision with that same evaluator instance and exact retention evidence;
-9. compares any supplied expected package with the evaluator-produced package;
-10. claims permanent idempotency ownership under expected-head compare-and-swap;
-11. atomically commits the complete registration transaction and audit entry;
-12. stops before credential resolution or transport.
+3. requires caller-requested ownership, registration semantic-event, registration audit-entry, and registration marker IDs and binds them into the request fingerprint;
+4. recovers and verifies the readiness ledger, including explicit genesis authority;
+5. recovers and verifies the supplied Milestone 12 Delivery Ledger;
+6. reuses the sole Milestone 13 Delivery/Invocation authority resolver;
+7. reconstructs the evaluator configuration projection;
+8. evaluates through an approved configured Milestone 14 evaluator;
+9. verifies the Decision with that same evaluator instance and exact retention evidence;
+10. compares any supplied expected package with the evaluator-produced package;
+11. claims permanent global ownership of all `M15-IDEM-001` coordinates under expected-head compare-and-swap;
+12. atomically commits the complete registration transaction and audit entry;
+13. stops before credential resolution or transport.
 
 Do not accept a prebuilt package as authority.
 
-An identical retry is not lookup-only. It must execute steps 1–9 exactly once, reconstruct the request and package, prove exact equality with the permanent ownership and original transaction, and then return `idempotent-original-returned` without append, ownership refresh, head advancement, or Authorization extension.
+An identical retry is not lookup-only. It must execute the capture-through-package-comparison sequence exactly once, reconstruct the request and package, and prove exact equality across the key, every ownership/request/transaction/Decision/registration-event coordinate, the permanent ownership record, and the original transaction. It then returns `idempotent-original-returned` without append, ownership refresh, head advancement, or Authorization extension.
 
 ### Replay Orchestration
 
@@ -148,6 +151,7 @@ Implement one Git-ignored local adapter with:
 - expected-head compare-and-swap;
 - canonical JSON and domain-separated SHA-256;
 - immutable deterministic event locations;
+- safe explicit creation of one deterministic genesis history/head/marker authority, with reserved marker ID `m15-genesis`, generation `0`, and atomic fixed-marker installation as the initialization visibility boundary;
 - temporary staging, file synchronization, atomic same-filesystem rename, and directory synchronization where supported;
 - immutable event-local marker archives plus a separately replaced, byte-identical authoritative fixed current marker;
 - restart recovery and crash-orphan classification;
@@ -162,17 +166,20 @@ Document and test its cooperative local limitations. Do not claim distributed or
 
 Reuse FounderOS canonicalization patterns where compatible. Canonical input must be finite, plain, acyclic, and composed only of enumerable own data properties. Reject accessors before invoking them, symbols, non-enumerable fields, inherited capabilities, custom prototypes, aliases that undermine capture, functions, and unsupported built-ins.
 
-Use lowercase SHA-256 with existing FounderOS canonical JSON. Implement exactly the artifact names, domain tags, unsigned schemas, included/excluded fields, dependency order, fingerprint fields, and authority classes in the sole normative `M15-COMMIT-001` table in the Durable Readiness Evaluation Transaction Contract. Do not create a variant table or a competing serializer/hash. Integrity and recovery results remain strict non-fingerprinted ephemeral outputs.
+Use lowercase SHA-256 with existing FounderOS canonical JSON. Implement exactly the artifact names, domain tags, unsigned schemas, included/excluded fields, dependency order, fingerprint fields, and authority classes in the sole normative `M15-COMMIT-001` table in the Durable Readiness Evaluation Transaction Contract. Do not create a variant table or a competing serializer/hash. Implement the sole exhaustive Evidence Durability Inventory from the privacy policy: every application/adapter operation-result envelope and transient status value, including registration, replay, append, integrity, recovery, derived-state, initialization/open, and failed-mutation results, plus validation reports, remains non-fingerprinted and non-persisted unless a separately reviewed specification outside readiness-ledger authority explicitly defines a durable validation report.
+
+Implement the exact ledger-head keys without aliases: `headContractVersion`, `headGeneration`, three counts, `lastCommittedLedgerSequence`, latest audit-entry ID/fingerprint, latest semantic-event ID/fingerprint, latest subject transaction ID/fingerprint, `completeHistoryFingerprint`, and `ledgerHeadFingerprint`. Genesis makes all latest coordinates null; registration and replay make all non-null. Marker-embedded head bytes, `readHead()`, and rebuilt derived `HEAD` bytes must be identical. Reject `last committed event` or other variant fields.
 
 The canonical marker is computed last with the resulting head embedded. Preserve one immutable event-local marker archive, then atomically install byte-identical bytes at the fixed current-marker location. Only that fixed-marker replacement is the authoritative visibility boundary (`M15-TXN-001`, `M15-TXN-002`); the archive preserves marker history and global identity but never activates an event by itself. A separate `HEAD` projection and indexes are derived and rebuildable. An unactivated component is never committed; a committed marker is never rolled back because derived publication failed.
 
 ## Idempotency Requirements
 
 - First valid registration permanently owns the key.
+- First valid registration globally owns the caller-requested ownership, registration semantic-event, registration audit-entry, and registration marker IDs together with the registration request ID, transaction ID, and evaluator-produced Decision ID.
 - Identical registration retry returns the exact original without append.
 - Conflicting key reuse fails across restart.
-- Conflicting transaction, request, Decision, or replay ID reuse fails.
-- Original request, transaction, and Decision identities are globally owned even across different keys or requests, with the stable conflict reasons specified in the registration contract.
+- Conflicting ownership, transaction, request, Decision, registration semantic-event, registration audit-entry, registration marker, replay-key, or replay-ID reuse fails with the stable coordinate-specific reason.
+- Every `M15-IDEM-001` identity is globally owned even across different keys or requests, with the stable conflict reasons specified in the registration contract.
 - Replay request, attempt, semantic-event, audit-entry, and marker identities are caller-bound in the replay request and globally owned. Exact retry is allowed only for the full owned tuple and complete request fingerprint, and its original expected-head coordinate need not equal the later current head (`M15-REPLAY-003`).
 - Derived-index loss never frees ownership.
 - Expiration never frees ownership.
@@ -185,9 +192,10 @@ Verify:
 - exact marker-bounded event set;
 - sequence and audit-chain continuity;
 - transaction, request, package, ownership, replay, and marker fingerprints;
+- canonical genesis history, head, marker, archive/current-marker byte equality, and initialization classification;
 - exact Decision, gate order, retention evidence, evaluator configuration, and Delivery/Invocation bindings;
 - replay attempt references and classifications;
-- counts, last event, head, and complete-history coordinates;
+- counts, sequence, latest audit-entry, latest semantic-event, latest subject-transaction, head, and complete-history coordinates;
 - privacy and no-execution invariants.
 
 Do not silently repair, truncate, skip, resign, or overwrite authoritative corruption.
@@ -212,6 +220,8 @@ Reject or exclude:
 
 Persist Credential Reference ID and fingerprint only.
 
+Persist only the authoritative and derived members enumerated by the sole Evidence Durability Inventory. Every application/adapter operation-result envelope and transient status value, plus validation reports, is ephemeral public or validation output: do not write it into authoritative records, staging envelopes intended for installation, markers, derived state, logs, traces, metrics, or observability artifacts, and do not fingerprint it. An authoritative or derived record returned inside an ephemeral result retains its inventory class, but the envelope never permits a second durable copy.
+
 Production import closure must contain no HTTP, DNS, TLS, socket, proxy, provider SDK, credential resolver, environment-secret, Agent, Hermes, MCP, streaming, or tools/functions capability.
 
 No contract or result may express `live-ready`, production enablement, or equivalent authority.
@@ -221,12 +231,23 @@ No contract or result may express `live-ready`, production enablement, or equiva
 Implement unit, integration, restart, adapter, corruption, concurrency, and facade tests covering at least:
 
 - successful first registration;
+- canonical genesis bytes and fingerprints across clean processes;
+- safe first create and every genesis crash point before staging, during staging, after genesis archive creation, and after fixed-marker installation;
+- uninitialized, initialized-empty, incomplete-genesis, and corrupt-genesis classification;
+- independently recomputed genesis history, head, marker, archive/current equality, and first-registration advance from genesis;
+- exact genesis, first-registration, and replay head fixtures; unknown/missing head-key rejection; substituted latest-coordinate rejection; and byte equality among marker, `readHead()`, and rebuilt `HEAD`;
 - identical idempotent registration replay;
 - conflicting idempotency reuse;
 - duplicate Decision ID;
 - duplicate transaction ID;
 - duplicate registration request ID under a different key;
 - duplicate Decision ID under a different request;
+- duplicate ownership ID;
+- duplicate registration semantic-event ID;
+- duplicate registration audit-entry ID;
+- duplicate registration marker ID;
+- the same original-registration IDs under another key or request, the same key with changed requested IDs, and exact retry with every original coordinate;
+- replay idempotency-key conflict and exact replay retry;
 - stale fingerprint;
 - coherent re-sign substitution;
 - altered gate order;
@@ -259,6 +280,7 @@ Implement unit, integration, restart, adapter, corruption, concurrency, and faca
 - raw credential and credential-like material;
 - accessor-backed, hidden, symbolic, inherited, custom-prototype, aliased, and executable input;
 - stored-data privacy inspection;
+- stored-data and log inspection proving no application/adapter operation-result envelope, transient status value, or validation report persists, while schema-backed public results remain canonical/redacted/non-fingerprinted and validation reports remain redacted, non-fingerprinted, and ephemeral;
 - no-network import and runtime proof;
 - no-credential import and runtime proof;
 - deterministic repeated bytes and stable ordering;
@@ -269,7 +291,7 @@ Implement unit, integration, restart, adapter, corruption, concurrency, and faca
 - every future implementation-preflight rejection case;
 - ADR, status, version, index-inventory, and relative-link documentation lint;
 - static package dependency-direction proof and no-execution facade/status proof;
-- complete Milestone 04–14 regression preservation.
+- complete Milestone 04–14 regression preservation with no predecessor-test loss: before counting any Milestone 15 tests, at least the pinned baseline of 42 test files and 1,038 tests must execute and pass.
 
 Use every `M15-SC-*` scenario in the Acceptance Criteria as the minimum executable scenario catalog. Implement the exact normative-clause parser, source-section ownership grammar, and traceability rules specified there. Validation fails on an unmapped normative clause or source file, a missing requirement/acceptance/scenario target, a requirement without a scenario, a scenario referencing a missing requirement, a non-contiguous scenario catalog, or a duplicate requirement/acceptance/scenario ID.
 
@@ -331,7 +353,7 @@ pnpm test
 git diff --check
 ```
 
-All gates and Milestone 04–14 regressions must pass.
+All gates, all 72 scenarios `M15-SC-001` through `M15-SC-072`, and all Milestone 04–14 regressions must pass. The predecessor suite must be reported separately and may not fall below 42 test files and 1,038 passing tests before any Milestone 15 tests are counted; any lower count fails verification unless a separate reviewed authorization explicitly changes the predecessor baseline.
 
 ## Final Implementation Report
 

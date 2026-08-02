@@ -22,6 +22,8 @@
 - [ ] Canonical JSON is finite, deterministic, acyclic, and byte stable.
 - [ ] Domain-separated SHA-256 fingerprints independently recompute.
 - [ ] Every fingerprint matches the exact named unsigned schema, fields, exclusions, domain tag, and order in the sole `M15-COMMIT-001` table; integrity and recovery results remain non-fingerprinted ephemeral outputs.
+- [ ] Clean processes independently derive byte-identical genesis complete-history, head, marker, and fingerprint bytes without time, randomness, process, or filesystem input.
+- [ ] Genesis, registration, and replay heads use the exact latest audit-entry, semantic-event, and subject-transaction ID/fingerprint fields and reject every missing, extra, aliased, or category-invalid key.
 - [ ] Cross-record authority bindings are semantically verified, not accepted from coherent local re-signing.
 
 ## Registration Verification
@@ -33,14 +35,15 @@
 - [ ] Caller package substitution, omission, addition, and reordering fail.
 - [ ] Authorization precedes Credential Reference and Transport planning.
 - [ ] Complete ownership, transaction, and audit evidence commits atomically.
+- [ ] The registration request explicitly supplies ownership, registration semantic-event, registration audit-entry, and registration marker IDs and binds them into its fingerprint and exact-retry tuple.
 - [ ] Registration stops before credential resolution and transport.
 
 ## Idempotency and Concurrency Verification
 
-- [ ] First registration permanently owns its key.
+- [ ] First registration permanently owns its key, ownership ID, request ID, transaction ID, Decision ID, registration semantic-event ID, registration audit-entry ID, and registration marker ID.
 - [ ] Identical retry returns the exact original transaction without append.
 - [ ] Identical retry performs the governed resolver/evaluator/same-instance verification sequence exactly once and returns `idempotent-original-returned`.
-- [ ] Conflicting key, transaction ID, request ID, or Decision ID reuse fails.
+- [ ] Conflicting reuse of any original-registration ownership coordinate fails with its stable coordinate-specific reason.
 - [ ] Ownership survives process restart and derived-index loss.
 - [ ] Stale expected head fails without mutation.
 - [ ] Concurrent cooperative writers produce at most one valid commit.
@@ -59,12 +62,17 @@
 - [ ] Public results distinguish historical, current-admissibility, append, and `recorded`/`not-recorded` status; every not-recorded result has exactly one stable operation reason and no attempt.
 - [ ] Replay append status exists only in the ephemeral operation result, never in the pre-commit replay-attempt fingerprint domain.
 - [ ] Exact replay retry binds all five replay IDs, verifies permanent history, tolerates later head advancement only through its stored expected-head exception, and returns `idempotent-replay-returned` without append.
+- [ ] Replay idempotency-key ownership is global and permanent; changed bytes under the same key return `replay-idempotency-key-conflict`.
 - [ ] Original transaction bytes remain unchanged after every replay attempt.
 - [ ] Replay attempts order by ledger sequence and remain append-only.
 
 ## Integrity and Recovery Verification
 
-- [ ] Genesis and non-empty commit-head markers verify.
+- [ ] Genesis complete-history, zero-event head, deterministic marker, immutable archive, and fixed current-marker copy independently verify.
+- [ ] Safe open/create distinguishes uninitialized, initialized-empty, incomplete-genesis, corrupt-genesis, and non-empty initialized roots without treating partial state as authority.
+- [ ] Genesis crashes before staging, during staging, after archive creation, and after fixed-marker installation yield only the specified complete or non-authoritative states.
+- [ ] The first registration advances exactly from the verified genesis head to generation and sequence `1`.
+- [ ] Marker-embedded head, public `readHead()`, and rebuilt derived `HEAD` bytes are identical for genesis, registration, and replay.
 - [ ] Event, audit, and marker sequence/count/head coordinates agree.
 - [ ] Missing, reordered, duplicated, corrupt, partial, or contradictory authoritative evidence fails.
 - [ ] Altered gate order, retention evidence, configuration, Delivery, Invocation, or Adapter authority fails.
@@ -106,10 +114,13 @@
 - [ ] A durable transaction cannot satisfy a provider-execution authorization boundary by itself.
 - [ ] Production import closure contains no HTTP, DNS, TLS, socket, proxy, provider SDK, environment-secret, credential resolver, Agent, Hermes, MCP, streaming, or tools/functions path.
 - [ ] No outbound network or credential access occurs in tests or runtime probes.
+- [ ] The sole Evidence Durability Inventory is exhaustive: only its authoritative and derived members may persist.
+- [ ] No authoritative record, staging-to-install envelope, derived record, log, trace, metric, or observability artifact contains an application/adapter operation-result envelope, transient status value, or validation report.
+- [ ] Every public application/adapter operation-result envelope and transient status value is strict canonical redacted ephemeral output; validation reports are redacted ephemeral outputs; none is fingerprinted or persisted except through an explicitly and separately reviewed outside-ledger validation-report specification.
 
 ## Regression Verification
 
-- [ ] All Milestone 04–14 tests remain green.
+- [ ] All Milestone 04–14 tests remain green with no predecessor-test loss: at least 42 test files and 1,038 tests execute and pass before any Milestone 15 test is counted.
 - [ ] New Milestone 15 unit, integration, restart, corruption, concurrency, path-safety, privacy, and no-execution tests pass.
 - [ ] Existing package boundaries and public facades remain compatible.
 
@@ -119,7 +130,7 @@
 - [ ] Every scenario references only existing requirements.
 - [ ] Requirement, acceptance, and scenario IDs are unique.
 - [ ] Deterministic documentation/fixture lint parses every normative clause and source file/section using the acceptance-criteria ownership grammar and fails on any unmapped clause/file, missing target, non-contiguous catalog, or duplicate ID.
-- [ ] All scenarios `M15-SC-001` through `M15-SC-053` execute, including all Milestone 04–14 regressions.
+- [ ] All scenarios `M15-SC-001` through `M15-SC-072` execute, and the separately counted Milestone 04–14 predecessor suite preserves at least 42 files and 1,038 passing tests.
 
 ## Required Commands
 

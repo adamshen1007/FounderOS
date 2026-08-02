@@ -110,6 +110,8 @@ Replay append status is exactly `appended` or `not-appended` and exists only in 
 - `not-recorded`: contains no replay attempt, has `replayAppendStatus = not-appended`, and contains exactly one stable operation reason.
 - `idempotent-replay-returned`: contains the exact previously committed replay attempt, has `replayAppendStatus = not-appended`, performs no authoritative mutation, and is available only through the exact-retry rule in `M15-REPLAY-003`.
 
+The complete submission-result envelope and append status are ephemeral, non-authoritative, non-fingerprinted, and non-persisted under the sole Evidence Durability Inventory in the privacy policy. A `recorded` or `idempotent-replay-returned` result may return the one authoritative attempt already governed by its marker, but the result envelope never creates or permits a second durable copy.
+
 Stable `not-recorded` reasons include:
 
 - `invalid-replay-input`;
@@ -121,6 +123,7 @@ Stable `not-recorded` reasons include:
 - `operator-cleanup-required`;
 - `append-conflict`;
 - `replay-identity-conflict`;
+- `replay-idempotency-key-conflict`;
 - `replay-request-id-conflict`;
 - `replay-attempt-id-conflict`;
 - `replay-semantic-event-id-conflict`;
@@ -161,7 +164,7 @@ Missing members, reordered gates, altered retention evidence, coherent re-signin
 
 - Replay attempts are immutable and append-only.
 - Unsafe, credential-bearing, accessor-backed, or otherwise prohibited public input is rejected before evaluation or append and does not become replay evidence.
-- The first marker-committed replay submission permanently owns its replay idempotency key, replay request ID/fingerprint, replay attempt ID, replay semantic event ID, replay audit entry ID, and replay marker ID (`M15-IDEM-002`).
+- The first marker-committed replay submission globally and permanently owns its replay idempotency key, replay request ID/fingerprint, replay attempt ID, replay semantic event ID, replay audit entry ID, and replay marker ID (`M15-IDEM-002`). The same key with different canonical request bytes returns `replay-idempotency-key-conflict`; the same request under a different key is not an exact retry and returns the coordinate-specific request conflict.
 - Every attempt references one existing original transaction.
 - Attempt ordering uses ledger sequence, not timestamps.
 - An exact replay-submission retry (`M15-REPLAY-003`) returns the original replay attempt only when the replay idempotency key; replay request, attempt, semantic-event, audit-entry, and marker IDs; and complete replay-request fingerprint all match permanent history. It first verifies the current ledger and original attempt/activating marker. Its stored expected-head coordinate must match the owned request but is exempt from equality with the later current head. It performs no historical reconstruction, current-admissibility reassessment, append, ownership refresh, or head advancement. Conflicting reuse returns the coordinate-specific stable conflict reason listed above; a content or append ownership collision not reducible to one ID returns `replay-identity-conflict` or `append-conflict` respectively.

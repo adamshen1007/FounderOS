@@ -19,9 +19,9 @@ The shared package will own strict, versioned, storage-independent schemas and i
 - Delivery and Invocation identity projections;
 - canonical evaluation packages;
 - committed transactions and idempotency ownership;
-- audit entries, ledger heads, and commit markers;
-- replay attempts and verification results;
-- integrity, recovery, and derived-index results.
+- genesis commitments, audit entries, exact ledger heads, and commit markers;
+- replay attempts, durable historical-comparison/current-admissibility evidence, and ephemeral operation-result schemas;
+- ephemeral integrity/recovery result schemas and non-authoritative derived-index schemas.
 
 It must not import `knowledge-engine`, filesystem APIs, provider SDKs, credential APIs, or network APIs.
 
@@ -41,6 +41,8 @@ The service package will own:
 - derived-index verification and rebuilding.
 
 It must not expose low-level record insertion, ledger-head mutation, commit-marker construction, test-only corruption seams, credential resolution, or transport.
+
+Durability classification is governed solely by the Evidence Durability Inventory in the privacy policy. Defining a strict shared result schema does not make its values durable: all application/adapter operation-result envelopes and transient status metadata, including registration, replay, integrity, recovery, derived-state, initialization/open, and failed-mutation results, plus validation reports, remain non-fingerprinted and non-persisted. An embedded authoritative or derived record retains its inventory class without making the surrounding result envelope durable.
 
 ## Dependency Direction
 
@@ -112,7 +114,7 @@ Names may be refined during implementation, but authority separation must remain
 
 The registration facade accepts only:
 
-- one strict registration request;
+- one strict registration request containing caller-requested ownership, registration semantic-event, registration audit-entry, and registration marker IDs in addition to the request, transaction, and idempotency identities;
 - a governed Milestone 12 Delivery Ledger interface;
 - one approved configured Milestone 14 evaluator;
 - the governed readiness-ledger port;
@@ -144,13 +146,16 @@ The valid combined result `matched` plus `authorization-expired` proves historic
 
 ## Persistence Boundary
 
-Authoritative persistence contains immutable registration and replay components plus one immutable archived commit-marker value per event. The same canonical marker bytes and `commitMarkerFingerprint` are installed at the fixed current-marker location. Only successful atomic replacement of that fixed current marker activates the marker-bounded prefix and creates visibility (`M15-TXN-001`, `M15-TXN-002`). The archived copy preserves each globally unique marker ID for permanent integrity and ownership checks; it is uncommitted evidence until its byte-identical fixed current-marker copy is installed.
+Authoritative persistence begins with the explicit canonical genesis complete-history commitment, zero-event head, immutable genesis marker archive, and byte-identical fixed current marker (`M15-GENESIS-001`). Genesis uses reserved deterministic marker ID `m15-genesis`, generation `0`, zero counts/sequence, and null latest event coordinates. Atomic fixed-marker installation is the empty-ledger visibility boundary.
 
-Any separately stored `HEAD` pointer and all derived indexes are outside commit authority. They may be missing or corrupt and can be rebuilt from verified marker-bounded history without rolling back a committed event.
+Non-empty persistence contains immutable registration and replay components plus one immutable archived commit-marker value per event. The same canonical marker bytes and `commitMarkerFingerprint` are installed at the fixed current-marker location. Only successful atomic replacement of that fixed current marker activates the marker-bounded prefix and creates visibility (`M15-TXN-001`, `M15-TXN-002`). The archived copy preserves each globally unique marker ID for permanent integrity and ownership checks; it is uncommitted evidence until its byte-identical fixed current-marker copy is installed.
+
+The exact ledger-head schema is the sole field set in `M15-COMMIT-001`: version/generation, three counts, sequence, latest audit-entry ID/fingerprint, latest semantic-event ID/fingerprint, latest subject transaction ID/fingerprint, complete-history fingerprint, and head fingerprint. The marker-embedded head and public `readHead()` bytes are authoritative; any separately stored `HEAD` projection must be byte-identical but remains outside commit authority. Derived state may be missing or corrupt and can be rebuilt from verified marker-bounded history without rolling back a committed event.
 
 ## Transaction and Audit Ordering
 
 - Every committed event has a unique monotonically increasing ledger sequence.
+- Genesis has generation and sequence `0`; the first registration advances exactly from the verified genesis head to generation and sequence `1`.
 - Registration transactions and replay attempts share one audit sequence.
 - The sole normative commitment-domain table and acyclic order are in `FounderOS_Durable_Readiness_Evaluation_Transaction_Contract_v1.0.md` (`M15-COMMIT-001`).
 - Audit entries bind the previous ledger head and semantic event; complete history and the resulting head are computed afterward; the commit marker is computed last.

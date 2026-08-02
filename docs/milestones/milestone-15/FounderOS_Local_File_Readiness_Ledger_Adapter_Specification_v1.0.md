@@ -25,6 +25,7 @@ provider-readiness-ledger/
 ├── metadata.json
 ├── commit-head.json
 ├── events/
+│   ├── genesis/            # immutable canonical genesis marker archive
 │   ├── registrations/      # immutable event components plus archived marker
 │   └── replay-attempts/    # immutable event components plus archived marker
 ├── staging/
@@ -34,6 +35,8 @@ provider-readiness-ledger/
 ```
 
 Exact names may change during implementation, but authoritative, staging, quarantine, lock, and derived responsibilities must remain separated.
+
+For the version `1.0` genesis contract, the logical immutable archive location is exactly `events/genesis/commit-marker.json`, and the fixed current-marker location is exactly `commit-head.json`. Implementations may relocate the whole configured runtime root but may not vary these relative logical coordinates without a new contract version.
 
 ## Safe Open
 
@@ -48,7 +51,35 @@ Before mutation, the adapter must:
 - reject accessor-backed or custom-prototype configuration before path access;
 - normalize public errors without disclosing physical paths.
 
+Read-only open distinguishes `uninitialized`, `initialized-empty`, non-empty initialized, incomplete genesis initialization, and corruption. It never manufactures genesis in a read path. Explicit create is the only operation that may initialize an uninitialized root, and it must acquire the cooperative writer lock before writing genesis staging material.
+
 Node.js does not provide portable descriptor-relative traversal equivalent to all `openat(2)` protections. The adapter must document and test its best-effort no-follow leaf access and directory-identity rechecks without claiming hostile privileged-filesystem safety.
+
+## Genesis Initialization Protocol (`M15-GENESIS-001`)
+
+Create performs this exact sequence under the cooperative writer lock:
+
+1. repeat safe-open confinement and prove no active or installed FounderOS ledger component exists;
+2. construct and independently recompute the exact genesis complete-history commitment, genesis head, and genesis marker from `M15-COMMIT-001`;
+3. use reserved `markerId = "m15-genesis"` and `markerGeneration = 0` without time, randomness, process, or filesystem input;
+4. write and synchronize the complete genesis archive plus a byte-identical temporary fixed-marker copy in staging;
+5. atomically install the immutable genesis archive at the deterministic genesis location;
+6. atomically replace `commit-head.json` with the temporary fixed-marker copy; this is the sole genesis visibility boundary;
+7. synchronize the marker directory where supported;
+8. verify archive/current-marker byte equality and independently recompute genesis history, head, marker, and fingerprints;
+9. optionally publish the byte-identical derived `HEAD` projection after authority verifies;
+10. release the writer lock.
+
+Fault behavior is deterministic:
+
+| Genesis interruption | Visible authority | Classification | Permitted recovery |
+| --- | --- | --- | --- |
+| before staging | none | uninitialized | a later explicit create may start |
+| during staging | none | incomplete genesis staging | read-only open reports failure; a later locked create may discard only verified staging orphans and restart |
+| after archived genesis installation but before fixed-marker installation | none | incomplete genesis installation | read-only open reports failure; a later locked create may install only byte-identical independently recomputed canonical genesis or fail closed |
+| after fixed-marker installation | complete genesis only if archive/current bytes and all commitments verify | initialized empty or corrupt genesis | return the exact genesis head, or fail closed without repair |
+
+An archived genesis marker alone never becomes authority. A fixed genesis marker without its byte-identical archive is corruption. Event data, generation `1`, or a non-genesis marker cannot coexist with an uninitialized or initialized-empty classification. Concurrent create operations produce exactly one complete genesis state; the loser observes the verified initialized ledger and performs no mutation.
 
 ## Cooperative Writer Lock
 
@@ -68,7 +99,7 @@ For registration or replay append:
 1. Validate and capture all public inputs before filesystem mutation.
 2. Acquire the cooperative writer lock.
 3. Revalidate physical directory identity and safe entries.
-4. Recover and verify marker-bounded authoritative history.
+4. Recover and verify marker-bounded authoritative history, including the complete genesis commitment.
 5. Compare the exact expected-head fingerprint.
 6. Revalidate idempotency and identity conflicts under the lock.
 7. Construct one complete immutable event envelope and audit entry.
@@ -91,7 +122,7 @@ Unsupported directory synchronization errors may be suppressed only when explici
 
 ## Expected-Head Compare-and-Swap
 
-Every mutation supplies the head observed during preflight. A changed generation, event count, sequence, latest audit-entry fingerprint, complete-history fingerprint, or ledger-head fingerprint rejects the write without advancing the marker.
+Every mutation supplies the head observed during preflight. A changed generation, any count, sequence, latest audit-entry ID/fingerprint, latest semantic-event ID/fingerprint, latest subject transaction ID/fingerprint, complete-history fingerprint, or ledger-head fingerprint rejects the write without advancing the marker.
 
 No force, overwrite, implicit merge, or last-writer-wins behavior is permitted.
 
