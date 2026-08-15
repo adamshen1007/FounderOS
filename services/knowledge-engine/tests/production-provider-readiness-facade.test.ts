@@ -11,6 +11,7 @@ import type {
 import {
   createProductionProviderReadinessEvaluator,
   createProductionProviderReadinessEvaluatorWithObservabilityRetentionFailureForTest,
+  deriveApprovedProductionProviderReadinessEvaluatorConfiguration,
   evaluateProductionProviderReadinessWithDecisionCandidateForTest,
   getProductionProviderReadinessObservabilityAppendCountForTest,
   getProductionProviderReadinessRetentionIssuanceStateForTest,
@@ -2154,6 +2155,50 @@ describe("Milestone 14 sole production-provider readiness facade", () => {
       ).toEqual({ status: "valid", reason: null });
     }
     expect(getProductionProviderReadinessObservabilityAppendCountForTest(evaluator)).toBe(6);
+  });
+
+  it("derives immutable configuration only for the exact approved evaluator instance", () => {
+    const expected = deriveApprovedProductionProviderReadinessEvaluatorConfiguration(
+      configuredEvaluator,
+      {
+        adapterDescriptor: baseInput.adapterDescriptor,
+        transportPolicy: baseInput.transportPolicy,
+      },
+    );
+    expect(expected).toEqual({
+      configurationBindingVersion: "1.0",
+      adapterId: baseInput.adapterDescriptor.adapterId,
+      adapterFingerprint: baseInput.adapterDescriptor.adapterFingerprint,
+      providerFamilyReference: baseInput.adapterDescriptor.providerFamilyReference,
+      transportPolicyId: baseInput.transportPolicy.transportPolicyId,
+      transportPolicyFingerprint: baseInput.transportPolicy.policyFingerprint,
+      transportPolicyVersion: baseInput.adapterDescriptor.transportPolicyVersion,
+      observabilityPolicyVersion: baseInput.adapterDescriptor.observabilityPolicyVersion,
+      readinessEvaluatorContractVersion: "1.0",
+    });
+    expect(Object.isFrozen(expected)).toBe(true);
+    for (const candidate of [
+      {
+        evaluate: configuredEvaluator.evaluate,
+        verifyDecision: configuredEvaluator.verifyDecision,
+      },
+      Object.create(
+        Object.getPrototypeOf(configuredEvaluator),
+        Object.getOwnPropertyDescriptors(configuredEvaluator),
+      ),
+      new Proxy(configuredEvaluator, {}),
+      Object.freeze({
+        evaluate: configuredEvaluator.evaluate.bind(configuredEvaluator),
+        verifyDecision: configuredEvaluator.verifyDecision.bind(configuredEvaluator),
+      }),
+    ]) {
+      expect(() =>
+        deriveApprovedProductionProviderReadinessEvaluatorConfiguration(candidate, {
+          adapterDescriptor: baseInput.adapterDescriptor,
+          transportPolicy: baseInput.transportPolicy,
+        }),
+      ).toThrow("provenance is invalid");
+    }
   });
 
   it.each([

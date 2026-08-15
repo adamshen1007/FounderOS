@@ -1165,6 +1165,18 @@ export interface ProductionProviderReadinessEvaluator {
   }) => Promise<Readonly<{ status: "valid" | "invalid"; reason: string | null }>>;
 }
 
+export interface ApprovedProductionProviderReadinessEvaluatorConfiguration {
+  readonly configurationBindingVersion: "1.0";
+  readonly adapterId: string;
+  readonly adapterFingerprint: string;
+  readonly providerFamilyReference: string;
+  readonly transportPolicyId: string;
+  readonly transportPolicyFingerprint: string;
+  readonly transportPolicyVersion: "1.0";
+  readonly observabilityPolicyVersion: "1.0";
+  readonly readinessEvaluatorContractVersion: "1.0";
+}
+
 const evaluatorConfigurations = new WeakMap<
   ProductionProviderReadinessEvaluator,
   Readonly<{
@@ -1377,6 +1389,7 @@ async function verifyConfiguredProductionProviderReadinessDecision(
 function createConfiguredProductionProviderReadinessEvaluator(
   transportPolicyAuthority: ProductionProviderTransportPolicyAuthority,
   observabilityRetentionMode: ObservabilityRetentionMode,
+  evaluationMutation: "none" | "omit-health-evidence" = "none",
 ): ProductionProviderReadinessEvaluator {
   const appendAudit: ProviderObservabilityAppendAudit = { appendCount: 0 };
   const retentionIssuanceRegistry = createProviderObservabilityRetentionIssuanceRegistry();
@@ -1392,7 +1405,12 @@ function createConfiguredProductionProviderReadinessEvaluator(
         appendAudit,
       ).then((evaluation) => {
         retentionIssuanceRegistry.issue(evaluation);
-        return evaluation;
+        return evaluationMutation === "omit-health-evidence"
+          ? immutableCopy({
+              ...evaluation,
+              evidence: { ...evaluation.evidence, health: null },
+            })
+          : evaluation;
       });
     },
     verifyDecision(input: {
@@ -1426,6 +1444,46 @@ export function createProductionProviderReadinessEvaluator(config: {
   );
 }
 
+/** Engine-internal provenance/configuration derivation. Intentionally absent from the package facade. */
+export function deriveApprovedProductionProviderReadinessEvaluatorConfiguration(
+  evaluator: ProductionProviderReadinessEvaluator,
+  input: Readonly<{
+    adapterDescriptor: ProductionProviderAdapterDescriptor;
+    transportPolicy: SecureTransportPolicy;
+  }>,
+): ApprovedProductionProviderReadinessEvaluatorConfiguration {
+  const configured = evaluatorConfigurations.get(evaluator);
+  if (configured === undefined || !Object.isFrozen(evaluator)) {
+    throw new TypeError("Production provider readiness evaluator provenance is invalid");
+  }
+  const adapter = ProductionProviderAdapterDescriptorSchema.parse(input.adapterDescriptor);
+  const policy = input.transportPolicy;
+  const expected = configured.transportPolicyAuthority.getExpectedTransportPolicy({
+    schemaVersion: "1.0",
+    adapterId: adapter.adapterId,
+    adapterFingerprint: adapter.adapterFingerprint,
+    providerFamilyReference: adapter.providerFamilyReference,
+    transportPolicyVersion: adapter.transportPolicyVersion,
+  });
+  if (
+    expected === null ||
+    serializeDurableCanonicalJsonValue(expected) !== serializeDurableCanonicalJsonValue(policy)
+  ) {
+    throw new TypeError("Production provider readiness evaluator configuration is invalid");
+  }
+  return immutableCopy({
+    configurationBindingVersion: "1.0",
+    adapterId: adapter.adapterId,
+    adapterFingerprint: adapter.adapterFingerprint,
+    providerFamilyReference: adapter.providerFamilyReference,
+    transportPolicyId: expected.transportPolicyId,
+    transportPolicyFingerprint: expected.policyFingerprint,
+    transportPolicyVersion: adapter.transportPolicyVersion,
+    observabilityPolicyVersion: adapter.observabilityPolicyVersion,
+    readinessEvaluatorContractVersion: "1.0",
+  });
+}
+
 /** Direct-module deterministic failure seam. Intentionally absent from the package facade. */
 export function createProductionProviderReadinessEvaluatorWithObservabilityRetentionFailureForTest(
   transportPolicyAuthority: ProductionProviderTransportPolicyAuthority,
@@ -1437,6 +1495,17 @@ export function createProductionProviderReadinessEvaluatorWithObservabilityReten
   return createConfiguredProductionProviderReadinessEvaluator(
     captureProductionProviderTransportPolicyAuthority(transportPolicyAuthority),
     mode,
+  );
+}
+
+/** Direct-module deterministic valid-package mismatch seam. Intentionally absent from the facade. */
+export function createProductionProviderReadinessEvaluatorWithHistoricalMismatchForTest(
+  transportPolicyAuthority: ProductionProviderTransportPolicyAuthority,
+): ProductionProviderReadinessEvaluator {
+  return createConfiguredProductionProviderReadinessEvaluator(
+    captureProductionProviderTransportPolicyAuthority(transportPolicyAuthority),
+    "normal",
+    "omit-health-evidence",
   );
 }
 
