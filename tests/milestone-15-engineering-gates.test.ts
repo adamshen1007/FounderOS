@@ -402,6 +402,16 @@ function syntheticPredecessorReport(status = "passed") {
 }
 
 describe("Milestone 15 standalone predecessor proof", () => {
+  it("checks out complete Git history for real preflight fixtures in CI", () => {
+    const workflow = readFileSync(
+      resolve(repositoryRoot, ".github", "workflows", "ci.yml"),
+      "utf8",
+    );
+    expect(workflow).toContain(
+      "uses: actions/checkout@v4\n        with:\n          fetch-depth: 0",
+    );
+  });
+
   it("accepts the exact 42-file, 1,038-original-test plus one M14 provenance inventory", () => {
     const baseFiles = Array.from({ length: 42 }, (_, index) => `tests/base-${index}.test.ts`);
     expect(predecessor.validatePredecessorFileInventory(baseFiles, baseFiles)).toEqual(
