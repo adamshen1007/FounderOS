@@ -17,7 +17,9 @@
     "knowledge:migrate": "pnpm --filter @founderos/knowledge-schema build && pnpm --filter @founderos/knowledge-engine build && node services/knowledge-engine/dist/cli/migrate.js --root . --manifest knowledge/migration-manifest.yaml --output migration-report.json",
     "test": "pnpm --recursive --if-present run test && vitest run",
     "test:watch": "vitest",
-    "typecheck": "pnpm --recursive --if-present run typecheck && tsc -p tsconfig.json --noEmit"
+    "typecheck": "pnpm --recursive --if-present run typecheck && tsc -p tsconfig.json --noEmit",
+    "verify:m15-predecessor": "node scripts/verify-milestone-15-predecessor-baseline.mjs",
+    "verify:m15-predecessor-bound": "node scripts/verify-milestone-15-predecessor-bound.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

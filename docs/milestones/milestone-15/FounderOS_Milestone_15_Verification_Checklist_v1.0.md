@@ -60,6 +60,8 @@
 - [ ] Historical `matched` plus current `authorization-expired` records successfully and Authorization is never refreshed.
 - [ ] Current denial, review-required, not-evaluated, invalid-evidence, and authority-mismatch statuses record independently when append is safe.
 - [ ] Public results distinguish historical, current-admissibility, append, and `recorded`/`not-recorded` status; every not-recorded result has exactly one stable operation reason and no attempt.
+- [ ] Registration rejected, registration integrity-failed, and replay not-recorded reasons use their schema-owned version `1.0` closed status-specific enums; every production branch emits only a documented member.
+- [ ] `original-transaction-not-found` is the sole missing-original replay reason; `original-not-found`, typos, case variants, unrelated references, cross-operation reasons, and unknown future values reject.
 - [ ] Replay append status exists only in the ephemeral operation result, never in the pre-commit replay-attempt fingerprint domain.
 - [ ] Exact replay retry binds all five replay IDs, verifies permanent history, tolerates later head advancement only through its stored expected-head exception, and returns `idempotent-replay-returned` without append.
 - [ ] Replay idempotency-key ownership is global and permanent; changed bytes under the same key return `replay-idempotency-key-conflict`.
@@ -131,6 +133,9 @@
 - [ ] Requirement, acceptance, and scenario IDs are unique.
 - [ ] Deterministic documentation/fixture lint parses every normative clause and source file/section using the acceptance-criteria ownership grammar and fails on any unmapped clause/file, missing target, non-contiguous catalog, or duplicate ID.
 - [ ] All scenarios `M15-SC-001` through `M15-SC-072` execute, and the separately counted Milestone 04–14 predecessor suite preserves at least 42 files and 1,038 passing tests.
+- [ ] The runtime scenario registry contains 72 title-specific callable helpers, a complete machine-readable boundary/assertion matrix, zero generic fallback entries, zero hard-coded invocation counts, and exact per-scenario assertion-count contracts.
+- [ ] Harness-owned boundary observation proves that each helper invokes its declared production boundary; mutation tests reject no-op, missing, duplicate, cross-mapped, assertion-removed, manually fabricated boundary-evidence, and fallback-sentinel behaviors.
+- [ ] `M15-SC-013`, `014`, and `015` independently induce configuration, Delivery-authority, and Invocation-authority mismatch through governed replay; `M15-SC-017` calls governed replay for a missing original; `M15-SC-024`, `054`, `058`, `059`, `063`, and `069` exercise the exact derived-state, process, archive, head, ownership, and restart/index-loss behavior named by their catalog titles.
 
 ## Required Commands
 
@@ -140,8 +145,11 @@ pnpm lint
 pnpm build
 pnpm typecheck
 pnpm test
+pnpm verify:m15-predecessor-bound
 git diff --check
 ```
+
+Run `pnpm verify:m15-predecessor-bound` only after the ordinary `pnpm test` command has completed. It invokes `pnpm verify:m15-predecessor` once as the standalone bounded proof of the original 42-file/1,038-test Milestone 04–14 inventory, captures its actual exit and stdout in an ephemeral same-candidate attestation outside repository authority, and then runs only the bound SC-035 post-gate check. Neither predecessor command may be invoked from a Vitest hook or concurrently with the normal test gate.
 
 ## Approval Rule
 

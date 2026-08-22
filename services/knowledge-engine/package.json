@@ -13,12 +13,16 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./readiness-ledger": {
+      "types": "./dist/readiness-ledger.d.ts",
+      "import": "./dist/readiness-ledger.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "migrate": "node dist/cli/migrate.js",
-    "test": "vitest run",
+    "test": "node scripts/run-tests.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
