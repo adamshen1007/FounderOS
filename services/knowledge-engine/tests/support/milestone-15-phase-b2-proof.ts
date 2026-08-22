@@ -683,14 +683,12 @@ export async function proveM15RealGitPreflight(repositoryRoot: string): Promise<
       ].map((key) => [key, contract[key]]),
     );
     const remote = join(fixtureRoot, "origin.git");
-    git(fixtureRoot, [
-      "clone",
-      "--bare",
-      "--single-branch",
-      "--branch",
-      "main",
-      repositoryRoot,
+    git(fixtureRoot, ["init", "--bare", "--initial-branch=main", remote]);
+    git(repositoryRoot, [
+      "push",
+      "--quiet",
       remote,
+      `${contract.authorizedDocumentationMergeSha!}:refs/heads/main`,
     ]);
     const createRepository = (name: string): string => {
       const path = join(fixtureRoot, name);

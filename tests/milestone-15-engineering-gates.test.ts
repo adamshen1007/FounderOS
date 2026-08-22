@@ -6,6 +6,7 @@ import {
   existsSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -410,6 +411,39 @@ describe("Milestone 15 standalone predecessor proof", () => {
     expect(workflow).toContain(
       "uses: actions/checkout@v4\n        with:\n          fetch-depth: 0",
     );
+  });
+
+  it("builds real preflight fixtures without a local main branch", async () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "founderos-m15-ci-checkout-"));
+    const canonicalFixtureRoot = realpathSync(fixtureRoot);
+    try {
+      execFileSync("git", [
+        "clone",
+        "--shared",
+        "--quiet",
+        "--no-checkout",
+        repositoryRoot,
+        canonicalFixtureRoot,
+      ]);
+      git(
+        ["checkout", "--quiet", "--detach", git(["rev-parse", "HEAD"]).trim()],
+        canonicalFixtureRoot,
+      );
+      git(["update-ref", "-d", "refs/heads/main"], canonicalFixtureRoot);
+      git(
+        ["update-ref", "refs/remotes/origin/main", authorizedDocumentationMergeSha],
+        canonicalFixtureRoot,
+      );
+      const { proveM15RealGitPreflight } =
+        await import("../services/knowledge-engine/tests/support/milestone-15-phase-b2-proof.js");
+
+      await expect(proveM15RealGitPreflight(canonicalFixtureRoot)).resolves.toMatchObject({
+        positiveStatus: 0,
+        invalidCaseCount: 30,
+      });
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
   });
 
   it("accepts the exact 42-file, 1,038-original-test plus one M14 provenance inventory", () => {
