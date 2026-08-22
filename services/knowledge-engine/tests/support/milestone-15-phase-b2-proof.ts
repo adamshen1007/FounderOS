@@ -1066,14 +1066,12 @@ async function validateDocumentationSnapshotAgainstDigestContract(
   const adrSection = snapshot.architectureDecisions.slice(
     snapshot.architectureDecisions.indexOf("## ADR-0019"),
   );
-  if (!/^## ADR-0019:[^\n]+\n\n- \*\*Status:\*\* Proposed$/mu.test(adrSection))
+  if (!/^## ADR-0019:[^\n]+\n\n- \*\*Status:\*\* Accepted$/mu.test(adrSection))
     fail("phase-b2-adr-status-rejected");
   if (
+    !snapshot.documentationIndex.includes("**Implemented and merged.**") ||
     !snapshot.documentationIndex.includes(
-      "**Implementation candidate — independent review pending.**",
-    ) ||
-    !snapshot.documentationIndex.includes(
-      "publication, credential resolution, provider transport, real-provider integration, and live-execution authority are not authorized",
+      "credential resolution, provider transport, real-provider integration, and live-execution authority are not authorized",
     )
   ) {
     fail("phase-b2-candidate-status-rejected");
@@ -1144,8 +1142,8 @@ export async function proveM15StructuredDocumentation(repositoryRoot: string): P
       {
         ...snapshot,
         architectureDecisions: snapshot.architectureDecisions.replace(
-          "- **Status:** Proposed",
-          "- **Status:** Accepted",
+          "## ADR-0019: Persist verified provider-readiness evaluations without enabling provider execution\n\n- **Status:** Accepted",
+          "## ADR-0019: Persist verified provider-readiness evaluations without enabling provider execution\n\n- **Status:** Proposed",
         ),
       },
     ],
@@ -1154,7 +1152,7 @@ export async function proveM15StructuredDocumentation(repositoryRoot: string): P
       {
         ...snapshot,
         documentationIndex: snapshot.documentationIndex.replace(
-          "**Implementation candidate — independent review pending.**",
+          "**Implemented and merged.**",
           "**Published.**",
         ),
       },
