@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
@@ -362,25 +362,65 @@ function git(cwd: string, arguments_: readonly string[], env?: NodeJS.ProcessEnv
   return result.stdout.trim();
 }
 
-function repositoryIdentity(cwd: string): string {
-  const untracked = git(cwd, ["ls-files", "--others", "--exclude-standard", "-z"])
+interface ChildProcessResult {
+  readonly status: number | null;
+  readonly stderr: string;
+  readonly stdout: string;
+}
+
+function runChildProcess(
+  command: string,
+  arguments_: readonly string[],
+  cwd: string,
+): Promise<ChildProcessResult> {
+  return new Promise((resolveResult) => {
+    const child = spawn(command, [...arguments_], {
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
+    });
+    child.once("error", () => {
+      resolveResult({ status: null, stdout, stderr });
+    });
+    child.once("close", (status) => {
+      resolveResult({ status, stdout, stderr });
+    });
+  });
+}
+
+async function gitAsync(cwd: string, arguments_: readonly string[]): Promise<string> {
+  const result = await runChildProcess("git", arguments_, cwd);
+  if (result.status !== 0) fail("phase-b2-git-fixture-failed");
+  return result.stdout;
+}
+
+async function repositoryIdentity(cwd: string): Promise<string> {
+  const [status, refs, head, trackedPatch] = await Promise.all([
+    gitAsync(cwd, ["status", "--porcelain=v1", "-z", "--untracked-files=all"]),
+    gitAsync(cwd, ["show-ref"]),
+    gitAsync(cwd, ["rev-parse", "HEAD"]),
+    gitAsync(cwd, ["diff", "--binary", "HEAD"]),
+  ]);
+  const untracked = status
     .split("\0")
-    .filter(Boolean)
+    .filter((entry) => entry.startsWith("?? "))
+    .map((entry) => entry.slice(3))
     .sort();
-  const hash = createHash("sha256").update(
-    [
-      git(cwd, ["status", "--porcelain=v1", "-z", "--untracked-files=all"]),
-      git(cwd, ["show-ref"]),
-      git(cwd, ["rev-parse", "HEAD"]),
-      git(cwd, ["diff", "--binary", "HEAD"]),
-    ].join("\0"),
+  const hash = createHash("sha256").update([status, refs, head, trackedPatch].join("\0"));
+  const untrackedContents = await Promise.all(
+    untracked.map(async (path) => ({ bytes: await readFile(join(cwd, path)), path })),
   );
-  for (const path of untracked) {
-    hash
-      .update("\0")
-      .update(path)
-      .update("\0")
-      .update(readFileSync(join(cwd, path)));
+  for (const { bytes, path } of untrackedContents) {
+    hash.update("\0").update(path).update("\0").update(bytes);
   }
   return hash.digest("hex");
 }
@@ -697,14 +737,10 @@ export async function proveM15RealGitPreflight(repositoryRoot: string): Promise<
       return path;
     };
     const run = (repository: string, serializedCandidate = JSON.stringify(candidate)) =>
-      spawnSync(process.execPath, [preflightPath, serializedCandidate], {
-        cwd: repository,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-      });
+      runChildProcess(process.execPath, [preflightPath, serializedCandidate], repository);
     const positiveRepository = createRepository("positive");
-    const positiveBefore = repositoryIdentity(positiveRepository);
-    const positive = run(positiveRepository);
+    const positiveBefore = await repositoryIdentity(positiveRepository);
+    const positive = await run(positiveRepository);
     if (
       positive.status !== 0 ||
       positive.stdout !== "preflight-valid\n" ||
@@ -712,13 +748,35 @@ export async function proveM15RealGitPreflight(repositoryRoot: string): Promise<
     ) {
       fail("phase-b2-preflight-positive-rejected");
     }
-    if (repositoryIdentity(positiveRepository) !== positiveBefore)
+    if ((await repositoryIdentity(positiveRepository)) !== positiveBefore)
       fail("phase-b2-preflight-mutated-repository");
     const exactReasons: string[] = [];
     let mutationFreeCount = 1;
-    for (const mutation of AUTHORIZATION_MUTATIONS) {
-      const before = repositoryIdentity(positiveRepository);
-      const result = run(positiveRepository, mutation.serialize(candidate));
+    const authorizationMutationRepositories = AUTHORIZATION_MUTATIONS.map((mutation, index) => ({
+      mutation,
+      repository: createRepository(`authorization-${String(index).padStart(2, "0")}`),
+    }));
+    const preparedAuthorizationMutations = await Promise.all(
+      authorizationMutationRepositories.map(async (prepared) => ({
+        ...prepared,
+        before: await repositoryIdentity(prepared.repository),
+      })),
+    );
+    // Each authorization mutation owns an isolated clone; parallel CLI execution
+    // preserves an independently fingerprinted worktree, index, and ref state per case.
+    const completedAuthorizationMutations = await Promise.all(
+      preparedAuthorizationMutations.map(async (prepared) => ({
+        ...prepared,
+        result: await run(prepared.repository, prepared.mutation.serialize(candidate)),
+      })),
+    );
+    const verifiedAuthorizationMutations = await Promise.all(
+      completedAuthorizationMutations.map(async (completed) => ({
+        ...completed,
+        after: await repositoryIdentity(completed.repository),
+      })),
+    );
+    for (const { after, before, mutation, repository, result } of verifiedAuthorizationMutations) {
       if (
         result.status === 0 ||
         result.stdout !== "" ||
@@ -726,20 +784,38 @@ export async function proveM15RealGitPreflight(repositoryRoot: string): Promise<
       ) {
         fail(`phase-b2-preflight-case-rejected:${mutation.name}`);
       }
-      if (
-        result.stderr.includes(positiveRepository) ||
-        repositoryIdentity(positiveRepository) !== before
-      ) {
+      if (result.stderr.includes(repository) || after !== before) {
         fail(`phase-b2-preflight-case-mutated-or-leaked:${mutation.name}`);
       }
       exactReasons.push(`${mutation.name}:${mutation.expectedReason}`);
       mutationFreeCount += 1;
     }
-    for (const [index, mutation] of GIT_MUTATIONS.entries()) {
+    const gitMutationRepositories = GIT_MUTATIONS.map((mutation, index) => {
       const repository = createRepository(`negative-${String(index).padStart(2, "0")}`);
       mutation.apply(repository, contract);
-      const before = repositoryIdentity(repository);
-      const result = run(repository);
+      return { mutation, repository };
+    });
+    const preparedGitMutations = await Promise.all(
+      gitMutationRepositories.map(async (prepared) => ({
+        ...prepared,
+        before: await repositoryIdentity(prepared.repository),
+      })),
+    );
+    // Each Git mutation owns an isolated clone; parallel CLI inspection cannot share
+    // worktree, index, or ref state across cases.
+    const completedGitMutations = await Promise.all(
+      preparedGitMutations.map(async (prepared) => ({
+        ...prepared,
+        result: await run(prepared.repository),
+      })),
+    );
+    const verifiedGitMutations = await Promise.all(
+      completedGitMutations.map(async (completed) => ({
+        ...completed,
+        after: await repositoryIdentity(completed.repository),
+      })),
+    );
+    for (const { after, before, mutation, repository, result } of verifiedGitMutations) {
       if (
         result.status === 0 ||
         result.stdout !== "" ||
@@ -747,7 +823,7 @@ export async function proveM15RealGitPreflight(repositoryRoot: string): Promise<
       ) {
         fail(`phase-b2-preflight-case-rejected:${mutation.name}`);
       }
-      if (result.stderr.includes(repository) || repositoryIdentity(repository) !== before) {
+      if (result.stderr.includes(repository) || after !== before) {
         fail(`phase-b2-preflight-case-mutated-or-leaked:${mutation.name}`);
       }
       exactReasons.push(`${mutation.name}:${mutation.expectedReason}`);
