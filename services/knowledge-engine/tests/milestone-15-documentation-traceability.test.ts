@@ -239,13 +239,13 @@ describe("Milestone 15 documentation traceability", () => {
     }
   });
 
-  it("keeps ADR-0019 Proposed and documents the candidate without publication authority", async () => {
+  it("records accepted merged M15 while preserving the no-live-execution boundary", async () => {
     const adr = await readFile(join(repositoryRoot, "ARCHITECTURE_DECISIONS.md"), "utf8");
     const index = await readFile(join(repositoryRoot, "DOCUMENTATION_INDEX.md"), "utf8");
     const section = adr.slice(adr.indexOf("## ADR-0019"));
-    expect(section).toContain("**Status:** Proposed");
-    expect(index).toContain("Implementation candidate — independent review pending");
-    expect(index).toContain("publication");
-    expect(index).toContain("not authorized");
+    expect(section).toContain("**Status:** Accepted");
+    expect(index).toContain("**Implemented and merged.**");
+    expect(index).toContain("ADR-0019 is Accepted");
+    expect(index).toContain("live-execution authority are not authorized");
   });
 });

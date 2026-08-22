@@ -409,7 +409,7 @@ describe("Milestone 15 standalone predecessor proof", () => {
       "utf8",
     );
     expect(workflow).toContain(
-      "uses: actions/checkout@v4\n        with:\n          fetch-depth: 0",
+      "uses: actions/checkout@v6\n        with:\n          fetch-depth: 0",
     );
   });
 
@@ -636,7 +636,7 @@ describe("Milestone 15 standalone predecessor proof", () => {
     }
   });
 
-  it("keeps volatile final-suite totals out of candidate documentation", () => {
+  it("keeps volatile final-suite totals out of durable documentation", () => {
     const changedDocumentation = [
       readFileSync(resolve(repositoryRoot, "CHANGELOG.md"), "utf8"),
       readFileSync(resolve(repositoryRoot, "services/knowledge-engine/README.md"), "utf8"),
