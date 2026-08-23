@@ -234,6 +234,20 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 - [Milestone 15 Verification Checklist v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Verification_Checklist_v1.0.md)
 - [Milestone 15 Codex Implementation Prompt v1.0](./docs/milestones/milestone-15/FounderOS_Milestone_15_Codex_Implementation_Prompt_v1.0.md)
 
+### Milestone 16 — Production Execution Architecture and Threat Model
+
+**Specified — documentation-only; no implementation authorized.** Milestone 16 selects the OpenAI provider family and one future foreground non-streaming text-only operation, `founder-decision-memo`, from one verified governed Context Package. It defines a closed Responses API request envelope, authority and credential ownership, transport and retention boundaries, a 25-row threat model, fail-closed behavior, incident and kill-switch policy, and a separately gated implementation sequence. ADR-0020 is Proposed. The package adds no credential, resolver, provider SDK, network path, live request, deployment, or execution authority.
+
+- [Milestone 16 Package README v1.0](./docs/milestones/milestone-16/FounderOS_Milestone_16_Package_README_v1.0.md)
+- [Production Execution Architecture and Threat Model Specification v1.0](./docs/milestones/milestone-16/FounderOS_Milestone_16_Production_Execution_Architecture_and_Threat_Model_Specification_v1.0.md)
+- [OpenAI Responses Execution Boundary Contract v1.0](./docs/milestones/milestone-16/FounderOS_OpenAI_Responses_Execution_Boundary_Contract_v1.0.md)
+- [Founder Decision Memo Use Case Contract v1.0](./docs/milestones/milestone-16/FounderOS_Founder_Decision_Memo_Use_Case_Contract_v1.0.md)
+- [Production Execution Threat Model v1.0](./docs/milestones/milestone-16/FounderOS_Production_Execution_Threat_Model_v1.0.md)
+- [Authentication, Authorization, and Credential Ownership Specification v1.0](./docs/milestones/milestone-16/FounderOS_Authentication_Authorization_and_Credential_Ownership_Specification_v1.0.md)
+- [Provider Data, Privacy, Retention, Observability, Incident, and Kill-Switch Policy v1.0](./docs/milestones/milestone-16/FounderOS_Provider_Data_Privacy_Retention_Observability_Incident_and_Kill_Switch_Policy_v1.0.md)
+- [Milestone 16 Acceptance Criteria v1.0](./docs/milestones/milestone-16/FounderOS_Milestone_16_Acceptance_Criteria_v1.0.md)
+- [Milestone 16 Verification Checklist v1.0](./docs/milestones/milestone-16/FounderOS_Milestone_16_Verification_Checklist_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)
