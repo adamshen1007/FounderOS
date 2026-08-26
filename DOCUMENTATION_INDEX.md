@@ -248,6 +248,20 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 - [Milestone 16 Acceptance Criteria v1.0](./docs/milestones/milestone-16/FounderOS_Milestone_16_Acceptance_Criteria_v1.0.md)
 - [Milestone 16 Verification Checklist v1.0](./docs/milestones/milestone-16/FounderOS_Milestone_16_Verification_Checklist_v1.0.md)
 
+### Milestone 17 — Authorization Decision Authority Foundation
+
+**Implemented candidate — non-production and process-local.** Milestone 17 adds strict provider-neutral Service Identity, human approval, Authorization Request, Decision, claim, result, deterministic fingerprint, exact Service Identity evidence/workload/proof and fixed processing-tier binding, exact issuance, atomic permanent claim, monotonic revocation, inspection, verification, and disabled-harness behavior. It adds no identity provider, credential resolution, durable or distributed authorization storage, provider mapping, transport, network, deployment, or live execution. ADR-0021 is Proposed pending independent acceptance and merge.
+
+- [Milestone 17 Package README v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Package_README_v1.0.md)
+- [Authorization Decision Authority Design v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Authorization_Decision_Authority_Design_v1.0.md)
+- [Authorization Decision Authority Specification v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Authorization_Decision_Authority_Specification_v1.0.md)
+- [Service Identity Evidence Contract v1.0](./docs/milestones/milestone-17/FounderOS_Service_Identity_Evidence_Contract_v1.0.md)
+- [Human Approval and Authorization Request Contract v1.0](./docs/milestones/milestone-17/FounderOS_Human_Approval_and_Authorization_Request_Contract_v1.0.md)
+- [Authorization Decision, Claim, Revocation, and Verification Contract v1.0](./docs/milestones/milestone-17/FounderOS_Authorization_Decision_Claim_Revocation_and_Verification_Contract_v1.0.md)
+- [Milestone 17 Acceptance Criteria v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Acceptance_Criteria_v1.0.md)
+- [Milestone 17 Verification Checklist v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Verification_Checklist_v1.0.md)
+- [Milestone 17 Implementation Plan v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Implementation_Plan_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

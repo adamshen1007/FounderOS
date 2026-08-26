@@ -149,3 +149,14 @@ const replayAttempt = DurableReplayAttemptRecordSchema.parse(replayInput);
 ```
 
 All schemas reject unknown fields so contract changes remain explicit and versioned.
+
+## Milestone 17 execution authorization contracts
+
+`authorization.ts` owns strict versioned contracts for externally verified Service Identity
+evidence, human execution approval, exact `founder-decision-memo` Authorization Requests,
+Authorization Decisions, permanent exact-attempt claims, ceilings, closed reason codes, and
+operation results. Request identifiers reject credential-material markers, known OpenAI, Stripe,
+GitHub, and Slack credential-value forms even when embedded, URI-scheme forms, and URL-like
+material, and each Request binds the fixed processing tier `default`. The contracts contain logical Credential Reference
+identity only and provide no credential, identity-provider, persistence, provider, transport, or
+network capability.
