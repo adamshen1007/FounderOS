@@ -1,5 +1,16 @@
 export * from "./application/ingest-markdown.js";
 export {
+  createInMemoryExecutionAuthorizationAuthority,
+  type ClaimExecutionAuthorizationDecisionInput,
+  type InMemoryExecutionAuthorizationAuthority,
+  type InMemoryExecutionAuthorizationAuthorityConfiguration,
+  type InspectExecutionAuthorizationDecisionInput,
+  type IssueExecutionAuthorizationDecisionInput,
+  type RevokeExecutionAuthorizationDecisionInput,
+  type VerifyRegisteredExecutionAuthorizationClaimInput,
+  type VerifyRegisteredExecutionAuthorizationDecisionInput,
+} from "./application/in-memory-execution-authorization-authority.js";
+export {
   createProductionProviderReadinessEvaluator,
   ProductionProviderReadinessError,
   type EvaluateProductionProviderReadinessInput,
@@ -16,6 +27,11 @@ export {
   type DisabledProductionProviderHarnessMode,
   type DisabledProductionProviderHarnessResult,
 } from "./application/disabled-production-provider-adapter-harness.js";
+export {
+  runDisabledExecutionAuthorizationHarness,
+  type DisabledExecutionAuthorizationHarnessInput,
+  type DisabledExecutionAuthorizationHarnessResult,
+} from "./application/disabled-execution-authorization-harness.js";
 export {
   createStaticProductionProviderTransportPolicyAuthority,
   type ProductionProviderTransportPolicyAuthority,
@@ -78,6 +94,7 @@ export * from "./application/query-knowledge.js";
 export * from "./application/query-knowledge-repository.js";
 export * from "./application/run-migration-command.js";
 export * from "./domain/frontmatter.js";
+export * from "./domain/execution-authorization.js";
 export * from "./domain/knowledge-query.js";
 export {
   createKnowledgeContextFingerprint,
