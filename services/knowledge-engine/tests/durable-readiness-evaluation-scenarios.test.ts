@@ -77,6 +77,7 @@ import {
   type M15ScenarioExecutionEvidence,
   verifyM15ScenarioExecution,
 } from "./support/milestone-15-scenario-registry.js";
+import { waitForChildPath } from "./support/wait-for-child-path.js";
 import { proveM15ProductionNoExecution } from "./support/milestone-15-production-no-execution-proof.js";
 import {
   proveM15PredecessorGateContract,
@@ -501,21 +502,12 @@ async function realInitializationLockFixture(label: string): Promise<{
     },
   );
   const closed = new Promise<void>((resolveClosed) => child.once("close", () => resolveClosed()));
-  let observed = false;
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    try {
-      await rawReadFile(lockPath, "utf8");
-      observed = true;
-      break;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      await delay(10);
-    }
-  }
-  if (!observed) {
+  try {
+    await waitForChildPath(child, lockPath);
+  } catch (error) {
     child.kill("SIGTERM");
     await closed;
-    throw new Error("initialization-lock-fixture-timeout");
+    throw error;
   }
   child.kill("SIGTERM");
   await closed;

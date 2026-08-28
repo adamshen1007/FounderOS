@@ -41,6 +41,7 @@ import {
   type LocalFileReadinessLedgerFaultPoint,
 } from "../src/infrastructure/local-file-readiness-ledger.js";
 import { createCanonicalProviderReadinessEvaluationRuntime } from "./fixtures/provider-readiness-evaluations.js";
+import { waitForChildPath } from "./support/wait-for-child-path.js";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -171,14 +172,6 @@ async function exists(path: string): Promise<boolean> {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") return false;
     throw error;
   }
-}
-
-async function waitForPath(path: string): Promise<void> {
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    if (await exists(path)) return;
-    await new Promise<void>((resolvePromise) => setTimeout(resolvePromise, 10));
-  }
-  throw new Error("child process did not reach its initialization barrier");
 }
 
 function inactiveWriterLockBytes(processId: number): {
@@ -448,6 +441,29 @@ describe("Milestone 15 local file readiness ledger fault matrix", () => {
     expect((await reopened.verifyIntegrity()).status).toBe("valid");
   });
 
+  it("waits for a live child initialization barrier beyond the legacy five-second window", async () => {
+    const container = await temporaryRoot("delayed-child-initialization-barrier");
+    const barrier = join(container, "barrier");
+    const child = spawn(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        'import { writeFile } from "node:fs/promises"; const [path, delay] = process.argv.slice(1); await new Promise((resolve) => setTimeout(resolve, Number(delay))); await writeFile(path, "ready", "utf8"); await new Promise((resolve) => setTimeout(resolve, 1_000));',
+        barrier,
+        "5200",
+      ],
+      { stdio: "ignore" },
+    );
+    try {
+      await waitForChildPath(child, barrier, { timeoutMs: 10_000 });
+      expect(await readFile(barrier, "utf8")).toBe("ready");
+    } finally {
+      child.kill("SIGTERM");
+      await new Promise<void>((resolvePromise) => child.once("close", () => resolvePromise()));
+    }
+  }, 15_000);
+
   it("never steals parent initialization locks after real process crashes", async () => {
     const cases = [
       {
@@ -476,7 +492,7 @@ describe("Milestone 15 local file readiness ledger fault matrix", () => {
           [helper.pathname, JSON.stringify(storageOptions(runtimeRoot)), fault],
           { stdio: "ignore" },
         );
-        await waitForPath(barrier(runtimeRoot));
+        await waitForChildPath(child, barrier(runtimeRoot));
         child.kill("SIGKILL");
         await new Promise<void>((resolvePromise, rejectPromise) => {
           child.once("close", () => resolvePromise());
