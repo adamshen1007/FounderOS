@@ -2,6 +2,8 @@
 
 `@founderos/knowledge-schema` is the runtime-validation and TypeScript contract foundation for KnowledgeOS.
 
+Milestone 18 adds strict secret-free credential-resolution request, command, rotation, revocation, port-result, evidence, result, and verification contracts. These contracts cannot represent credential material, a material-derived value, headers, endpoints, callbacks, clients, or provider bodies.
+
 It implements the seven object categories defined by the official specifications:
 
 - General knowledge

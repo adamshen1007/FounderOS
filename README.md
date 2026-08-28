@@ -18,6 +18,8 @@ Milestone 16 is the accepted documentation-only production-execution architectur
 
 Milestone 17 implements the first separately bounded step in that sequence: strict provider-neutral execution-authorization contracts, deterministic exact Service Identity and human-approval evidence, fixed processing tier `default`, a factory-created process-local Authorization Decision authority, permanent exact-attempt claim ownership, monotonic revocation, independent verification, and a disabled evaluation harness. The implementation was independently reviewed, accepted, and merged through pull request #17; ADR-0021 is Accepted. The authority has no durable or distributed state, credential resolver, provider mapping, endpoint, transport, network, or live-execution capability, and its acceptance does not authorize any of those deferred capabilities.
 
+Milestone 18 is an implementation candidate for the next separately bounded step: strict secret-free credential-resolution contracts, authorization-first Knowledge Engine orchestration, and an independently owned process-local synthetic resolver with monotonic rotation, permanent revocation, exact replay, and resolver-owned `Uint8Array` overwrite before sanitized return. It reads no real credential and exposes no material, lease, header, endpoint, provider mapping, transport, network, deployment, or live-execution capability. ADR-0022 remains Proposed pending complete verification, independent acceptance, and merge.
+
 Repository dependencies must flow in one direction:
 
 ```text
