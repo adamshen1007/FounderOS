@@ -288,7 +288,7 @@ function createResolver(
           ? existing.result
           : immutableCopy({ status: "rejected", reasonCode: "conflicting_identity" });
       }
-      if (
+      const transitionInvalid =
         value.credentialReferenceId !== config.credentialReferenceId ||
         value.credentialReferenceFingerprint !== config.credentialReferenceFingerprint ||
         value.environmentClass !== config.environmentClass ||
@@ -298,16 +298,21 @@ function createResolver(
         value.priorRotationVersion !== activeRotationVersion ||
         value.rotationSequence !== rotationSequence + 1 ||
         reservedRotationVersions.has(value.nextRotationVersion) ||
-        Date.parse(value.effectiveAt) < Date.parse(lastTransitionAt)
-      ) {
-        return immutableCopy({ status: "rejected", reasonCode: "invalid_rotation_transition" });
+        Date.parse(value.effectiveAt) < Date.parse(lastTransitionAt);
+      reservedRotationVersions.add(value.nextRotationVersion);
+      if (transitionInvalid) {
+        const result = immutableCopy({
+          status: "rejected" as const,
+          reasonCode: "invalid_rotation_transition",
+        });
+        rotations.set(value.rotationRecordId, { canonicalInput: inputKey, result });
+        return result;
       }
       const result = immutableCopy({
         status: "rotated" as const,
         activeRotationVersion: value.nextRotationVersion,
         rotationSequence: value.rotationSequence,
       });
-      reservedRotationVersions.add(value.nextRotationVersion);
       activeRotationVersion = value.nextRotationVersion;
       rotationSequence = value.rotationSequence;
       lastTransitionAt = value.effectiveAt;
@@ -337,7 +342,12 @@ function createResolver(
         value.revocationVersion <= currentRevocationVersion ||
         Date.parse(value.revokedAt) < Date.parse(lastTransitionAt)
       ) {
-        return immutableCopy({ status: "rejected", reasonCode: "invalid_revocation_transition" });
+        const result = immutableCopy({
+          status: "rejected" as const,
+          reasonCode: "invalid_revocation_transition",
+        });
+        revocations.set(value.revocationRecordId, { canonicalInput: inputKey, result });
+        return result;
       }
       const result = immutableCopy({
         status: "revoked" as const,

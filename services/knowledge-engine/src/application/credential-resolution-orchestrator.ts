@@ -52,8 +52,60 @@ interface ReservedResolution {
   result: CredentialResolutionResult | null;
 }
 
+interface CapturedOrchestratorConfiguration {
+  readonly resolverId: string;
+  readonly authority: CredentialResolutionOrchestratorConfiguration["authority"];
+  readonly verifyDecision: CredentialResolutionOrchestratorConfiguration["authority"]["verifyDecision"];
+  readonly verifyClaim: CredentialResolutionOrchestratorConfiguration["authority"]["verifyClaim"];
+  readonly port: CredentialResolutionPort;
+  readonly resolveAndRelease: CredentialResolutionPort["resolveAndRelease"];
+}
+
 const CONFIGURATION_KEYS = ["schemaVersion", "resolverId", "authority", "port"] as const;
 const RESOLVE_KEYS = ["schemaVersion", "request", "decision", "claim"] as const;
+
+function captureOwnCallable(value: unknown, key: string): ((...args: never[]) => unknown) | null {
+  if (value === null || typeof value !== "object") return null;
+  const descriptor = Object.getOwnPropertyDescriptor(value, key);
+  return descriptor !== undefined &&
+    descriptor.enumerable === true &&
+    "value" in descriptor &&
+    typeof descriptor.value === "function"
+    ? (descriptor.value as (...args: never[]) => unknown)
+    : null;
+}
+
+function captureConfiguration(value: unknown): CapturedOrchestratorConfiguration | null {
+  try {
+    const descriptors = captureExactOwnEnumerableDataDescriptors(value, CONFIGURATION_KEYS);
+    if (
+      descriptors === null ||
+      descriptors.schemaVersion.value !== "1.0" ||
+      typeof descriptors.resolverId.value !== "string" ||
+      descriptors.resolverId.value.length === 0
+    ) {
+      return null;
+    }
+    const authority = descriptors.authority.value;
+    const port = descriptors.port.value;
+    const verifyDecision = captureOwnCallable(authority, "verifyDecision");
+    const verifyClaim = captureOwnCallable(authority, "verifyClaim");
+    const resolveAndRelease = captureOwnCallable(port, "resolveAndRelease");
+    if (verifyDecision === null || verifyClaim === null || resolveAndRelease === null) return null;
+    return {
+      resolverId: descriptors.resolverId.value,
+      authority: authority as CredentialResolutionOrchestratorConfiguration["authority"],
+      verifyDecision:
+        verifyDecision as CredentialResolutionOrchestratorConfiguration["authority"]["verifyDecision"],
+      verifyClaim:
+        verifyClaim as CredentialResolutionOrchestratorConfiguration["authority"]["verifyClaim"],
+      port: port as CredentialResolutionPort,
+      resolveAndRelease: resolveAndRelease as CredentialResolutionPort["resolveAndRelease"],
+    };
+  } catch {
+    return null;
+  }
+}
 
 function immutableCopy<T>(value: T): T {
   return deepFreeze(structuredClone(value));
@@ -98,6 +150,7 @@ function exactCoordinates(
     request.credentialReferenceId === authorization.credentialReferenceId &&
     request.credentialReferenceFingerprint === authorization.credentialReferenceFingerprint &&
     request.expectedRotationVersion === authorization.credentialRotationVersion &&
+    request.purposeReference === `purpose/${authorization.operation}` &&
     claim.authorizationDecisionId === decision.authorizationDecisionId &&
     claim.decisionFingerprint === decision.decisionFingerprint &&
     claim.executionAttemptId === request.executionAttemptId &&
@@ -137,28 +190,11 @@ function portEvidenceMatches(
 export function createCredentialResolutionOrchestrator(
   configuration: CredentialResolutionOrchestratorConfiguration,
 ): CredentialResolutionOrchestrator {
-  const descriptors = captureExactOwnEnumerableDataDescriptors(configuration, CONFIGURATION_KEYS);
-  if (
-    descriptors === null ||
-    descriptors.schemaVersion.value !== "1.0" ||
-    typeof descriptors.resolverId.value !== "string" ||
-    descriptors.resolverId.value.length === 0 ||
-    descriptors.authority.value === null ||
-    typeof descriptors.authority.value !== "object" ||
-    typeof (descriptors.authority.value as { verifyDecision?: unknown }).verifyDecision !==
-      "function" ||
-    typeof (descriptors.authority.value as { verifyClaim?: unknown }).verifyClaim !== "function" ||
-    descriptors.port.value === null ||
-    typeof descriptors.port.value !== "object" ||
-    typeof (descriptors.port.value as { resolveAndRelease?: unknown }).resolveAndRelease !==
-      "function"
-  ) {
+  const captured = captureConfiguration(configuration);
+  if (captured === null) {
     throw new TypeError("Credential resolution orchestrator configuration is invalid");
   }
-  const resolverId = descriptors.resolverId.value;
-  const authority = descriptors.authority
-    .value as CredentialResolutionOrchestratorConfiguration["authority"];
-  const port = descriptors.port.value as CredentialResolutionPort;
+  const { authority, port, resolverId, resolveAndRelease, verifyClaim, verifyDecision } = captured;
   const reservations = new Map<string, ReservedResolution>();
 
   return Object.freeze({
@@ -187,12 +223,12 @@ export function createCredentialResolutionOrchestrator(
             ? (existing.result ?? rejected("internal_integrity_failure"))
             : rejected("conflicting_identity");
         }
-        const decisionVerification = authority.verifyDecision({
+        const decisionVerification = verifyDecision.call(authority, {
           schemaVersion: "1.0",
           authorizationDecision: decision,
           evaluatedAt: request.evaluatedAt,
         });
-        const claimVerification = authority.verifyClaim({
+        const claimVerification = verifyClaim.call(authority, {
           schemaVersion: "1.0",
           authorizationDecision: decision,
           authorizationClaim: claim,
@@ -207,6 +243,9 @@ export function createCredentialResolutionOrchestrator(
         if (Date.parse(request.evaluatedAt) >= Date.parse(request.resolutionDeadline)) {
           return rejected("deadline_expired");
         }
+        if (Date.parse(request.resolutionDeadline) > Date.parse(decision.expiresAt)) {
+          return rejected("deadline_expired");
+        }
         const { requestFingerprint, ...commandFields } = request;
         void requestFingerprint;
         const command: CredentialResolutionCommand = immutableCopy({
@@ -217,7 +256,7 @@ export function createCredentialResolutionOrchestrator(
           requestFingerprint: request.requestFingerprint,
           result: null,
         });
-        const portResult = port.resolveAndRelease(command);
+        const portResult = resolveAndRelease.call(port, command);
         const parsedPortResult = CredentialResolutionPortResultSchema.safeParse(portResult);
         let result: CredentialResolutionResult;
         if (!parsedPortResult.success) {

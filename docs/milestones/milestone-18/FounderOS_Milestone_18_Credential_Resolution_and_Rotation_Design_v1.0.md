@@ -125,8 +125,8 @@ The canonical request binds:
 - environment and operation;
 - Credential Reference ID and fingerprint;
 - expected rotation version;
-- bounded purpose reference;
-- explicit `evaluatedAt` and resolution deadline.
+- canonical `purpose/<authorized operation>` reference;
+- explicit `evaluatedAt` and resolution deadline no later than the M17 Decision expiry.
 
 Unknown, hidden, symbolic, inherited, accessor-backed, non-enumerable, non-plain, duplicate,
 non-canonical, unbounded, secret-shaped, URL-shaped, or unsupported values fail before authority or
@@ -192,7 +192,8 @@ public facade.
 2. Reject malformed, hidden-capability, secret-bearing, URL-bearing, or unsupported input.
 3. Ask the registered M17 authority to verify the exact Decision and claim at `evaluatedAt`.
 4. Compare every Decision, claim, attempt, provider, Adapter, environment, operation, reference,
-   fingerprint, rotation, purpose, and deadline coordinate.
+   fingerprint, rotation, canonical operation-derived purpose, and authorization-bounded deadline
+   coordinate.
 5. Reserve the resolution request ID before resolver access. Exact replay returns the original
    immutable sanitized result without rematerializing; conflicting reuse fails closed.
 6. Invoke `resolveAndRelease` exactly once.

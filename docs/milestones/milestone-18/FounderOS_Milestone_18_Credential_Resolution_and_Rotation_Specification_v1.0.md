@@ -37,7 +37,8 @@ in tests or a later approved application boundary.
 4. Verify the exact registered M17 Decision at `evaluatedAt`.
 5. Verify the exact registered M17 claim at `evaluatedAt`.
 6. Compare Decision, claim, Attempt, provider, Adapter, environment, operation, Credential
-   Reference, rotation, purpose, evaluation, and deadline coordinates.
+   Reference, rotation, canonical `purpose/<authorized operation>`, evaluation, and a resolution
+   deadline no later than the M17 Decision expiry.
 7. Reject an expired resolution deadline.
 8. Permanently reserve the resolution identity.
 9. Invoke the resolver port exactly once.
@@ -55,9 +56,10 @@ fails before authority or resolver access.
 
 The first configured rotation has sequence `1`. Rotation requires the exact current version, the
 next positive sequence, non-regressing effective time, authority reference, and evidence reference.
-Every version and record identity is permanently reserved. Revocation is monotonic and permanent;
-it never restores a prior version. Fallible validation and artifact construction complete before
-registry state changes.
+Every version and schema-valid, fingerprint-valid record identity is permanently reserved,
+including rejected transition attempts. Revocation is monotonic and permanent; it never restores a
+prior version. Fallible validation and artifact construction complete before registry state
+changes.
 
 Resolution identity, rotation, revocation, and evidence state are process-local. The milestone
 claims deterministic single-process linearization only, not durability or distributed authority.

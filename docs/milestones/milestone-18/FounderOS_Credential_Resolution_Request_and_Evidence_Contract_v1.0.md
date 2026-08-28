@@ -4,8 +4,9 @@
 
 `CredentialResolutionRequest` binds schema version, resolution ID, M17 Decision and claim IDs and
 fingerprints, exact Attempt coordinates, subject, Consumer, Delivery, Context, Invocation,
-provider, Adapter, environment, operation, Credential Reference and rotation, purpose,
-`evaluatedAt`, and deadline. It is strict canonical plain data and cannot represent a secret,
+provider, Adapter, environment, operation, Credential Reference and rotation, the canonical
+`purpose/<authorized operation>` reference, `evaluatedAt`, and a deadline no later than the M17
+Decision expiry. It is strict canonical plain data and cannot represent a secret,
 endpoint, header, callback, client, path, or provider body.
 
 `CredentialResolutionCommand` is the immutable subset sent through the structural resolver port

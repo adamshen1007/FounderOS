@@ -257,6 +257,87 @@ describe("Milestone 18 credential resolution orchestration", () => {
     expect(calls).toBe(0);
   });
 
+  it("rejects freshly fingerprinted purpose and authorization-deadline substitutions", () => {
+    const { authority, decision, claim } = claimedAuthorization();
+    const orchestrator = createCredentialResolutionOrchestrator({
+      schemaVersion: "1.0",
+      resolverId: "resolver.synthetic.primary",
+      authority,
+      port: port(),
+    });
+    const foreignPurpose = resolutionRequest({
+      resolutionRequestId: "credential-resolution-m18-foreign-purpose",
+      authorizationDecisionFingerprint: decision.decisionFingerprint,
+      authorizationClaimFingerprint: claim.claimFingerprint,
+      purposeReference: "purpose/unrelated-operation",
+    });
+    const postAuthorizationDeadline = resolutionRequest({
+      resolutionRequestId: "credential-resolution-m18-post-authorization-deadline",
+      authorizationDecisionFingerprint: decision.decisionFingerprint,
+      authorizationClaimFingerprint: claim.claimFingerprint,
+      resolutionDeadline: "2026-08-23T01:16:00.000Z",
+    });
+
+    expect(
+      orchestrator.resolve({
+        schemaVersion: "1.0",
+        request: foreignPurpose,
+        decision,
+        claim,
+      }),
+    ).toEqual({ status: "rejected", reasonCodes: ["coordinate_mismatch"] });
+    expect(
+      orchestrator.resolve({
+        schemaVersion: "1.0",
+        request: postAuthorizationDeadline,
+        decision,
+        claim,
+      }),
+    ).toEqual({ status: "rejected", reasonCodes: ["deadline_expired"] });
+    expect(calls).toBe(0);
+  });
+
+  it("rejects hostile orchestrator capabilities without invoking getters or exposing errors", () => {
+    const { authority } = claimedAuthorization();
+    const expectedError = new TypeError(
+      "Credential resolution orchestrator configuration is invalid",
+    );
+    let getterRead = false;
+    const hostileAuthority = { ...authority } as Record<string, unknown>;
+    Object.defineProperty(hostileAuthority, "verifyDecision", {
+      enumerable: true,
+      get() {
+        getterRead = true;
+        throw new Error("hostile-authority-detail");
+      },
+    });
+
+    expect(() =>
+      createCredentialResolutionOrchestrator({
+        schemaVersion: "1.0",
+        resolverId: "resolver.synthetic.primary",
+        authority: hostileAuthority as never,
+        port: port(),
+      }),
+    ).toThrow(expectedError);
+    expect(getterRead).toBe(false);
+
+    const hostileWrapper = new Proxy(
+      {
+        schemaVersion: "1.0" as const,
+        resolverId: "resolver.synthetic.primary",
+        authority,
+        port: port(),
+      },
+      {
+        getPrototypeOf() {
+          throw new Error("hostile-wrapper-detail");
+        },
+      },
+    );
+    expect(() => createCredentialResolutionOrchestrator(hostileWrapper)).toThrow(expectedError);
+  });
+
   it("constructs and independently verifies deterministic rotation and revocation records", () => {
     const rotationInput = {
       schemaVersion: "1.0" as const,

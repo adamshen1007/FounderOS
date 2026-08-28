@@ -124,7 +124,11 @@ const M18_DYNAMIC_ACCESS_FINGERPRINTS = new Map([
   ],
   [
     "infrastructure/credential-resolver/src/index.ts",
-    "c2a391d0e9d1aa68bd231ebc8709a027729e7ccc377f49c2a0d73ad7b185ecf3",
+    "429646aaebabb53153ffa038a8707ab99a63beec3fd3ee4b8bbfb15af8a36f4b",
+  ],
+  [
+    "services/knowledge-engine/src/application/credential-resolution-orchestrator.ts",
+    "da6b1e312398d82231637f3af145542d3a1bdd7452ecf485047faec29b29b19d",
   ],
 ]);
 const M18_SAFE_REFLECTION_MEMBERS = new Map<string, ReadonlySet<string>>([
@@ -137,6 +141,10 @@ const M18_SAFE_REFLECTION_MEMBERS = new Map<string, ReadonlySet<string>>([
       "Object.prototype",
       "Reflect.ownKeys",
     ]),
+  ],
+  [
+    "services/knowledge-engine/src/application/credential-resolution-orchestrator.ts",
+    new Set(["Object.getOwnPropertyDescriptor"]),
   ],
 ]);
 

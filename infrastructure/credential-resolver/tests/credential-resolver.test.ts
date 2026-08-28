@@ -206,6 +206,56 @@ describe("Milestone 18 synthetic credential resolver", () => {
     });
   });
 
+  it("permanently reserves rejected rotation record and version identities", () => {
+    const subject = resolver();
+    const rejected = rotationRecord({ rotationSequence: 3 });
+    expect(subject.rotate(rejected)).toEqual({
+      status: "rejected",
+      reasonCode: "invalid_rotation_transition",
+    });
+    expect(subject.rotate(rejected)).toEqual({
+      status: "rejected",
+      reasonCode: "invalid_rotation_transition",
+    });
+    expect(subject.rotate(rotationRecord({ rotationSequence: 2 }))).toEqual({
+      status: "rejected",
+      reasonCode: "conflicting_identity",
+    });
+    expect(
+      subject.rotate(
+        rotationRecord({
+          rotationRecordId: "rotation-record-reserved-version",
+          rotationSequence: 2,
+        }),
+      ),
+    ).toEqual({ status: "rejected", reasonCode: "invalid_rotation_transition" });
+    expect(subject.inspect()).toMatchObject({
+      activeRotationVersion: "rotation-v1",
+      rotationSequence: 1,
+    });
+  });
+
+  it("permanently reserves rejected revocation record identities", () => {
+    const subject = resolver();
+    const rejected = revocationRecord({ rotationVersion: "rotation-v2" });
+    expect(subject.revoke(rejected)).toEqual({
+      status: "rejected",
+      reasonCode: "invalid_revocation_transition",
+    });
+    expect(subject.revoke(rejected)).toEqual({
+      status: "rejected",
+      reasonCode: "invalid_revocation_transition",
+    });
+    expect(subject.revoke(revocationRecord())).toEqual({
+      status: "rejected",
+      reasonCode: "conflicting_identity",
+    });
+    expect(subject.inspect()).toMatchObject({
+      currentRevocationVersion: 0,
+      activeVersionRevoked: false,
+    });
+  });
+
   it("overwrites the owned buffer when a fault occurs after materialization", () => {
     const evaluation = runDisabledSyntheticCredentialReleaseHarness({
       configuration: configuration(),
