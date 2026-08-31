@@ -1,5 +1,7 @@
 export * from "./application/ingest-markdown.js";
 export * from "./application/credential-resolution-orchestrator.js";
+export * from "./application/openai-responses-preparation-orchestrator.js";
+export * from "./application/m19-source-authorities.js";
 export {
   createInMemoryExecutionAuthorizationAuthority,
   type ClaimExecutionAuthorizationDecisionInput,
@@ -97,6 +99,7 @@ export * from "./application/run-migration-command.js";
 export * from "./domain/frontmatter.js";
 export * from "./domain/credential-resolution.js";
 export * from "./domain/execution-authorization.js";
+export * from "./domain/openai-responses-adapter.js";
 export * from "./domain/knowledge-query.js";
 export {
   createKnowledgeContextFingerprint,

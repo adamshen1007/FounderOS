@@ -264,7 +264,7 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 
 ### Milestone 18 — Credential Resolution and Rotation Foundation
 
-**Implementation candidate — synthetic, process-local, and transport-free.** Milestone 18 adds strict secret-free shared contracts, registered M17 Decision/claim verification before resolver access, exact resolution identity replay, and an infrastructure-owned deterministic synthetic resolver with monotonic rotation, permanent revocation, and owned-buffer overwrite before sanitized return. ADR-0022 is Proposed pending complete verification, independent acceptance, and merge. It adds no real credential, secret store, environment read, provider mapper, header, endpoint, transport, network, deployment, release, or live execution.
+**Accepted and merged — synthetic, process-local, and transport-free.** Milestone 18 adds strict secret-free shared contracts, registered M17 Decision/claim verification before resolver access, exact resolution identity replay, and an infrastructure-owned deterministic synthetic resolver with monotonic rotation, permanent revocation, and owned-buffer overwrite before sanitized return. The implementation was independently reviewed and merged through pull request #19; ADR-0022 is Accepted. It adds no real credential, secret store, environment read, provider mapper, header, endpoint, transport, network, deployment, release, or live execution.
 
 - [Credential Resolution and Rotation Design v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Credential_Resolution_and_Rotation_Design_v1.0.md)
 - [Credential Resolution and Rotation Specification v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Credential_Resolution_and_Rotation_Specification_v1.0.md)
@@ -274,6 +274,21 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 - [Milestone 18 Verification Checklist v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Verification_Checklist_v1.0.md)
 - [Milestone 18 Package README v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Package_README_v1.0.md)
 - [Milestone 18 Implementation Plan v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Implementation_Plan_v1.0.md)
+
+### Milestone 19 — Disabled OpenAI Responses Adapter Foundation
+
+**Accepted specification; implementation authorized and locally implemented pending final verification.** Milestone 19 defines deterministic fixed-profile OpenAI Responses request-plan mapping, inert fixture-response mapping, exact M17/M18 evidence compatibility, a disabled-only adapter facade, and transitive no-network proof. The facade can terminate only as `disabled-by-policy` and cannot receive credential material, construct authentication headers, pass a successful final pre-send gate, or perform transport. ADR-0023 remains Proposed until implementation acceptance and publication.
+
+- [Milestone 19 Package README v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Package_README_v1.0.md)
+- [Disabled OpenAI Responses Adapter Design v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Disabled_OpenAI_Responses_Adapter_Design_v1.0.md)
+- [Disabled OpenAI Responses Adapter Specification v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Disabled_OpenAI_Responses_Adapter_Specification_v1.0.md)
+- [OpenAI Responses Request Plan and Response Mapping Contract v1.0](./docs/milestones/milestone-19/FounderOS_OpenAI_Responses_Request_Plan_and_Response_Mapping_Contract_v1.0.md)
+- [Disabled Provider Adapter and No-Network Contract v1.0](./docs/milestones/milestone-19/FounderOS_Disabled_Provider_Adapter_and_No_Network_Contract_v1.0.md)
+- [OpenAI Model, Instruction, Cache, and Failure Authority Contract v1.0](./docs/milestones/milestone-19/FounderOS_OpenAI_Model_Instruction_Cache_and_Failure_Authority_Contract_v1.0.md)
+- [Milestone 19 Acceptance Criteria v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Acceptance_Criteria_v1.0.md)
+- [Milestone 19 Acceptance Traceability v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Acceptance_Traceability_v1.0.md)
+- [Milestone 19 Verification Checklist v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Verification_Checklist_v1.0.md)
+- [Milestone 19 Implementation Plan v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Implementation_Plan_v1.0.md)
 
 ## Repository governance
 
