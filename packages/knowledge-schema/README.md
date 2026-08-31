@@ -4,6 +4,11 @@
 
 Milestone 18 adds strict secret-free credential-resolution request, command, rotation, revocation, port-result, evidence, result, and verification contracts. These contracts cannot represent credential material, a material-derived value, headers, endpoints, callbacks, clients, or provider bodies.
 
+Milestone 19 adds strict versioned model-policy, prompt-cache-policy, instruction-profile,
+input-projection, readiness, current-control, request-plan, fixture-response, mapping-evidence,
+disabled-policy, preparation-result, and closed-taxonomy contracts. They contain no credential
+material, authentication header, endpoint override, client, callback, transport, or provider SDK.
+
 It implements the seven object categories defined by the official specifications:
 
 - General knowledge

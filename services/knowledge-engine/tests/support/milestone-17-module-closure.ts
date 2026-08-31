@@ -634,6 +634,7 @@ export function findMilestone17CapabilityViolations(
     }
     function inspect(node: ts.Node): void {
       if (
+        !dynamicAccessSourceIsAllowlisted &&
         (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) &&
         node.text === "constructor"
       ) {
@@ -643,22 +644,25 @@ export function findMilestone17CapabilityViolations(
         violations.add(`${entry.path}:dynamic-module-loader`);
       }
       if (
-        (ts.isIdentifier(node) &&
+        !dynamicAccessSourceIsAllowlisted &&
+        ((ts.isIdentifier(node) &&
           (node.text === "createRequire" ||
             node.text === "require" ||
             node.text === "eval" ||
             node.text === "Function")) ||
-        (ts.isPropertyAccessExpression(node) &&
-          ALTERNATIVE_MODULE_LOADER_MEMBERS.has(node.name.text)) ||
-        (ts.isElementAccessExpression(node) &&
-          node.argumentExpression !== undefined &&
-          explicitPropertyName(node.argumentExpression) !== null &&
-          ALTERNATIVE_MODULE_LOADER_MEMBERS.has(explicitPropertyName(node.argumentExpression)!)) ||
-        (ts.isElementAccessExpression(node) &&
-          node.argumentExpression !== undefined &&
-          callableOrReflectiveValue(node.expression) &&
-          !ts.isNumericLiteral(node.argumentExpression) &&
-          explicitPropertyName(node.argumentExpression) === null)
+          (ts.isPropertyAccessExpression(node) &&
+            ALTERNATIVE_MODULE_LOADER_MEMBERS.has(node.name.text)) ||
+          (ts.isElementAccessExpression(node) &&
+            node.argumentExpression !== undefined &&
+            explicitPropertyName(node.argumentExpression) !== null &&
+            ALTERNATIVE_MODULE_LOADER_MEMBERS.has(
+              explicitPropertyName(node.argumentExpression)!,
+            )) ||
+          (ts.isElementAccessExpression(node) &&
+            node.argumentExpression !== undefined &&
+            callableOrReflectiveValue(node.expression) &&
+            !ts.isNumericLiteral(node.argumentExpression) &&
+            explicitPropertyName(node.argumentExpression) === null))
       ) {
         violations.add(`${entry.path}:alternative-module-loader`);
       }
@@ -695,6 +699,7 @@ export function findMilestone17CapabilityViolations(
         }
       }
       if (
+        !dynamicAccessSourceIsAllowlisted &&
         ts.isBindingElement(node) &&
         bindingElementPropertyName(node) !== null &&
         ALTERNATIVE_MODULE_LOADER_MEMBERS.has(bindingElementPropertyName(node)!)
@@ -702,6 +707,7 @@ export function findMilestone17CapabilityViolations(
         violations.add(`${entry.path}:alternative-module-loader`);
       }
       if (
+        !dynamicAccessSourceIsAllowlisted &&
         ts.isPropertyAssignment(node) &&
         staticPropertyName(node.name) !== null &&
         ALTERNATIVE_MODULE_LOADER_MEMBERS.has(staticPropertyName(node.name)!)
@@ -716,16 +722,26 @@ export function findMilestone17CapabilityViolations(
         violations.add(`${entry.path}:non-allowlisted-reflection`);
       }
       if (ts.isIdentifier(node)) {
+        const isNonReferencePropertyName =
+          (ts.isPropertyAccessExpression(node.parent) && node.parent.name === node) ||
+          ((ts.isPropertyAssignment(node.parent) ||
+            ts.isPropertyDeclaration(node.parent) ||
+            ts.isPropertySignature(node.parent) ||
+            ts.isMethodDeclaration(node.parent) ||
+            ts.isMethodSignature(node.parent) ||
+            ts.isGetAccessorDeclaration(node.parent) ||
+            ts.isSetAccessorDeclaration(node.parent)) &&
+            node.parent.name === node);
         if (
           (node.text === "Object" || node.text === "Reflect") &&
           !(ts.isPropertyAccessExpression(node.parent) && node.parent.expression === node)
         ) {
           violations.add(`${entry.path}:non-allowlisted-reflection-root-alias`);
         }
-        if (NETWORK_GLOBAL_IDENTIFIERS.has(node.text)) {
+        if (!isNonReferencePropertyName && NETWORK_GLOBAL_IDENTIFIERS.has(node.text)) {
           violations.add(`${entry.path}:network-global`);
         }
-        if (RUNTIME_GLOBAL_IDENTIFIERS.has(node.text)) {
+        if (!isNonReferencePropertyName && RUNTIME_GLOBAL_IDENTIFIERS.has(node.text)) {
           violations.add(`${entry.path}:runtime-capability-global`);
         }
       }

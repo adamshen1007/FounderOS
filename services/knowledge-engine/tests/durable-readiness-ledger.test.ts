@@ -22,6 +22,8 @@ import {
   createGovernedReadinessEvaluationLedger,
   type ReadinessEvaluatorConfigurationInput,
 } from "../src/application/manage-governed-readiness-evaluation-ledger.js";
+import { createDurableM19ReadinessAuthority } from "../src/application/m19-source-authorities.js";
+import type { M19AuthorityRequest } from "../src/application/openai-responses-preparation-orchestrator.js";
 import {
   createCommittedReadinessTransaction,
   createCanonicalReadinessEvaluationPackage,
@@ -34,6 +36,7 @@ import {
   verifyCommittedReadinessTransaction,
   verifyCanonicalReadinessEvaluationPackage,
 } from "../src/domain/durable-readiness-ledger.js";
+import { createM19PolicyAuthorityEvidence } from "../src/domain/openai-responses-adapter.js";
 import { createAuthorizationDecisionEvidence } from "../src/domain/provider-readiness.js";
 import {
   openLocalFileReadinessEvaluationLedger,
@@ -104,9 +107,15 @@ function deliveryLedgerWithAuthorityFailure(
   });
 }
 
-async function registeredLedger(name: string) {
+async function registeredLedger(
+  name: string,
+  runtimeOptions: Parameters<typeof createCanonicalProviderReadinessEvaluationRuntime>[1] = {},
+) {
   const deliveryRoot = await root(`${name}-delivery`);
-  const runtime = await createCanonicalProviderReadinessEvaluationRuntime([deliveryRoot]);
+  const runtime = await createCanonicalProviderReadinessEvaluationRuntime(
+    [deliveryRoot],
+    runtimeOptions,
+  );
   const readinessRoot = await root(`${name}-readiness`);
   const ledger = await openLocalFileReadinessEvaluationLedger(options(readinessRoot));
   const head = await ledger.readHead();
@@ -143,6 +152,125 @@ describe("Milestone 15 durable readiness ledger", () => {
     expect(
       Object.values(M15_COMMITMENT_DOMAINS).every((value) => value.startsWith("founderos.m15.")),
     ).toBe(true);
+  });
+
+  it("resolves M19 readiness from a real committed OpenAI-family ledger transaction", async () => {
+    const { ledger, runtime, transaction } = await registeredLedger("m19-source-authority", {
+      adapterId: "adapter-openai-m19",
+      providerFamilyReference: "provider-family/openai",
+    });
+    const retained = transaction.evaluationPackage.retainedEvidence;
+    if (retained.costAndBudget === null) throw new Error("Expected retained cost evidence");
+    const { policyFingerprint: _policyFingerprint, ...expectedPolicy } =
+      runtime.input.transportPolicy;
+    void _policyFingerprint;
+    const policyAuthorityEvidence = createM19PolicyAuthorityEvidence({
+      schemaVersion: "1.0",
+      providerFamilyReference: "provider-family/openai",
+      environmentClass: "evaluation",
+      operation: "founder-decision-memo",
+      pricingEvidenceId: retained.costAndBudget.pricingReferenceId,
+      pricingEvidenceFingerprint: retained.costAndBudget.pricingReferenceFingerprint,
+      pricingReviewedAt: "2026-07-30T00:00:00.000Z",
+      pricingExpiresAt: "2026-07-30T03:00:00.000Z",
+      privacyPolicyFingerprint: "6".repeat(64),
+      privacyReviewedAt: "2026-07-30T00:00:00.000Z",
+      privacyExpiresAt: "2026-07-30T03:00:00.000Z",
+      providerRetentionEvidenceId: "provider-retention-m19",
+      providerRetentionEvidenceFingerprint: "8".repeat(64),
+      providerRetentionReviewedAt: "2026-07-30T00:00:00.000Z",
+      providerRetentionExpiresAt: "2026-07-30T03:00:00.000Z",
+      accountRetentionEvidenceId: "account-retention-m19",
+      accountRetentionEvidenceFingerprint: "a".repeat(64),
+      accountRetentionReviewedAt: "2026-07-30T00:00:00.000Z",
+      accountRetentionExpiresAt: "2026-07-30T03:00:00.000Z",
+      operationFingerprint: "9".repeat(64),
+      cachePolicyReviewedAt: "2026-07-30T00:00:00.000Z",
+      cachePolicyExpiresAt: "2026-07-30T03:00:00.000Z",
+      cacheEvidenceReference: "evidence/cache-policy-m19",
+      issuerReference: "authority/m19-policy-evidence",
+    });
+    const authority = createDurableM19ReadinessAuthority({
+      schemaVersion: "1.0",
+      ledger,
+      transactionId: transaction.transactionId,
+      adapterState: "dry-run-mapping",
+      environmentClass: "evaluation",
+      operation: "founder-decision-memo",
+      transportPolicy: runtime.input.transportPolicy,
+      transportPolicyVerification: {
+        adapter: runtime.input.adapterDescriptor,
+        expectedPolicy,
+      },
+      policyAuthorityEvidence,
+      expiresAt: "2026-07-30T03:00:00.000Z",
+      issuerReference: "authority/m19-durable-readiness",
+    });
+    const plan = retained.requestPlan;
+    if (plan === null) throw new Error("Expected retained request plan");
+    const request = {
+      schemaVersion: "1.0",
+      preparationId: "preparation-real-ledger-m19",
+      evaluatedAt: "2026-07-30T01:00:00.000Z",
+      decision: {
+        authorizationDecisionId: "decision-real-ledger-m19",
+        decisionFingerprint: "c".repeat(64),
+        authorizationRequest: {
+          executionAttemptId: "attempt-real-ledger-m19",
+          executionAttemptFingerprint: "1".repeat(64),
+          adapterId: transaction.adapterId,
+          adapterFingerprint: transaction.adapterFingerprint,
+          providerFamilyReference: transaction.providerFamilyReference,
+          deliveryTransactionId: plan.deliveryTransactionId,
+          deliveryTransactionFingerprint: plan.deliveryTransactionFingerprint,
+          invocationRequestId: plan.invocationRequestId,
+          invocationRequestFingerprint: plan.invocationRequestFingerprint,
+          environmentClass: "evaluation",
+          operation: "founder-decision-memo",
+        },
+      },
+      claim: {
+        authorizationClaimId: "claim-real-ledger-m19",
+        claimFingerprint: "2".repeat(64),
+      },
+    } as unknown as M19AuthorityRequest;
+
+    let networkCalls = 0;
+    const networkGlobals = [
+      "fetch",
+      "WebSocket",
+      "EventSource",
+      "XMLHttpRequest",
+      "navigator",
+    ] as const;
+    const originalDescriptors = new Map<string, PropertyDescriptor>();
+    for (const name of networkGlobals) {
+      const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
+      if (descriptor === undefined || descriptor.configurable !== true) continue;
+      originalDescriptors.set(name, descriptor);
+      Object.defineProperty(globalThis, name, {
+        configurable: true,
+        get() {
+          networkCalls += 1;
+          throw new Error("network forbidden");
+        },
+      });
+    }
+    try {
+      const evidence = await authority.resolve(request);
+      expect(evidence.readinessTransactionFingerprint).toBe(transaction.transactionFingerprint);
+      expect(evidence.m14CompatibilityFingerprint).toBe(
+        retained.compatibility?.compatibilityFingerprint,
+      );
+      expect(evidence.policyAuthorityEvidenceFingerprint).toBe(
+        policyAuthorityEvidence.evidenceFingerprint,
+      );
+      expect(networkCalls).toBe(0);
+    } finally {
+      for (const [name, descriptor] of originalDescriptors) {
+        Object.defineProperty(globalThis, name, descriptor);
+      }
+    }
   });
 
   it("produces byte-identical deterministic genesis commitments", () => {

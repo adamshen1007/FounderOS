@@ -456,7 +456,10 @@ describe("Milestone 15 local file readiness ledger fault matrix", () => {
       { stdio: "ignore" },
     );
     try {
-      await waitForChildPath(child, barrier, { timeoutMs: 10_000 });
+      await waitForChildPath(child, barrier, {
+        timeoutMs: 10_000,
+        expectedUtf8Content: "ready",
+      });
       expect(await readFile(barrier, "utf8")).toBe("ready");
     } finally {
       child.kill("SIGTERM");

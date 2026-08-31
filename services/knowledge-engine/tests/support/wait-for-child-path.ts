@@ -1,16 +1,20 @@
 import type { ChildProcess } from "node:child_process";
-import { lstat } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 
 export interface ChildPathWaitOptions {
   readonly timeoutMs?: number;
   readonly pollIntervalMs?: number;
+  readonly expectedUtf8Content?: string;
 }
 
-async function pathExists(path: string): Promise<boolean> {
+async function pathIsReady(path: string, expectedUtf8Content?: string): Promise<boolean> {
   try {
-    await lstat(path);
-    return true;
+    if (expectedUtf8Content === undefined) {
+      await lstat(path);
+      return true;
+    }
+    return (await readFile(path, "utf8")) === expectedUtf8Content;
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") return false;
     throw error;
@@ -27,7 +31,7 @@ export async function waitForChildPath(
   const deadline = Date.now() + timeoutMs;
 
   while (true) {
-    if (await pathExists(path)) return;
+    if (await pathIsReady(path, options.expectedUtf8Content)) return;
     if (child.exitCode !== null || child.signalCode !== null) {
       throw new Error("child-exited-before-initialization-barrier");
     }

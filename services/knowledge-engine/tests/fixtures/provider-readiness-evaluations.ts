@@ -1104,7 +1104,13 @@ export const EXECUTABLE_PROVIDER_READINESS_EVALUATIONS: readonly ProviderReadine
     ...BYPASS_CASES,
   ];
 
-export async function createCanonicalProviderReadinessEvaluationRuntime(roots: string[]) {
+export async function createCanonicalProviderReadinessEvaluationRuntime(
+  roots: string[],
+  options: {
+    readonly adapterId?: string;
+    readonly providerFamilyReference?: string;
+  } = {},
+) {
   const runtime = await createReasoningTestRuntime(roots);
   const invocationRequest = createInvocation(runtime);
   const authority = await resolveVerifiedGovernedReasoningAuthority({
@@ -1116,8 +1122,8 @@ export async function createCanonicalProviderReadinessEvaluationRuntime(roots: s
   const adapterDescriptor = createProductionProviderAdapterDescriptor(
     {
       schemaVersion: "1.0",
-      adapterId: "adapter-readiness-catalog",
-      providerFamilyReference: "provider-family/evaluation",
+      adapterId: options.adapterId ?? "adapter-readiness-catalog",
+      providerFamilyReference: options.providerFamilyReference ?? "provider-family/evaluation",
       requestMappingVersion: "1.0",
       responseMappingVersion: "1.0",
       transportPolicyVersion: "1.0",

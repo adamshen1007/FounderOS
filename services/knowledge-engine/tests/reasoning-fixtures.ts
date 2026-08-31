@@ -75,6 +75,9 @@ export function createInvocation(
     readonly maxOutputCharacters?: number;
     readonly outputContentType?: "canonical-json" | "canonical-text";
     readonly requireNonEmpty?: boolean;
+    readonly taskSourceClassification?: "evaluation-fixture" | "request-author";
+    readonly taskText?: string;
+    readonly duplicateRequestAuthorTask?: boolean;
   } = {},
 ): ReasoningInvocationRequest {
   const envelope = runtime.fixture.result.envelope;
@@ -92,16 +95,30 @@ export function createInvocation(
     blockId: "task-instruction",
     blockType: "task-instruction",
     contentType: "canonical-text",
-    text: "Produce the deterministic governed evaluation fixture.",
+    text: options.taskText ?? "Produce the deterministic governed evaluation fixture.",
     priority: 1,
-    sourceClassification: "evaluation-fixture",
+    sourceClassification: options.taskSourceClassification ?? "evaluation-fixture",
   });
+  const duplicateTaskBlock = options.duplicateRequestAuthorTask
+    ? createReasoningInstructionBlock({
+        schemaVersion: "1.0",
+        blockId: "task-instruction-duplicate",
+        blockType: "task-instruction",
+        contentType: "canonical-text",
+        text: "A second founder question must reject.",
+        priority: 2,
+        sourceClassification: "request-author",
+      })
+    : null;
   const outputContentType = options.outputContentType ?? "canonical-json";
   const maxOutputCharacters = options.maxOutputCharacters ?? 4_000;
   const reasoningInput = createProviderNeutralReasoningInput({
     schemaVersion: "1.0",
     contentType: "provider-neutral-instruction-blocks-v1",
-    instructionBlocks: [contextBlock, taskBlock],
+    instructionBlocks:
+      duplicateTaskBlock === null
+        ? [contextBlock, taskBlock]
+        : [contextBlock, taskBlock, duplicateTaskBlock],
     contextReference: {
       contextPackageId: envelope.contextPackageId,
       contextPackageFingerprint: envelope.contextPackageFingerprint,
