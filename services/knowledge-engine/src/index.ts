@@ -1,4 +1,5 @@
 export * from "./application/ingest-markdown.js";
+export * from "./application/credential-resolution-orchestrator.js";
 export {
   createInMemoryExecutionAuthorizationAuthority,
   type ClaimExecutionAuthorizationDecisionInput,
@@ -94,6 +95,7 @@ export * from "./application/query-knowledge.js";
 export * from "./application/query-knowledge-repository.js";
 export * from "./application/run-migration-command.js";
 export * from "./domain/frontmatter.js";
+export * from "./domain/credential-resolution.js";
 export * from "./domain/execution-authorization.js";
 export * from "./domain/knowledge-query.js";
 export {

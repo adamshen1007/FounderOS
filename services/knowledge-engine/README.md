@@ -1,5 +1,7 @@
 # Knowledge engine
 
+Milestone 18 adds authorization-first credential-resolution orchestration. It verifies the exact registered Milestone 17 Decision and claim, compares every non-secret binding, reserves resolution identity, invokes a structural resolver port once, and constructs independently verifiable sanitized evidence. It does not import the concrete resolver or handle synthetic material.
+
 The Milestone 02 and 03 foundations read one Markdown file or one explicitly selected directory, parse YAML frontmatter, normalize specification-style keys, validate through `@founderos/knowledge-schema`, and return deterministic file-level and aggregate migration reports.
 
 Milestone 04 adds manifest-controlled corpus execution. It loads a strict YAML manifest, confines every read to one physical root, rejects symbolic links and unsafe paths, verifies canonical SHA-256 digests, enforces ready/approved lifecycle gates, creates schema-valid objects from canonical document content, and writes a deterministic report artifact.

@@ -262,6 +262,19 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 - [Milestone 17 Verification Checklist v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Verification_Checklist_v1.0.md)
 - [Milestone 17 Implementation Plan v1.0](./docs/milestones/milestone-17/FounderOS_Milestone_17_Implementation_Plan_v1.0.md)
 
+### Milestone 18 — Credential Resolution and Rotation Foundation
+
+**Implementation candidate — synthetic, process-local, and transport-free.** Milestone 18 adds strict secret-free shared contracts, registered M17 Decision/claim verification before resolver access, exact resolution identity replay, and an infrastructure-owned deterministic synthetic resolver with monotonic rotation, permanent revocation, and owned-buffer overwrite before sanitized return. ADR-0022 is Proposed pending complete verification, independent acceptance, and merge. It adds no real credential, secret store, environment read, provider mapper, header, endpoint, transport, network, deployment, release, or live execution.
+
+- [Credential Resolution and Rotation Design v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Credential_Resolution_and_Rotation_Design_v1.0.md)
+- [Credential Resolution and Rotation Specification v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Credential_Resolution_and_Rotation_Specification_v1.0.md)
+- [Credential Resolution Request and Evidence Contract v1.0](./docs/milestones/milestone-18/FounderOS_Credential_Resolution_Request_and_Evidence_Contract_v1.0.md)
+- [Credential Rotation and Revocation Contract v1.0](./docs/milestones/milestone-18/FounderOS_Credential_Rotation_and_Revocation_Contract_v1.0.md)
+- [Milestone 18 Acceptance Criteria v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Acceptance_Criteria_v1.0.md)
+- [Milestone 18 Verification Checklist v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Verification_Checklist_v1.0.md)
+- [Milestone 18 Package README v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Package_README_v1.0.md)
+- [Milestone 18 Implementation Plan v1.0](./docs/milestones/milestone-18/FounderOS_Milestone_18_Implementation_Plan_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

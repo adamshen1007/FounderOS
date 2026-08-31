@@ -1,6 +1,7 @@
 export * from "./canonical-json.js";
 export * from "./authorization.js";
 export * from "./context.js";
+export * from "./credential-resolution.js";
 export * from "./corpus.js";
 export * from "./durable-registry.js";
 export * from "./delivery.js";

@@ -258,12 +258,17 @@ export function collectTransitiveTypeScriptModuleClosure(
 
 export function findMilestone17CapabilityViolations(
   entries: readonly TypeScriptModuleClosureEntry[],
-  options: { readonly requireCompleteDynamicAccessAllowlist?: boolean } = {},
+  options: {
+    readonly additionalDynamicAccessSourceFingerprints?: ReadonlyMap<string, string>;
+    readonly additionalSafeReflectionMembers?: ReadonlyMap<string, ReadonlySet<string>>;
+    readonly requireCompleteDynamicAccessAllowlist?: boolean;
+  } = {},
 ): readonly string[] {
   const violations = new Set<string>();
   const observedDynamicAccessAllowlistPaths = new Set<string>();
   for (const entry of entries) {
     const expectedDynamicAccessSourceFingerprint =
+      options.additionalDynamicAccessSourceFingerprints?.get(entry.path) ??
       EXPLICITLY_SAFE_DYNAMIC_ACCESS_SOURCE_FINGERPRINTS.get(entry.path);
     const actualSourceFingerprint = createHash("sha256").update(entry.source).digest("hex");
     const dynamicAccessSourceIsAllowlisted =
@@ -610,7 +615,10 @@ export function findMilestone17CapabilityViolations(
       ts.forEachChild(node, collectReflectiveValueBindings);
     }
     collectReflectiveValueBindings(sourceFile);
-    const safeReflectionMembers = EXPLICITLY_SAFE_REFLECTION_MEMBERS.get(entry.path) ?? new Set();
+    const safeReflectionMembers =
+      options.additionalSafeReflectionMembers?.get(entry.path) ??
+      EXPLICITLY_SAFE_REFLECTION_MEMBERS.get(entry.path) ??
+      new Set();
     function bindingElementPropertyName(element: ts.BindingElement): string | null {
       if (element.dotDotDotToken !== undefined) return null;
       if (element.propertyName === undefined) {
