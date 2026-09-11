@@ -6,7 +6,7 @@
 
 ## Status
 
-**Accepted specification; implementation authorized and locally implemented pending verification**
+**Implementation independently reviewed, accepted, and merged through pull request #20**
 
 ## Objective
 
