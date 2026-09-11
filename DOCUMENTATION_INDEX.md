@@ -277,7 +277,7 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 
 ### Milestone 19 — Disabled OpenAI Responses Adapter Foundation
 
-**Accepted specification; implementation authorized and locally implemented pending final verification.** Milestone 19 defines deterministic fixed-profile OpenAI Responses request-plan mapping, inert fixture-response mapping, exact M17/M18 evidence compatibility, a disabled-only adapter facade, and transitive no-network proof. The facade can terminate only as `disabled-by-policy` and cannot receive credential material, construct authentication headers, pass a successful final pre-send gate, or perform transport. ADR-0023 remains Proposed until implementation acceptance and publication.
+**Implementation independently reviewed, accepted, and merged through pull request #20.** Milestone 19 defines deterministic fixed-profile OpenAI Responses request-plan mapping, inert fixture-response mapping, exact M17/M18 evidence compatibility, a disabled-only adapter facade, and transitive no-network proof. The facade can terminate only as `disabled-by-policy` and cannot receive credential material, construct authentication headers, pass a successful final pre-send gate, or perform transport. ADR-0023 is Accepted.
 
 - [Milestone 19 Package README v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Package_README_v1.0.md)
 - [Disabled OpenAI Responses Adapter Design v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Disabled_OpenAI_Responses_Adapter_Design_v1.0.md)

@@ -1,4 +1,5 @@
 .build/
+.github/CODEOWNERS
 coverage/
 docs/**/*.md
 node_modules/
