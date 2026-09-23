@@ -22,9 +22,10 @@ fault injection and independently verifiable reports.
 4. [Fault injection and final-control rehearsal contract](./FounderOS_Fault_Injection_and_Final_Control_Rehearsal_Contract_v1.0.md)
 5. [M20 dry-run contract catalog](./FounderOS_M20_Dry_Run_Contract_Catalog_v1.0.md)
 6. [Acceptance criteria](./FounderOS_Milestone_20_Acceptance_Criteria_v1.0.md)
-7. [Verification checklist](./FounderOS_Milestone_20_Verification_Checklist_v1.0.md)
-8. [Implementation plan](./FounderOS_Milestone_20_Implementation_Plan_v1.0.md)
-9. This package README
+7. [Acceptance traceability](./FounderOS_Milestone_20_Acceptance_Traceability_v1.0.md)
+8. [Verification checklist](./FounderOS_Milestone_20_Verification_Checklist_v1.0.md)
+9. [Implementation plan](./FounderOS_Milestone_20_Implementation_Plan_v1.0.md)
+10. This package README
 
 ## Boundary
 
