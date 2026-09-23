@@ -2,7 +2,7 @@
 
 FounderOS is an AI-native operating system for founder decision-making, organizational memory, and governed AI-assisted execution. This repository is a documentation-first TypeScript monorepo.
 
-The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, deterministic queries, governed context assembly, a provider-neutral governed Context Consumer delivery boundary, a restart-safe local Context Delivery Ledger with durable idempotency and Replay Attempt evidence, a production-provider readiness boundary, and a local no-network M17–M19 dry-run candidate. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, real-provider or production-model execution, Hermes, an agent runtime, MCP connectors, or a user interface.
+The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, deterministic queries, governed context assembly, a provider-neutral governed Context Consumer delivery boundary, a restart-safe local Context Delivery Ledger with durable idempotency and Replay Attempt evidence, a production-provider readiness boundary, and an accepted local no-network M17–M19 dry-run foundation. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, real-provider or production-model execution, Hermes, an agent runtime, MCP connectors, or a user interface.
 
 ## Architecture at a glance
 
@@ -22,14 +22,15 @@ Milestone 18 implements the second separately bounded step: strict secret-free c
 
 Milestone 19 implements the independently reviewed and accepted third bounded step: a deterministic disabled OpenAI Responses adapter foundation. Shared strict contracts, Knowledge Engine authority orchestration, fixed non-secret request-plan mapping, inert deterministic fixture-response mapping, complete acceptance traceability, and a disabled-only three-method integration facade terminate as `disabled-by-policy`. The implementation was merged through pull request #20; ADR-0023 is Accepted. It contains no credential material handoff, authentication header, successful final pre-send revalidation, DNS, TLS, HTTP client, SDK, provider request, deployment, release, or live execution.
 
-Milestone 20 implements a local candidate for the fourth bounded step: strict dry-run contracts,
+Milestone 20 implements the accepted fourth bounded step: strict dry-run contracts,
 deterministic structural-port orchestration, permanent process-local run identity, independent
 report verification, a closed test-owned fault catalog, and repository-only composition of the
 public M17, M18, and M19 boundaries. Valid composition stops at M19 `disabled-by-policy`, then
 performs a non-authoritative final-control rehearsal and can report only `dry-run-verified`; every
 available ambient network global is wrapped by a test witness and all scenario families prove zero
-attempts. ADR-0024 remains Proposed, and the candidate is not yet independently accepted, merged,
-published, production-ready, or authorized for live execution. It adds no real credential,
+attempts. The independently reviewed implementation was merged through pull request #27, and
+ADR-0024 is Accepted for this non-executing foundation only. It is not production-ready or
+authorized for live execution. It adds no real credential,
 authentication header, endpoint, transport, provider SDK, provider request, Agent, Hermes, MCP,
 deployment, or release capability.
 

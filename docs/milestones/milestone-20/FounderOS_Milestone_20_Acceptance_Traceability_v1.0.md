@@ -2,10 +2,10 @@
 
 ## Purpose
 
-This ledger maps every Milestone 20 acceptance criterion to the current implementation candidate
-and its executable proof. It records local implementation evidence only. It does not claim
-independent whole-candidate acceptance, Git publication, merge, production readiness, provider
-access, deployment, release, live execution, or authority to begin Milestone 21.
+This ledger maps every Milestone 20 acceptance criterion to the accepted implementation and its
+executable proof. The independently reviewed implementation was merged through pull request #27;
+ADR-0024 is Accepted for the non-executing foundation only. This ledger does not claim production
+readiness, provider access, deployment, release, live execution, or authority to begin Milestone 21.
 
 | Acceptance | Implementation anchor | Executable proof |
 | --- | --- | --- |
