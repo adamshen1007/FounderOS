@@ -9,6 +9,13 @@ input-projection, readiness, current-control, request-plan, fixture-response, ma
 disabled-policy, preparation-result, and closed-taxonomy contracts. They contain no credential
 material, authentication header, endpoint override, client, callback, transport, or provider SDK.
 
+Milestone 20 adds strict versioned dry-run request, scenario, catalog, fault, stage observation,
+protected-call count, final-control snapshot and rehearsal, report, result, taxonomy, verification,
+and fingerprint-domain contracts. Exact report grammar binds terminal reason, observation prefix,
+assertion tuple, scenario-specific owner call counts, and literal-zero network attempts. These are
+storage-independent validation contracts only; the package does not orchestrate authorities,
+inject faults, access credentials, perform transport, or authorize execution.
+
 It implements the seven object categories defined by the official specifications:
 
 - General knowledge

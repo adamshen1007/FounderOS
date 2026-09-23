@@ -11,6 +11,7 @@ export * from "./durable-readiness-ledger.js";
 export * from "./enums.js";
 export * from "./metadata.js";
 export * from "./migration.js";
+export * from "./m20-dry-run.js";
 export * from "./objects.js";
 export * from "./openai-responses-adapter.js";
 export * from "./parse.js";

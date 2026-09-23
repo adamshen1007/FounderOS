@@ -59,6 +59,10 @@ const EXPLICITLY_SAFE_DYNAMIC_ACCESS_SOURCE_FINGERPRINTS = new Map([
     "3c1287ef8c321211ae1ce0d49bf13a3291d0bd8bb47a16c91b439f435e82fdc8",
   ],
   [
+    "packages/knowledge-schema/src/m20-dry-run.ts",
+    "7cb83f06604427ffbadda29315f547582885d1956378ced775d1ed999d139fc3",
+  ],
+  [
     "packages/knowledge-schema/src/provider-readiness.ts",
     "df93dc9dea4fc24af8a1f6d72e3ab367c9c8705551e0bf5e42126d7dc11c0736",
   ],
@@ -93,6 +97,7 @@ const EXPLICITLY_SAFE_DYNAMIC_ACCESS_SOURCE_FINGERPRINTS = new Map([
 ]);
 const NETWORK_GLOBAL_IDENTIFIERS = new Set([
   "EventSource",
+  "WebTransport",
   "WebSocket",
   "XMLHttpRequest",
   "fetch",
@@ -121,6 +126,7 @@ const EXPLICITLY_SAFE_REFLECTION_MEMBERS = new Map<string, ReadonlySet<string>>(
     "packages/knowledge-schema/src/durable-readiness-ledger.ts",
     new Set(["Object.getOwnPropertyDescriptors", "Reflect.ownKeys"]),
   ],
+  ["packages/knowledge-schema/src/m20-dry-run.ts", new Set(["Reflect.ownKeys"])],
   [
     "services/knowledge-engine/src/application/production-provider-readiness-input-safety.ts",
     new Set([
@@ -756,7 +762,7 @@ export function findMilestone17CapabilityViolations(
             `${entry.path}:non-allowlisted-dynamic-element-access:${node.getText(sourceFile)}`,
           );
         }
-        if (propertyName === "fetch" || propertyName === "WebSocket") {
+        if (propertyName !== null && NETWORK_GLOBAL_IDENTIFIERS.has(propertyName)) {
           violations.add(`${entry.path}:network-global`);
         }
         if (propertyName === "process") {
