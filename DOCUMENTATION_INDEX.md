@@ -292,13 +292,12 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 
 ### Milestone 20 — End-to-End Dry-Run and Fault-Injection Closure
 
-**Specification accepted for implementation; local implementation candidate awaiting final
-verification and independent exact-candidate review.** Milestone 20 implements deterministic no-network composition of the
+**Specification and implementation accepted; merged through pull request #27.** Milestone 20 implements deterministic no-network composition of the
 accepted M17 authorization, M18 synthetic credential-resolution, and M19 disabled OpenAI Responses
 preparation boundaries. Its success terminal is only `dry-run-verified` after strict public
 parsing and M20-known-coordinate binding of inherited-trust M19 `disabled-by-policy`, a
 non-authoritative final-control rehearsal, exact stage and call evidence, and an observed zero
-network-attempt delta. ADR-0024 remains Proposed. No credential, authentication
+network-attempt delta. ADR-0024 is Accepted for this non-executing foundation only. No credential, authentication
 header, live final pre-send gate, transport, provider request, deployment, release, or live
 execution is implemented or authorized.
 

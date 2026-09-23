@@ -214,8 +214,8 @@ describe("Milestone 20 documentation, security, and structural traceability", ()
       expect(index).toContain(document);
     }
     expect(read("README.md")).toContain("Milestone 20 implements");
-    expect(read("CHANGELOG.md")).toContain("Implemented a local Milestone 20 candidate");
-    expect(read("ARCHITECTURE_DECISIONS.md")).toMatch(/ADR-0024:[\s\S]*\*\*Status:\*\* Proposed/u);
+    expect(read("CHANGELOG.md")).toContain("Implemented Milestone 20 deterministic");
+    expect(read("ARCHITECTURE_DECISIONS.md")).toMatch(/ADR-0024:[\s\S]*\*\*Status:\*\* Accepted/u);
     expect(read("packages/knowledge-schema/README.md")).toContain("Milestone 20 adds");
     expect(read("services/knowledge-engine/README.md")).toContain("Milestone 20 adds");
   });

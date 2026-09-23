@@ -6,11 +6,11 @@
 
 ## Status
 
-**Documentation candidate under independent review. No implementation is authorized.**
+**Specification accepted; implementation independently reviewed and merged through pull request #27.**
 
 ## Objective
 
-Specify one deterministic no-network composition of the accepted M17 authorization, M18 synthetic
+Provide one deterministic no-network composition of the accepted M17 authorization, M18 synthetic
 credential-resolution, and M19 disabled OpenAI Responses preparation boundaries, with controlled
 fault injection and independently verifiable reports.
 
@@ -28,7 +28,7 @@ fault injection and independently verifiable reports.
 
 ## Boundary
 
-M20's future success status will mean only that deterministic synthetic inputs reached a strictly
+M20's `dry-run-verified` status means only that deterministic synthetic inputs reached a strictly
 parsed, M20-known-coordinate-bound M19 `disabled-by-policy` result whose opaque fields retain the
 inherited M19 trust boundary, the captured no-network witness observed a zero delta, and the report
 verified. The final-control rehearsal is not a live final
@@ -36,9 +36,8 @@ pre-send gate. This package adds
 or authorizes no credential, header, transport, provider request, deployment, release, or live
 execution.
 
-## Acceptance Sequence
+## Publication Boundary
 
-1. Stabilize the complete documentation candidate.
-2. Obtain an independent read-only whole-candidate review.
-3. Obtain separate explicit human acceptance of the exact reviewed package.
-4. Only then begin separately authorized M20 implementation.
+ADR-0024 is Accepted for the merged non-executing foundation. The package's original specification
+and acceptance criteria remain the historical implementation authority; this publication closure
+does not authorize Milestone 21 implementation or live execution.
