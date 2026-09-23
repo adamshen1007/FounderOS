@@ -290,6 +290,29 @@ Milestone 14 is implemented by provider-neutral readiness contracts in [`@founde
 - [Milestone 19 Verification Checklist v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Verification_Checklist_v1.0.md)
 - [Milestone 19 Implementation Plan v1.0](./docs/milestones/milestone-19/FounderOS_Milestone_19_Implementation_Plan_v1.0.md)
 
+### Milestone 20 — End-to-End Dry-Run and Fault-Injection Closure
+
+**Specification accepted for implementation; local implementation candidate awaiting final
+verification and independent exact-candidate review.** Milestone 20 implements deterministic no-network composition of the
+accepted M17 authorization, M18 synthetic credential-resolution, and M19 disabled OpenAI Responses
+preparation boundaries. Its success terminal is only `dry-run-verified` after strict public
+parsing and M20-known-coordinate binding of inherited-trust M19 `disabled-by-policy`, a
+non-authoritative final-control rehearsal, exact stage and call evidence, and an observed zero
+network-attempt delta. ADR-0024 remains Proposed. No credential, authentication
+header, live final pre-send gate, transport, provider request, deployment, release, or live
+execution is implemented or authorized.
+
+- [Milestone 20 Package README v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_Package_README_v1.0.md)
+- [End-to-End Dry-Run and Fault-Injection Design v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_End_to_End_Dry_Run_and_Fault_Injection_Design_v1.0.md)
+- [End-to-End Dry-Run and Fault-Injection Specification v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_End_to_End_Dry_Run_and_Fault_Injection_Specification_v1.0.md)
+- [Dry-Run Execution Report Contract v1.0](./docs/milestones/milestone-20/FounderOS_Dry_Run_Execution_Report_Contract_v1.0.md)
+- [Fault Injection and Final-Control Rehearsal Contract v1.0](./docs/milestones/milestone-20/FounderOS_Fault_Injection_and_Final_Control_Rehearsal_Contract_v1.0.md)
+- [M20 Dry-Run Contract Catalog v1.0](./docs/milestones/milestone-20/FounderOS_M20_Dry_Run_Contract_Catalog_v1.0.md)
+- [Milestone 20 Acceptance Criteria v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_Acceptance_Criteria_v1.0.md)
+- [Milestone 20 Acceptance Traceability v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_Acceptance_Traceability_v1.0.md)
+- [Milestone 20 Verification Checklist v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_Verification_Checklist_v1.0.md)
+- [Milestone 20 Implementation Plan v1.0](./docs/milestones/milestone-20/FounderOS_Milestone_20_Implementation_Plan_v1.0.md)
+
 ## Repository governance
 
 - [Architecture decisions](./ARCHITECTURE_DECISIONS.md)

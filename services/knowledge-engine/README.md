@@ -13,6 +13,16 @@ and separately captured M19 privacy, retention, operation, and cache-policy evid
 M12 Delivery, captured M13 Invocation, and Context Package before deriving and binding their
 canonical projection to the M17 Decision.
 
+Milestone 20 adds a no-network dry-run conductor over factory-captured structural M17, M19, final-
+control, and monotonic network-witness ports. It captures exact public data, permanently reserves
+run identity before the first await, distinguishes owners, followers, conflicts, and exact replay,
+executes the accepted gate order, constructs canonical reports, and exposes a pure structural
+report verifier. Concrete M17/M18/M19 wiring, the closed fault catalog, source snapshots, the
+non-authoritative final-control authority, and ambient-network traps remain repository test-only.
+The service imports neither concrete credential-resolver nor provider-adapter packages and gains no
+credential, filesystem, environment, endpoint, transport, provider SDK, Agent, Hermes, MCP, or live
+execution capability.
+
 The Milestone 02 and 03 foundations read one Markdown file or one explicitly selected directory, parse YAML frontmatter, normalize specification-style keys, validate through `@founderos/knowledge-schema`, and return deterministic file-level and aggregate migration reports.
 
 Milestone 04 adds manifest-controlled corpus execution. It loads a strict YAML manifest, confines every read to one physical root, rejects symbolic links and unsafe paths, verifies canonical SHA-256 digests, enforces ready/approved lifecycle gates, creates schema-valid objects from canonical document content, and writes a deterministic report artifact.

@@ -2,7 +2,7 @@
 
 FounderOS is an AI-native operating system for founder decision-making, organizational memory, and governed AI-assisted execution. This repository is a documentation-first TypeScript monorepo.
 
-The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, deterministic queries, governed context assembly, a provider-neutral governed Context Consumer delivery boundary, a restart-safe local Context Delivery Ledger with durable idempotency and Replay Attempt evidence, and a production-provider readiness boundary that evaluates authorization, credential references, transport policy, admission, containment, health, mapping, and observability. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, real-provider or production-model execution, Hermes, an agent runtime, MCP connectors, or a user interface.
+The repository currently provides the governed KnowledgeOS schema, ingestion, migration, corpus-backed repository snapshots, deterministic comparison and governed change sets, human-controlled snapshot review, a local durable snapshot registry and activation audit trail, deterministic queries, governed context assembly, a provider-neutral governed Context Consumer delivery boundary, a restart-safe local Context Delivery Ledger with durable idempotency and Replay Attempt evidence, a production-provider readiness boundary, and a local no-network M17–M19 dry-run candidate. It does **not** implement a general-purpose application database, distributed or remote persistence, automatic activation or synchronization, semantic retrieval, real-provider or production-model execution, Hermes, an agent runtime, MCP connectors, or a user interface.
 
 ## Architecture at a glance
 
@@ -22,6 +22,17 @@ Milestone 18 implements the second separately bounded step: strict secret-free c
 
 Milestone 19 implements the independently reviewed and accepted third bounded step: a deterministic disabled OpenAI Responses adapter foundation. Shared strict contracts, Knowledge Engine authority orchestration, fixed non-secret request-plan mapping, inert deterministic fixture-response mapping, complete acceptance traceability, and a disabled-only three-method integration facade terminate as `disabled-by-policy`. The implementation was merged through pull request #20; ADR-0023 is Accepted. It contains no credential material handoff, authentication header, successful final pre-send revalidation, DNS, TLS, HTTP client, SDK, provider request, deployment, release, or live execution.
 
+Milestone 20 implements a local candidate for the fourth bounded step: strict dry-run contracts,
+deterministic structural-port orchestration, permanent process-local run identity, independent
+report verification, a closed test-owned fault catalog, and repository-only composition of the
+public M17, M18, and M19 boundaries. Valid composition stops at M19 `disabled-by-policy`, then
+performs a non-authoritative final-control rehearsal and can report only `dry-run-verified`; every
+available ambient network global is wrapped by a test witness and all scenario families prove zero
+attempts. ADR-0024 remains Proposed, and the candidate is not yet independently accepted, merged,
+published, production-ready, or authorized for live execution. It adds no real credential,
+authentication header, endpoint, transport, provider SDK, provider request, Agent, Hermes, MCP,
+deployment, or release capability.
+
 Repository dependencies must flow in one direction:
 
 ```text
@@ -34,8 +45,8 @@ The official specifications are indexed in [DOCUMENTATION_INDEX.md](./DOCUMENTAT
 
 ## Implemented foundations
 
-- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, repositories, lifecycle and durable registry evidence, governed context packages, Consumer delivery, storage-independent durable Delivery, Reasoning Execution, Readiness Evaluation Ledger contracts and results, provider-neutral production-readiness evidence, execution Authorization Decisions and claims, credential resolution, and disabled OpenAI Responses preparation/mapping.
-- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, deterministic budget-bounded context assembly, fail-closed provider-neutral delivery, governed append-only Delivery, Reasoning Execution, and Readiness Evaluation ledgers, deterministic fake-provider reasoning with independently verifiable result evidence, the non-executing production-provider readiness facade, process-local Authorization Decision authority, credential-resolution orchestration, and disabled OpenAI Responses preparation orchestration.
+- [`@founderos/knowledge-schema`](./packages/knowledge-schema/README.md) provides strict runtime schemas and inferred TypeScript contracts for KnowledgeOS metadata, objects, migration, queries, repositories, lifecycle and durable registry evidence, governed context packages, Consumer delivery, storage-independent durable Delivery, Reasoning Execution, Readiness Evaluation Ledger contracts and results, provider-neutral production-readiness evidence, execution Authorization Decisions and claims, credential resolution, disabled OpenAI Responses preparation/mapping, and M20 dry-run evidence.
+- [`@founderos/knowledge-engine`](./services/knowledge-engine/README.md) provides read-only ingestion, manifest-controlled Priority 1 corpus migration, corpus-backed repository initialization, deterministic snapshots and queries, governed lifecycle and durable activation, deterministic budget-bounded context assembly, fail-closed provider-neutral delivery, governed append-only Delivery, Reasoning Execution, and Readiness Evaluation ledgers, deterministic fake-provider reasoning with independently verifiable result evidence, the non-executing production-provider readiness facade, process-local Authorization Decision authority, credential-resolution orchestration, disabled OpenAI Responses preparation orchestration, and structural M20 dry-run conduction and report verification.
 - `@founderos/openai-responses-adapter` provides only deterministic fixed-profile request mapping, inert fixture-response mapping, and structural `disabled-by-policy` termination. It has no send-like method or network dependency.
 - [`specs/knowledge-templates`](./specs/knowledge-templates) provides valid Markdown templates for all seven KnowledgeOS object types.
 - [`knowledge/migration-manifest.yaml`](./knowledge/migration-manifest.yaml) binds the eight canonical FounderOS Priority 1 documents to reviewed object identities, logical destinations, metadata, and source hashes.

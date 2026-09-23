@@ -97,7 +97,7 @@ export async function runKnowledgeEngineTests() {
     [vitest, "run", "--maxWorkers=1", `--exclude=${scenarioFile}`],
     { cwd: engineRoot },
   );
-  requireInventory(processA, 38, 1_173);
+  requireInventory(processA, 40, 1_327);
 
   const processB = await runContainedCommand(
     process.execPath,

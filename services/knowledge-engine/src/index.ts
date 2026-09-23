@@ -1,6 +1,7 @@
 export * from "./application/ingest-markdown.js";
 export * from "./application/credential-resolution-orchestrator.js";
 export * from "./application/openai-responses-preparation-orchestrator.js";
+export * from "./application/m20-dry-run-conductor.js";
 export * from "./application/m19-source-authorities.js";
 export {
   createInMemoryExecutionAuthorizationAuthority,
@@ -100,6 +101,23 @@ export * from "./domain/frontmatter.js";
 export * from "./domain/credential-resolution.js";
 export * from "./domain/execution-authorization.js";
 export * from "./domain/openai-responses-adapter.js";
+export {
+  createM20ArtifactFingerprint,
+  createM20DryRunReport,
+  createM20DryRunRequest,
+  createM20FinalControlProfile,
+  createM20FinalControlRehearsalEvidence,
+  createM20FinalControlSnapshot,
+  createM20ScenarioCatalog,
+  createM20ScenarioDescriptor,
+  createM20StageObservation,
+  verifyM20DryRunReport,
+  verifyM20DryRunRequest,
+  verifyM20FinalControlProfile,
+  verifyM20FinalControlRehearsalEvidence,
+  verifyM20FinalControlSnapshot,
+  verifyM20ScenarioCatalog,
+} from "./domain/m20-dry-run.js";
 export * from "./domain/knowledge-query.js";
 export {
   createKnowledgeContextFingerprint,
